@@ -30,13 +30,7 @@ jobs:
         continue-on-error: true
         run: python3 scripts/update_data.py
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Build (encrypts the site with the password secret)
-        env:
-          MODELLAB_PASSWORD: ${{ secrets.MODELLAB_PASSWORD }}
+      - name: Build
         run: ./build.sh
 
       - uses: actions/configure-pages@v5

@@ -239,6 +239,18 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   .pt b{font-size:22px}
   footer .wrap{flex-direction:column;align-items:flex-start}
 }
+.gatebox{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--lilac)!important}
+.gatebox h2{font-size:26px}
+.gatebox>p{color:var(--muted);max-width:460px}
+.signup{display:flex;gap:10px;width:100%;max-width:480px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.signup input[type=email]{flex:1;min-width:220px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:14px 20px;font:inherit;font-size:16px;color:var(--ink);outline:0}
+.signup input[type=email]:focus{border-color:var(--purple)}
+.signup .btn{flex:none}
+.signup-note{font-size:12.5px;color:var(--muted);max-width:420px}
+.signup-msg{font-size:14px;color:var(--down);min-height:20px}
+.lk{color:#b8b2a6;letter-spacing:.1em;font-weight:500}
+.mini .lk{font-size:13px;letter-spacing:0}
+.cgate{max-width:640px;margin:0 auto 110px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -394,8 +406,21 @@ var CATS=[];MODELS.forEach(function(m){if(CATS.indexOf(m.cat)<0)CATS.push(m.cat)
 var byId={};MODELS.forEach(function(m){byId[m.id]=m;});
 var HC=['#7c4def','#3fb8a8','#f0a35e','#e07a9b','#7aa2f7','#9ece6a','#b0a99a'];
 var MAXCMP=4;
+/* Email signup (Klaviyo client API). Fill these two values to go live.
+   companyId = your public API key (6 characters). listId = the list that receives signups.
+   While both are empty the form unlocks locally without saving the email (development only). */
+var SIGNUP={companyId:'',listId:''};
 var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0};
 
+function unlocked(){try{return localStorage.getItem('ml_sub')==='1';}catch(e){return false;}}
+function setUnlocked(){try{localStorage.setItem('ml_sub','1');}catch(e){}}
+function signupForm(ctx){
+  return '<form class="signup" data-signup="'+ctx+'" novalidate><input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required><button class="btn pri" type="submit">Unlock free access \u2192</button></form>'+
+  '<p class="signup-msg" role="alert"></p><p class="signup-note">Free. You get one short weekly email about a different investing model. Unsubscribe anytime. Educational only, not investment advice.</p>';
+}
+function gatePanel(title,blurb,ctx){
+  return '<div class="panel sh gatebox"><h2>'+title+'</h2><p>'+blurb+'</p>'+signupForm(ctx)+'</div>';
+}
 function $(s,r){return (r||document).querySelector(s);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function dots(n,cls){var h='<span class="dots '+(cls||'')+'" role="img" aria-label="'+n+' out of 5">';for(var i=1;i<=5;i++)h+='<i class="'+(i<=n?'f':'')+'"></i>';return h+'</span>';}
@@ -454,12 +479,12 @@ function viewHome(){
   var v=byId['value'],ms=modelStats(v);
   var heroRows=v.hold.map(function(x){var st=stats(x[0]);
     return '<div class="hrow"><div><b>'+esc(x[0])+'</b><span class="s">'+esc(x[1])+'</span></div><div class="bar"><i style="width:'+Math.min(100,x[2]*1.6)+'%"></i></div><div class="w">'+pctTxt(x[2])+'</div><div class="c">'+(st?chg(st.d1):'')+'</div></div>';}).join('');
-  var d1=ms?'<span class="pill '+sign(ms.d1)+'">1D '+fmt(ms.d1)+'</span>':'';
+  var d1=(ms&&unlocked())?'<span class="pill '+sign(ms.d1)+'">1D '+fmt(ms.d1)+'</span>':'';
   var lib=['index','value','dividend','momentum','all-weather'].map(function(id){var m=byId[id];
     return '<a class="lrow" style="background:var(--'+m.color+')" href="#m-'+m.id+'"><div><strong>'+esc(m.name)+'</strong><span class="s">'+esc(m.cat)+'</span></div>'+dots(m.risk,'p')+'</a>';}).join('');
   var steps=[['Pick a philosophy','Value, growth, dividend, all-weather and more, each explained in plain language.'],['See the portfolio','Every model has an example allocation, a donut chart, and a dollar calculator.'],['Compare side by side','Line up to four models on risk, effort, and growth, then see which fits you best.']];
   var stepHtml=steps.map(function(s,i){return '<button class="step'+(state.step===i?' on':'')+'" data-step="'+i+'"><h3>'+s[0]+'</h3><p>'+s[1]+'</p></button>';}).join('');
-  var tick=['VTI','QQQ','TLT','GLD'].map(function(t){var st=stats(t);return '<div class="mini"><b>'+t+'</b><span>'+(st?'$'+st.last.toFixed(2)+' &nbsp;<span class="c">'+chg(st.d1)+'</span>':'n/a')+'</span></div>';}).join('');
+  var tick=['VTI','QQQ','TLT','GLD'].map(function(t){var st=stats(t);return '<div class="mini"><b>'+t+'</b><span>'+(!unlocked()?'<a class="lk" href="#compare" style="text-decoration:none">Sign up to view</a>':(st?'$'+st.last.toFixed(2)+' &nbsp;<span class="c">'+chg(st.d1)+'</span>':'n/a'))+'</span></div>';}).join('');
   var cb=['index','value','momentum'].map(function(id){var m=byId[id];return '<div class="cbar">'+esc(m.name)+' · risk '+m.risk+'/5<div class="bar"><i style="width:'+(m.risk*20)+'%"></i></div></div>';}).join('');
   var ix=byId['index'];
   var calc=ix.hold.map(function(x){return '<div class="mini" style="background:transparent;padding:6px 16px;color:var(--muted)"><b style="color:var(--ink);font-weight:600">'+esc(x[0])+' '+x[2]+'%</b><span>'+money(10000*x[2]/100)+'</span></div>';}).join('');
@@ -505,9 +530,9 @@ function donut(m){
   return '<div class="donut">'+s+'</svg><div class="mid"><b>'+m.hold.length+'</b><span>holdings</span></div></div>';
 }
 function holdRows(m){
-  var amt=Number(state.amount)||0;
+  var amt=Number(state.amount)||0,U=unlocked(),LK='<span class="lk">\u2022\u2022\u2022</span>';
   return m.hold.map(function(x,i){var st=stats(x[0]);
-    return '<tr><td><div class="hn"><i style="background:'+HC[i%HC.length]+'"></i><div><b>'+esc(x[0])+'</b><span>'+esc(x[1])+' · '+esc(x[3])+'</span></div></div></td><td class="m">'+pctTxt(x[2])+'</td><td>'+money(amt*x[2]/100)+'</td><td>'+(st?'$'+st.last.toFixed(2):'n/a')+'</td><td class="m">'+(st?chg(st.d1):'n/a')+'</td><td class="m">'+(st?chg(st.ytd,1):'n/a')+'</td></tr>';}).join('');
+    return '<tr><td><div class="hn"><i style="background:'+HC[i%HC.length]+'"></i><div><b>'+esc(x[0])+'</b><span>'+esc(x[1])+' · '+esc(x[3])+'</span></div></div></td><td class="m">'+pctTxt(x[2])+'</td><td>'+money(amt*x[2]/100)+'</td><td>'+(!U?LK:(st?'$'+st.last.toFixed(2):'n/a'))+'</td><td class="m">'+(!U?LK:(st?chg(st.d1):'n/a'))+'</td><td class="m">'+(!U?LK:(st?chg(st.ytd,1):'n/a'))+'</td></tr>';}).join('');
 }
 function viewModel(id){
   var m=byId[id];if(!m)return viewLibrary();
@@ -519,7 +544,7 @@ function viewModel(id){
   return '<div class="wrap"><div class="mhead"><div class="crumb"><a href="#library">Library</a> &nbsp;/&nbsp; '+esc(m.cat)+'</div><h1>'+esc(m.name)+'</h1><p class="sub">'+esc(m.tag)+'</p>'+
    '<div class="facts"><div class="fact"><small>Horizon</small><b>'+esc(m.horizon)+'</b></div><div class="fact"><small>Turnover</small><b>'+esc(m.turnover)+'</b></div><div class="fact"><small>Risk</small>'+dots(m.risk,'p big')+'</div><div class="fact"><small>Effort</small>'+dots(m.effort,'p big')+'</div></div></div>'+
    '<div class="stack">'+
-   '<div class="panel sh"><div class="ph"><h2 style="font-size:22px">Price change of the example portfolio</h2>'+badge()+'</div>'+perf+'<p class="note">'+esc(note)+'</p></div>'+
+   (unlocked()?'<div class="panel sh"><div class="ph"><h2 style="font-size:22px">Price change of the example portfolio</h2>'+badge()+'</div>'+perf+'<p class="note">'+esc(note)+'</p></div>':gatePanel('See live price changes','Enter your email to unlock free price snapshots, the Compare tool and Find your fit.','model'))+
    '<div class="two"><div class="panel" style="background:var(--lilac)"><h2>The belief</h2><p class="b">'+esc(m.belief)+'</p><p class="note" style="margin:0">'+esc(m.origin)+'</p></div>'+
    '<div class="panel"><h2>How it works</h2>'+m.steps.map(function(s,i){return '<div class="nstep"><i>'+(i+1)+'</i><span>'+esc(s)+'</span></div>';}).join('')+'</div></div>'+
    '<div class="panel sh" style="padding:36px"><div class="ph"><div><h2>Example portfolio</h2><p class="note" style="margin-top:6px">Hypothetical and for illustration only. Weights add to 100%.</p></div><label class="calc" for="amt">If I invested <span>$</span><input id="amt" type="number" inputmode="numeric" min="0" step="500" value="'+state.amount+'"></label></div>'+
@@ -547,6 +572,7 @@ function rankHtml(){
 }
 function slider(k,label,val){return '<div class="sl"><label for="s-'+k+'">'+label+'<span id="v-'+k+'">'+val+'/5</span></label><input type="range" id="s-'+k+'" data-fit="'+k+'" min="1" max="5" step="1" value="'+val+'" style="--p:'+((val-1)*25)+'%"></div>';}
 function viewCompare(){
+  if(!unlocked())return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div><div class="cgate">'+gatePanel('Unlock Compare','Free with your email. You also get price snapshots on every model and a weekly email about one model.','compare')+'</div></div>';
   var sel=state.compare.map(function(id){return byId[id];}).filter(Boolean);
   var chips=sel.map(function(m){return '<button class="cp" data-cmp="'+m.id+'" aria-label="Remove '+esc(m.name)+'">'+esc(m.name)+' <i>✕</i></button>';}).join('');
   var rest=MODELS.filter(function(m){return state.compare.indexOf(m.id)<0;});
@@ -604,6 +630,20 @@ document.addEventListener('input',function(e){
   var t=e.target;
   if(t.hasAttribute&&t.hasAttribute('data-fit')){var k=t.getAttribute('data-fit');state.fit[k]=Number(t.value);t.style.setProperty('--p',((t.value-1)*25)+'%');$('#v-'+k).textContent=t.value+'/5';$('#rank').innerHTML=rankHtml();}
   if(t.id==='amt'){state.amount=Math.max(0,Number(t.value)||0);var id=(location.hash||'').slice(3);if(byId[id])$('#hold').innerHTML=holdRows(byId[id]);}
+});
+document.addEventListener('submit',function(e){
+  var f=e.target.closest&&e.target.closest('form[data-signup]');if(!f)return;
+  e.preventDefault();
+  var email=(f.querySelector('input[name=email]').value||'').trim(),msg=f.parentNode.querySelector('.signup-msg'),btn=f.querySelector('button');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='Please enter a valid email address.';return;}
+  msg.textContent='';btn.disabled=true;btn.textContent='One moment\u2026';
+  function done(){setUnlocked();rerender();}
+  function fail(){btn.disabled=false;btn.textContent='Unlock free access \u2192';msg.textContent='Could not sign you up right now. Please try again.';}
+  if(!SIGNUP.companyId||!SIGNUP.listId){console.warn('ModelLab: SIGNUP not configured, email was not saved.');done();return;}
+  fetch('https://a.klaviyo.com/client/subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{
+    method:'POST',headers:{'Content-Type':'application/json','revision':'2024-10-15'},
+    body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab site ('+f.getAttribute('data-signup')+')',profile:{data:{type:'profile',attributes:{email:email}}}},relationships:{list:{data:{type:'list',id:SIGNUP.listId}}}}})
+  }).then(function(r){if(r.status===202||r.ok)done();else fail();}).catch(fail);
 });
 document.addEventListener('change',function(e){if(e.target.id==='sort'){state.sort=e.target.value;rerender();}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.menu){state.menu=false;rerender();}});
