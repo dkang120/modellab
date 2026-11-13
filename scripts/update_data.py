@@ -37,6 +37,8 @@ def main():
             "d1": s[-2][1],
             "w1": on_or_before(s, (ld - dt.timedelta(days=7)).isoformat()),
             "m": [month_end(s, *ym) for ym in MONTHS(ld)],
+            "y5": month_end(s, ld.year - 5, ld.month),
+            "y10": month_end(s, ld.year - 10, ld.month),
         }
     ld = dt.date.fromisoformat(last_date)
     months = [f"{y}-{m:02d}" for y, m in MONTHS(ld)]
@@ -49,6 +51,7 @@ def main():
         "months": months,
         "ytdIdx": months.index(f"{ld.year-1}-12"),
         "mtdIdx": len(months) - 1,
+        "longBase": {"y5": f"{ld.year-5}-{ld.month:02d}", "y10": f"{ld.year-10}-{ld.month:02d}"},
         "tickers": out,
     }
     json.dump(data, open("data.json", "w"), separators=(",", ":"))
