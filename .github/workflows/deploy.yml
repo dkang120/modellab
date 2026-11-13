@@ -1,0 +1,47 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "30 22 * * 1-5"   # weekdays after the US market close
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Refresh prices. If the fetch fails, the committed data.json snapshot is used instead.
+      - name: Refresh prices
+        continue-on-error: true
+        run: python3 scripts/update_data.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build (encrypts the site with the password secret)
+        env:
+          MODELLAB_PASSWORD: ${{ secrets.MODELLAB_PASSWORD }}
+        run: ./build.sh
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
