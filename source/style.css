@@ -396,3 +396,10 @@ body.home .site-footer{border-radius:0}
 .mdl .rw{gap:2cqw}
 .mdl .rw>span:first-of-type{min-width:19cqw}
 .mdl .rw .dots{margin-left:auto}
+/* fit fixes: radius must be % (cqw on the container itself resolves to its parent), roomier grid cards */
+.mdl{border-radius:7.476%/5.52%}
+.mgrid .mdl{aspect-ratio:224.7/340;border-radius:7.476%/4.94%}
+.mdl .nm{font-size:10.6cqw;flex-wrap:wrap}
+.mdl .tag{top:19cqw}
+.mdl .info{bottom:7cqw}
+.mdl .rw b{font-size:6.2cqw}
