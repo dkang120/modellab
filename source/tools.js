@@ -552,7 +552,7 @@ ML.routes.overlap={nav:'tools',view:viewOverlap,before:ensureHist};
 ML.routes.build={nav:'tools',view:viewBuild,before:ensureHist};
 ML.routes.leaderboard={nav:'leaderboard',view:viewLeaderboard};
 ML.routes.__leave=function(){painStop();};
-if(ML.routeFor(location.hash))ML.rerender();
+if(ML.routeFor(ML.curH()))ML.rerender();
 
 /* ================= events ================= */
 function cap(e,sel){return e.target.closest&&e.target.closest(sel);}
@@ -573,7 +573,7 @@ document.addEventListener('click',function(e){
     (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){b.textContent='Copied ✓';}).catch(function(){b.textContent='Copy failed';});return;}
   if(cap(e,'[data-t-badd]')){BD.rows.push(['VTI',0]);ML.rerender();return;}
   if((el=cap(e,'[data-t-bdel]'))){BD.rows.splice(Number(el.getAttribute('data-t-bdel')),1);ML.rerender();return;}
-  if(cap(e,'[data-t-bjoin]')){LBS.custom={rows:BD.rows.map(function(r){return [r[0],r[1]];})};location.hash='#leaderboard';return;}
+  if(cap(e,'[data-t-bjoin]')){LBS.custom={rows:BD.rows.map(function(r){return [r[0],r[1]];})};ML.go('#leaderboard');return;}
   if((el=cap(e,'[data-t-lbf]'))){LBS.filter=el.getAttribute('data-t-lbf');ML.rerender();return;}
   if(cap(e,'[data-t-lbclear]')){LBS.custom=null;ML.rerender();return;}
   if(cap(e,'[data-t-lbjoin]')){lbJoin();return;}
