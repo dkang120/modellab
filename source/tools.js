@@ -55,7 +55,7 @@ css.textContent=[
 '.tl-bars .r{display:grid;grid-template-columns:120px 1fr 54px;gap:12px;align-items:center;font-size:14px;margin:8px 0}',
 '.tl-bars .t{height:12px;border-radius:8px;background:var(--lilac);overflow:hidden}.tl-bars .t i{display:block;height:100%;background:var(--purple)}',
 '.tl-lbhead{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:6px}',
-'.tl-me td{background:var(--lav-soft)}',
+'.tl-me td{background:var(--t-blue)}',
 '.tl-warn{background:var(--peach);border-radius:16px;padding:14px 18px;font-size:14px;color:var(--ink);margin-top:14px}',
 '.tl-ok{background:var(--mint);border-radius:16px;padding:14px 18px;font-size:14px;margin-top:14px}',
 '@media(max-width:700px){.tl-opts{grid-template-columns:1fr}.tl-hold{grid-template-columns:1fr 90px auto}.tl-hit{grid-template-columns:auto 1fr}.tl-hit .v{display:none}.tl-bars .r{grid-template-columns:90px 1fr 46px}}'
@@ -123,13 +123,13 @@ function chart(o){
   function Y(v){var a=log?Math.log(lo):lo,b=log?Math.log(hi):hi,c=log?Math.log(Math.max(v,lo)):v;return T+ih*(1-(c-a)/(b-a));}
   var s='<svg class="tl-chart" viewBox="0 0 '+W+' '+Ht+'" role="img" aria-label="'+esc(o.aria||'Chart')+'">';
   for(i=0;i<=4;i++){var gv=log?Math.exp(Math.log(lo)+(Math.log(hi)-Math.log(lo))*i/4):lo+(hi-lo)*i/4,gy=Y(gv);
-    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+gy+'" y2="'+gy+'" stroke="#e9e4d9" stroke-width="1"/><text x="'+(L-8)+'" y="'+(gy+4)+'" text-anchor="end">'+mshort(gv)+'</text>';}
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+gy+'" y2="'+gy+'" stroke="#e9e9eb" stroke-width="1"/><text x="'+(L-8)+'" y="'+(gy+4)+'" text-anchor="end">'+mshort(gv)+'</text>';}
   var y0=Number((o.labels[0]||'0').slice(0,4)),y1=Number((o.labels[n-1]||'0').slice(0,4)),step=Math.max(1,Math.ceil((y1-y0)/6));
   for(i=0;i<n;i++){var lb=o.labels[i]||'',yy=Number(lb.slice(0,4));
-    if(lb.slice(5,7)==='01'&&yy%step===0&&i>0&&i<n-1){s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(T+ih)+'" y2="'+(T+ih+4)+'" stroke="#b0a99a"/><text x="'+X(i)+'" y="'+(Ht-8)+'" text-anchor="middle">'+yy+'</text>';}}
+    if(lb.slice(5,7)==='01'&&yy%step===0&&i>0&&i<n-1){s+='<line x1="'+X(i)+'" x2="'+X(i)+'" y1="'+(T+ih)+'" y2="'+(T+ih+4)+'" stroke="#a3a3a8"/><text x="'+X(i)+'" y="'+(Ht-8)+'" text-anchor="middle">'+yy+'</text>';}}
   s+='<text x="'+L+'" y="'+(Ht-8)+'" text-anchor="start">'+esc(o.labels[0]?mlab(o.labels[0]):'')+'</text>';
-  if(o.base!=null){var by=Y(o.base);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+by+'" y2="'+by+'" stroke="#b0a99a" stroke-width="1" stroke-dasharray="3 4"/>';}
-  (o.marks||[]).forEach(function(mk){var mx=X(mk.i);s+='<line x1="'+mx+'" x2="'+mx+'" y1="'+T+'" y2="'+(T+ih)+'" stroke="#d2604a" stroke-width="1.5" stroke-dasharray="4 4"/><text x="'+Math.min(mx+6,W-R-70)+'" y="'+(T+12)+'" style="fill:#d2604a;font-weight:600">'+esc(mk.label)+'</text>';});
+  if(o.base!=null){var by=Y(o.base);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+by+'" y2="'+by+'" stroke="#a3a3a8" stroke-width="1" stroke-dasharray="3 4"/>';}
+  (o.marks||[]).forEach(function(mk){var mx=X(mk.i);s+='<line x1="'+mx+'" x2="'+mx+'" y1="'+T+'" y2="'+(T+ih)+'" stroke="#E51317" stroke-width="1.5" stroke-dasharray="4 4"/><text x="'+Math.min(mx+6,W-R-70)+'" y="'+(T+12)+'" style="fill:#E51317;font-weight:600">'+esc(mk.label)+'</text>';});
   o.series.forEach(function(se){
     var d='',pen=false;
     for(i=0;i<se.vals.length;i++){var v=se.vals[i];if(v==null){pen=false;continue;}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=true;}
@@ -272,9 +272,9 @@ function painChartHtml(){
   var you=P.dec?painYou():h,series=[];
   var all=h.concat(P.mkt);if(P.dec==='buy')all=all.concat(painYou());
   var lo=Math.min.apply(null,all)*0.92,hi=Math.max.apply(null,all)*1.06;
-  series.push({vals:P.mkt.map(function(v,j){return j<=k?v:null;}),color:'#c9c2b3',w:2});
-  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#7aa2f7',w:2.2,dash:'6 5'});
-  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#7c4def',w:3});
+  series.push({vals:P.mkt.map(function(v,j){return j<=k?v:null;}),color:'#dedee2',w:2});
+  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#c5dcff',w:2.2,dash:'6 5'});
+  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#4c90f7',w:3});
   var marks=P.decK!=null&&k>=P.decK?[{i:P.decK,label:P.dec==='sell'?'You sold':(P.dec==='buy'?'You bought more':'You held')}]:[];
   return chart({n:P.len+1,labels:labs,series:series,ymin:lo,ymax:hi,base:P.amt,marks:marks,aria:'Portfolio value over time',tick:function(l){return l.slice(0,4);}});
 }
@@ -287,7 +287,7 @@ function painBody(){
    statBox('PORTFOLIO VALUE',money(cur),(cur>=P.amt?'+':'−')+money(Math.abs(cur-P.amt))+' vs start',cur>=P.amt?'up':'dn')+
    statBox('BELOW ITS PEAK',pct1(dd),underNow+' months underwater',dd<-0.005?'dn':'na')+
    statBox('US STOCK MARKET',money(P.mkt[k]),'for reference')+'</div>';
-  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#7c4def'],P.dec&&P.dec!=='hold'?['If you had held','#7aa2f7']:null,['US stock market','#c9c2b3']].filter(Boolean))+s;
+  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#4c90f7'],P.dec&&P.dec!=='hold'?['If you had held','#c5dcff']:null,['US stock market','#dedee2']].filter(Boolean))+s;
   if(P.pause!=null&&k===P.pause&&P.dec==null){
     out+='<div class="tl-dec" role="alertdialog" aria-live="assertive"><h3>'+curLab+': you are down '+pctAbs(dd)+' from the peak.</h3><p>Your $'+Math.round(P.amt).toLocaleString('en-US')+' is now worth <b>'+money(cur)+'</b>. The news is bad. What do you do?</p><div class="btns"><button class="btn light" data-t-pdec="sell">Sell everything</button><button class="btn light" data-t-pdec="hold">Hold</button><button class="btn pri" data-t-pdec="buy">Buy more ('+money(P.amt*0.5)+')</button></div></div>';
   }
@@ -330,7 +330,7 @@ function stressCell(m,sc){
   var s=pstats(p);return {mdd:s.mdd,tot:s.total};
 }
 function heat(v){ // v = drawdown (negative). Map 0..-50% to mint->peach->coral
-  var x=Math.min(1,Math.max(0,-v/0.5)),a=x<0.5?[223,240,230]:[247,230,222],b=x<0.5?[247,230,222]:[236,171,150],t=x<0.5?x*2:(x-0.5)*2;
+  var x=Math.min(1,Math.max(0,-v/0.5)),a=x<0.5?[241,241,243]:[253,236,236],b=x<0.5?[253,236,236]:[244,150,152],t=x<0.5?x*2:(x-0.5)*2;
   return 'rgb('+a.map(function(c,i){return Math.round(c+(b[i]-c)*t);}).join(',')+')';
 }
 function viewStress(){
@@ -442,7 +442,7 @@ function viewBuild(){
     var a=pstats(mine),b=pstats(other),c=pstats(mk),labs=[];
     for(var i=0;i<=g1-g0+1;i++)labs.push(HM[g0-1+i]||'');
     var all=mine.concat(other,mk);
-    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#c9c2b3',w:2},{vals:other,color:'#7aa2f7',w:2.2},{vals:mine,color:'#7c4def',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#7c4def'],[cm.name,'#7aa2f7'],['US stock market','#c9c2b3']])+
+    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#dedee2',w:2},{vals:other,color:'#c5dcff',w:2.2},{vals:mine,color:'#4c90f7',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#4c90f7'],[cm.name,'#c5dcff'],['US stock market','#dedee2']])+
      '<div class="tw" style="margin-top:14px"><table><thead><tr><th></th><th>YOUR MIX</th><th>'+esc(cm.name.toUpperCase())+'</th><th>US STOCKS</th></tr></thead><tbody>'+
      [['Ending value',function(s,p){return money(p[p.length-1]);}],['Per year (CAGR)',function(s){return s.cagr==null?'n/a':pct1(s.cagr);}],['Worst fall',function(s){return pct1(s.mdd);}],['Months to recover',function(s){return s.recover!=null?s.recover:(s.mdd<0?'not yet':'—');}],['Worst 12 months',function(s){return s.worst12==null?'n/a':pct1(s.worst12);}],['Best 12 months',function(s){return s.best12==null?'n/a':pct1(s.best12);}]].map(function(r){return '<tr><td>'+r[0]+'</td><td class="m">'+r[1](a,mine)+'</td><td>'+r[1](b,other)+'</td><td>'+r[1](c,mk)+'</td></tr>';}).join('')+'</tbody></table></div>';
   }

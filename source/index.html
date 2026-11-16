@@ -5,271 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ModelLab: every investing model, built as a portfolio</title>
 <meta name="description" content="Explore investing philosophies as example portfolios, with price snapshots, a dollar calculator and side-by-side comparisons. Educational only.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --cream:#fbfaf6; --lav:#e4dafb; --lav-soft:#f3eefc; --ink:#3e3a32; --muted:#7c766a;
-  --purple:#7c4def; --purple-deep:#5b33c9; --white:#fff; --line:#e9e4d9;
-  --blue:#e6eef6; --peach:#f7e6de; --mint:#dff0e6; --lilac:#ece5fb; --yellow:#fbefc8;
-  --up:#2f9e6e; --down:#d2604a;
-  --font:'Lexend',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --shadow:0 8px 28px rgba(61,58,50,.10);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:var(--font);color:var(--ink);font-size:16px;line-height:1.5;
-  background:var(--cream) linear-gradient(180deg,var(--lav) 0,var(--cream) 520px) no-repeat;background-size:100% 520px;-webkit-font-smoothing:antialiased}
-body.home{background-image:linear-gradient(180deg,var(--lav) 0,var(--cream) 820px);background-size:100% 820px}
-body.dark{background:#171614;color:#f2efe8}
-a{color:inherit}
-button{font:inherit;color:inherit;cursor:pointer}
-h1,h2,h3,p{margin:0}
-:focus-visible{outline:3px solid var(--purple);outline-offset:3px;border-radius:8px}
-.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
-/* nav */
-.navbar{position:sticky;top:14px;z-index:20;padding-top:14px}
-.nav{display:flex;align-items:center;justify-content:space-between;height:68px;padding:0 12px 0 28px;background:var(--white);border-radius:999px;box-shadow:var(--shadow)}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:22px;letter-spacing:-.02em}
-.logo svg{width:26px;height:26px}
-.nav-links{display:flex;align-items:center;gap:36px}
-.nav-links a.l{text-decoration:none;color:var(--muted);font-weight:500;font-size:17px}
-.nav-links a.l:hover,.nav-links a.l.on{color:var(--ink)}
-/* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:14px 26px;font-weight:600;font-size:16px;text-decoration:none;border:1.5px solid transparent;cursor:pointer;transition:transform .12s ease}
-.btn:hover{transform:translateY(-1px)}
-.btn.pri{background:var(--purple);color:#fff;border-bottom:4px solid var(--purple-deep)}
-.btn.light{background:var(--white);border-color:var(--line);color:var(--ink)}
-.btn.sm{padding:10px 20px;font-size:15px}
-.btn.lg{padding:18px 34px;font-size:18px}
-.btn[aria-pressed=true]{border-color:var(--purple);color:var(--purple)}
-/* type */
-.display{font-size:clamp(40px,6vw,72px);font-weight:700;letter-spacing:-.045em;line-height:1.02}
-.h2{font-size:clamp(32px,4.4vw,48px);font-weight:700;letter-spacing:-.04em;line-height:1.1;text-align:center}
-.h2 em,.display em{font-style:normal;color:var(--purple)}
-.sub{color:var(--muted);font-size:20px}
-.center{text-align:center}
-.eyebrow{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-/* hero */
-.hero{display:grid;grid-template-columns:1.12fr .88fr;gap:40px;align-items:center;padding:72px 0 40px}
-.hero .sub{margin-top:24px;max-width:470px;font-size:19px}
-.hero .cta{margin-top:34px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
-.hero small{color:var(--muted);font-size:14px}
-.demo{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:28px 30px;display:flex;flex-direction:column;gap:18px}
-.demo-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.demo-h h3{font-size:24px;font-weight:700;letter-spacing:-.02em}
-.demo-h p{font-size:13px;color:var(--muted);margin-top:2px}
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;white-space:nowrap}
-.pill.up{background:var(--mint);color:var(--up)}.pill.dn{background:var(--peach);color:var(--down)}.pill.na{background:var(--lilac);color:var(--muted)}
-.hrow{display:grid;grid-template-columns:96px 1fr 44px 56px;gap:14px;align-items:center;font-size:13px}
-.hrow b{display:block;font-size:15px;font-weight:600}
-.hrow span.s{color:var(--muted);font-size:11.5px}
-.bar{height:8px;border-radius:6px;background:#ebe7dd;overflow:hidden}.bar i{display:block;height:100%;background:var(--purple);border-radius:6px}
-.hrow .w{text-align:right;font-weight:600;font-size:14px}.hrow .c{text-align:right;font-size:13px}
-.up{color:var(--up)}.dn{color:var(--down)}
-.demo-f{border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px}
-.demo-f b{color:var(--ink);font-size:24px;letter-spacing:-.02em}
-.ideas{text-align:center;padding:40px 0 80px}
-.ideas .names{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 48px;margin-top:20px;font-size:24px;font-weight:700;letter-spacing:-.02em;color:#b8b2a6}
-/* sections */
-section.s{padding:84px 0}
-.simple{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-top:64px}
-.steps{display:flex;flex-direction:column;gap:30px}
-.step{border-left:3px solid var(--line);padding:2px 0 2px 20px;cursor:pointer;background:none;border-top:0;border-right:0;border-bottom:0;text-align:left;width:100%}
-.step h3{font-size:22px;font-weight:600;color:#a39d90;letter-spacing:-.01em}
-.step p{font-size:15px;color:#a39d90;margin-top:6px;max-width:340px}
-.step.on{border-left-color:var(--ink)}.step.on h3{color:var(--ink)}.step.on p{color:var(--muted)}
-.libcard{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:10px}
-.libcard>b{font-size:18px;margin-bottom:4px}
-.lrow{display:flex;justify-content:space-between;align-items:center;border-radius:14px;padding:12px 16px;text-decoration:none}
-.lrow strong{display:block;font-size:16px}.lrow span.s{font-size:12px;color:var(--muted)}
-.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
-.bcard{border-radius:24px;padding:30px;display:flex;flex-direction:column;gap:14px}
-.bcard h3{font-size:24px;font-weight:700;letter-spacing:-.025em}
-.bcard>p{font-size:15px;color:var(--muted)}
-.mini{background:var(--white);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;font-size:15px;font-weight:500}
-.mini b{font-weight:700}.mini .c{font-size:13px}
-.cbar{font-size:13px;font-weight:500;display:flex;flex-direction:column;gap:6px}
-.cbar .bar{background:#fff;height:9px}
-/* cards */
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.mcard{display:flex;flex-direction:column;align-items:flex-start;gap:12px;border-radius:24px;padding:28px;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease;box-shadow:0 2px 8px rgba(61,58,50,.04)}
-.mcard:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.mcard .cat{background:#fff;color:var(--purple-deep);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500}
-.mcard h3{font-size:30px;font-weight:700;letter-spacing:-.035em;line-height:1.1}
-.mcard p{font-size:15px;color:var(--muted)}
-.mcard .meters{display:flex;gap:18px;font-size:13px;font-weight:500;flex-wrap:wrap}
-.mcard .go{color:var(--purple);font-weight:600;font-size:15px;margin-top:auto}
-.dots{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}
-.dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ink);display:block}
-.dots i.f{background:var(--ink)}
-.dots.p i{border-color:var(--purple)}.dots.p i.f{background:var(--purple)}
-.dots.big i{width:14px;height:14px}
-/* faq */
-.faq{max-width:860px;margin:44px auto 0;display:flex;flex-direction:column;gap:14px}
-.faq details{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:22px 28px}
-.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:19px;font-weight:600;letter-spacing:-.01em}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:'+';font-size:26px;color:var(--purple);font-weight:500;line-height:1}
-.faq details[open] summary::after{content:'−'}
-.faq details p{margin-top:12px;color:var(--muted);font-size:16px;max-width:760px}
-/* cta */
-.ctaband{background:linear-gradient(180deg,var(--cream) 0,var(--lav) 100%);padding:110px 0 70px;text-align:center}
-.ctaband .btn{margin-top:36px}
-.ctaband small{display:block;margin-top:22px;color:var(--muted);font-size:14px}
-/* footer */
-footer{background:var(--cream);border-top:1px solid var(--line)}
-footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:40px;padding-bottom:40px;font-size:14px;color:var(--muted);flex-wrap:wrap}
-footer .fsrc{flex-basis:100%;margin:0;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
-footer .fl{display:flex;gap:32px}footer a{text-decoration:none}footer a:hover{color:var(--ink)}
-/* page header */
-.phead{text-align:center;padding:56px 0 48px}
-.phead .display{font-size:clamp(44px,6vw,72px);letter-spacing:-.045em}
-.phead .sub{margin-top:16px}
-.mhead{padding:30px 0 44px}
-.crumb{font-size:15px;color:var(--muted)}.crumb a{text-decoration:none}.crumb a:hover{color:var(--ink)}
-.mhead h1{font-size:clamp(56px,9vw,88px);font-weight:700;letter-spacing:-.05em;line-height:1;margin:34px 0 14px}
-.mhead .sub{font-size:24px;max-width:760px}
-.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:34px}
-.fact{background:var(--white);border-radius:18px;padding:18px 22px;display:flex;flex-direction:column;gap:6px}
-.fact small{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.fact b{font-size:22px;font-weight:700}
-.stack{display:flex;flex-direction:column;gap:24px;padding-bottom:100px}
-.panel{background:var(--white);border-radius:24px;padding:32px}
-.panel.sh{box-shadow:var(--shadow)}
-.panel h2{font-size:28px;font-weight:700;letter-spacing:-.035em}
-.ph{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.perf{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
-.vstrip-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:26px 0 0}
-.vstrip-h h3{margin:0;font-size:18px;letter-spacing:-.02em}
-.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
-.vc{background:var(--cream);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
-.vc small{color:var(--muted);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.06em}
-.vc b{font-size:24px;letter-spacing:-.02em;font-weight:700}
-.vc span{font-size:13px;font-weight:600}
-.vc em{font-style:normal;font-size:12px;color:var(--muted)}
-@media(max-width:700px){.vgrid{grid-template-columns:repeat(2,1fr)}}
-
-.pt{border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
-.pt small{font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--muted)}
-.pt b{font-size:26px;font-weight:700;letter-spacing:-.02em}
-.pt.up{background:var(--mint)}.pt.dn{background:var(--peach)}.pt.na{background:var(--cream)}
-.note{font-size:13px;color:var(--muted);margin-top:14px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.two>.panel{display:flex;flex-direction:column;gap:14px}
-.panel p.b{color:var(--muted);font-size:17px;line-height:1.6}
-.nstep{display:flex;gap:14px;align-items:flex-start;color:var(--muted);font-size:16px;line-height:1.5}
-.nstep i{flex:none;width:30px;height:30px;border-radius:50%;background:var(--purple);color:#fff;font-style:normal;font-weight:700;font-size:14px;display:grid;place-items:center}
-.pb{display:grid;grid-template-columns:240px 1fr;gap:56px;align-items:center;margin-top:24px}
-.donut{position:relative;width:240px;height:240px}
-.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
-.donut .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.donut .mid b{font-size:44px;line-height:1}.donut .mid span{font-size:14px;color:var(--muted)}
-.calc{display:flex;align-items:center;gap:14px;background:var(--cream);border:1.5px solid var(--line);border-radius:14px;padding:10px 18px;font-size:14px;color:var(--muted)}
-.calc input{border:0;background:transparent;font:inherit;font-size:20px;font-weight:700;color:var(--ink);width:110px;text-align:right;outline:0}
-.calc:focus-within{border-color:var(--purple)}
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:560px}
-th{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-align:right;padding:0 0 10px;border-bottom:1px solid var(--line)}
-th:first-child,td:first-child{text-align:left}
-td{padding:16px 0;border-bottom:1px solid var(--line);text-align:right;font-size:15px;vertical-align:middle}
-td.m{font-weight:500}
-.hn{display:flex;gap:12px;align-items:center}.hn i{width:12px;height:12px;border-radius:50%;flex:none}
-.hn b{display:block;font-size:17px;font-weight:600}.hn span{font-size:12px;color:var(--muted)}
-.pc h3{font-size:24px;font-weight:700;letter-spacing:-.025em}
-.pc ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
-.pc li{display:flex;gap:12px;color:var(--muted);font-size:16px}
-.pc li::before{content:'•';font-weight:700}
-.pc.g{background:var(--mint)}.pc.g h3,.pc.g li::before{color:var(--up)}
-.pc.r{background:var(--peach)}.pc.r h3,.pc.r li::before{color:var(--down)}
-.wb h3{font-size:22px;font-weight:700}.wb p{color:var(--muted);font-size:16px}
-.btns{display:flex;gap:12px;flex-wrap:wrap}
-.pager{display:flex;justify-content:space-between;gap:12px}
-/* library */
-.filters{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:40px}
-.chips{display:flex;flex-wrap:wrap;gap:10px}
-.chip{border-radius:999px;padding:10px 18px;font-size:15px;font-weight:500;background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
-.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
-.sortw{display:flex;align-items:center;gap:6px;border-radius:999px;border:1.5px solid var(--line);background:var(--white);padding:0 14px 0 18px;font-size:15px;font-weight:500;height:44px}
-.sortw select{border:0;background:transparent;font:inherit;color:var(--ink);font-weight:500;cursor:pointer;outline:0;padding:8px 0}
-.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px}
-/* compare */
-.sel{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:28px;position:relative}
-.sel>span{font-size:15px;color:var(--muted)}
-.cp{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:999px;padding:10px 12px 10px 18px;font-size:15px;font-weight:500;border:0}
-.cp i{font-style:normal;opacity:.7;font-size:13px}
-.addm{border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--purple);padding:10px 18px;font-weight:500;font-size:15px}
-.menu{position:absolute;top:52px;right:auto;left:130px;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:8px;z-index:6;display:grid;grid-template-columns:repeat(2,1fr);gap:2px;max-height:320px;overflow:auto;min-width:320px}
-.menu button{background:none;border:0;text-align:left;padding:10px 14px;border-radius:12px;font-size:15px}
-.menu button:hover{background:var(--lilac)}
-.ct{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:10px 0 4px;overflow-x:auto}
-.ct table{min-width:760px;table-layout:fixed}
-.ct th,.ct td{text-align:left;padding:18px 12px;border-top:1px solid var(--line);border-bottom:0;font-size:16px}
-.ct thead th{border-top:0;font-size:22px;letter-spacing:-.02em;color:var(--ink);font-weight:700}
-.ct th:first-child,.ct td:first-child{padding-left:28px;color:var(--muted);font-weight:500;font-size:15px;width:190px}
-.ct thead th:first-child{color:var(--muted);font-size:13px}
-.ct td{font-weight:500}.ct td.v{font-weight:600}
-.ct thead a{text-decoration:none}
-.fit{display:grid;grid-template-columns:1fr 1fr;gap:40px;background:var(--lilac);border-radius:24px;padding:36px}
-.fit h2{font-size:32px;font-weight:700;letter-spacing:-.04em}
-.fit>div>p{color:var(--muted);margin:14px 0 20px;max-width:420px}
-.sl{margin-bottom:18px}
-.sl label{display:flex;justify-content:space-between;font-size:15px;font-weight:500;margin-bottom:8px}
-.sl label span{color:var(--purple);font-weight:600}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:6px;background:linear-gradient(to right,var(--purple) var(--p,50%),#fff var(--p,50%));outline-offset:6px;margin:0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--purple);cursor:pointer}
-input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--purple);cursor:pointer}
-.bm small{display:block;font-size:14px;font-weight:600;letter-spacing:.1em;color:var(--muted);margin-bottom:14px}
-.rk{display:flex;align-items:center;gap:16px;background:#fff;border-radius:16px;padding:16px 20px;text-decoration:none;margin-bottom:12px}
-.rk .n{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px}
-.rk div{flex:1}.rk b{display:block;font-size:18px;font-weight:600}.rk span.w{font-size:13px;color:var(--muted)}
-.rk .v{color:var(--purple);font-weight:600;font-size:14px;flex:none}
-/* about */
-.about{max-width:820px;margin:0 auto;padding-bottom:100px;display:flex;flex-direction:column;gap:24px}
-.about .panel h2{font-size:26px;margin-bottom:12px}
-.about ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;color:var(--muted)}
-/* responsive */
-@media(max-width:960px){
-  .hero,.simple,.fit{grid-template-columns:1fr}
-  .bento,.grid3{grid-template-columns:1fr 1fr}
-  .two{grid-template-columns:1fr}
-  .pb{grid-template-columns:1fr;gap:28px}.donut{margin:0 auto}
-  .perf{grid-template-columns:repeat(3,1fr)}
-  .facts{grid-template-columns:repeat(2,1fr)}
-  .nav-links{gap:18px}
-}
-@media(max-width:640px){
-  .wrap{padding:0 16px}
-  .nav{padding-left:18px;height:60px}.nav-links a.l{display:none}
-  .bento,.grid3{grid-template-columns:1fr}
-  .hero{padding-top:40px}
-  section.s{padding:56px 0}
-  .menu{left:0;grid-template-columns:1fr;min-width:0;width:100%}
-  .panel{padding:22px}
-  .pt b{font-size:22px}
-  footer .wrap{flex-direction:column;align-items:flex-start}
-}
-.gatebox{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--lilac)!important}
-.gatebox h2{font-size:26px}
-.gatebox>p{color:var(--muted);max-width:460px}
-.signup{display:flex;gap:10px;width:100%;max-width:480px;margin-top:6px;flex-wrap:wrap;justify-content:center}
-.signup input[type=email]{flex:1;min-width:220px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:14px 20px;font:inherit;font-size:16px;color:var(--ink);outline:0}
-.signup input[type=email]:focus{border-color:var(--purple)}
-.signup .btn{flex:none}
-.signup-note{font-size:12.5px;color:var(--muted);max-width:420px}
-.signup-msg{font-size:14px;color:var(--down);min-height:20px}
-.lk{color:#b8b2a6;letter-spacing:.1em;font-weight:500}
-.mini .lk{font-size:13px;letter-spacing:0}
-.cgate{max-width:640px;margin:0 auto 110px}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="navbar"><div class="wrap"><nav class="nav" aria-label="Primary">
-  <a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 26 26" fill="none" stroke="#7c4def" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3h7M11 3v7.2L4.6 20.4A1.8 1.8 0 0 0 6.2 23h13.6a1.8 1.8 0 0 0 1.6-2.6L15 10.2V3"/><path d="M7.4 16.5h11.2"/></svg>ModelLab</a>
-  <div class="nav-links"><a class="l" href="#library" data-nav="library">Library</a><a class="l" href="#compare" data-nav="compare">Compare</a><a class="l" href="#tools" data-nav="tools">Tools</a><a class="l" href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a class="btn pri sm" href="#library">Browse models →</a></div>
-</nav></div></div>
+<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a></nav><a class="tix" href="#tools" aria-label="Free access to the tools"><div class="tix__shake"><div class="tix__flip"><div class="tix__face" aria-hidden="true"><span class="tix__dash"></span><span class="tix__admit">ADMIT<br>ONE</span><span class="tix__main">TOOLS</span><span class="tix__sub">free access</span></div><div class="tix__face tix__face--back" aria-hidden="true"><span class="tix__dash"></span><span class="tix__admit">ADMIT<br>ONE</span><span class="tix__main">UNLOCK</span><span class="tix__sub">with email</span></div></div></div></a></header>
 <main id="view"></main>
 <div id="foot"></div>
 <script>
@@ -427,7 +166,7 @@ var TAGS={"index": "Own the whole market and keep costs near zero.", "value": "B
 MODELS.forEach(function(m){var o=META[m.id];if(o){m.name=o.name;m.cat=o.cat;m.color=o.c;if(TAGS[m.id])m.tag=TAGS[m.id];}else{m.color='blue';}});
 var CATS=[];MODELS.forEach(function(m){if(CATS.indexOf(m.cat)<0)CATS.push(m.cat);});
 var byId={};MODELS.forEach(function(m){byId[m.id]=m;});
-var HC=['#7c4def','#3fb8a8','#f0a35e','#e07a9b','#7aa2f7','#9ece6a','#b0a99a'];
+var HC=['#4c90f7','#c5dcff','#a3a3a8','#3d6bf4','#707070','#dedee2','#38383b'];
 var MAXCMP=4;
 /* Email signup (Klaviyo client API). Fill these two values to go live.
    companyId = your public API key (6 characters). listId = the list that receives signups.
@@ -502,15 +241,48 @@ function loadLive(){
 }
 
 /* ---------- shared pieces ---------- */
-function card(m){
-  return '<a class="mcard" style="background:var(--'+m.color+')" href="#m-'+m.id+'"><span class="cat">'+esc(m.cat)+'</span><h3>'+esc(m.name)+'</h3><p>'+esc(m.tag)+'</p>'+
-  '<div class="meters"><span>Risk '+dots(m.risk)+'</span><span>Effort '+dots(m.effort)+'</span></div><span class="go">View model →</span></a>';
+var LOGO='<svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>';
+var STRIPE=['#4c90f7','#c5dcff','#a3a3a8','#3d6bf4','#707070','#dedee2','#38383b'];
+function ico(k){var c='fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';return k==='risk'?'<svg viewBox="0 0 21 21" '+c+' aria-hidden="true"><path d="M3.5 14.5a7 7 0 1 1 14 0"/><path d="M10.5 14.5l3-4.5"/></svg>':'<svg viewBox="0 0 21 21" '+c+' aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"/><path d="M10.5 6.5v4l2.5 1.5"/></svg>';}
+function mdl(m,link){
+  var bands=m.hold.map(function(h,i){return '<i style="flex:'+h[2]+';background:'+STRIPE[i%STRIPE.length]+'"></i>';}).join('');
+  var inner='<div class="bg" aria-hidden="true">'+bands+'</div><div class="scrim"></div><span class="cat">'+esc(m.cat)+'</span><p class="tag">'+esc(m.tag)+'</p>'+
+   '<div class="info"><p class="nm">'+esc(m.name)+'</p><div class="rw">'+ico('risk')+'<span>Risk</span>'+dots(m.risk)+'</div><div class="rw">'+ico('effort')+'<span>Effort</span>'+dots(m.effort)+'</div>'+(link?'<div class="rw"><b>View model →</b></div>':'')+'</div>';
+  return link?'<a class="mdl" href="#m-'+m.id+'">'+inner+'</a>':'<div class="mdl">'+inner+'</div>';
 }
+function card(m){return mdl(m,true);}
 function footer(home){
-  var h='<footer><div class="wrap"><a class="logo" href="#home">'+$('.logo').innerHTML+'</a>';
-  h+=home?'<div class="fl"><a href="#library">Library</a><a href="#compare">Compare</a><a href="#tools">Tools</a><a href="#leaderboard">Leaderboard</a><a href="#about">About</a></div>':'<span>Educational only · not investment advice</span>';
-  return h+'<span>© 2026 ModelLab</span><p class="fsrc">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
+  var L=[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
+  return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
+   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
+   '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
+function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'">'+a[1]+'</a>';}).join('')+'</nav></div>';}
+
+/* ---------- landing stage ---------- */
+var HERO={i:0,timer:null,to:null};
+var HERO_C=[['index','−46.5%. worst fall since 1992.','i could hold that.'],['value','−60.7%. 51 months to recover.','i would have sold.'],['all-weather','−20.3%. its worst crash, 2022.','that is it?'],['growth','−50.9%. the dot-com bust.','ouch.']];
+var HERO_DRIFT=[['is-inyo',16,78,-1,.39,2,'−46.5%. index, worst fall.'],['is-reply',252,96,1,.42,-2,'wait, really?'],['is-inyo',20,126,-1,.32,2,'26 months. to get it back.'],['is-reply',250,556,1,.39,-3,'i’d have held'],['is-inyo',16,506,-1,.28,-2,'−14.7%. permanent, 2022.'],['is-reply',318,510,1,.42,3,'hmm.']];
+var HERO_HALO=[['is-reply',392.23,402.81,1.3,.41,2.75,'i can hold that'],['is-reply',926.29,231.59,1.3,.41,-2.99,'i need this'],['is-reply',293.52,573.65,1.2,.33,-1.75,'how long to recover?'],['is-inyo',174.48,454.91,1.2,.33,2.75,'−46.5%. index, worst since 1992.'],['is-reply',232.44,322.85,1.2,.33,-1.81,'i like this'],['is-inyo',164.45,190.4,1.2,.33,-.17,'−60.7%. value, worst since 1992.'],['is-reply',290.53,70.53,1.2,.33,.01,'read that again'],['is-reply',1005.23,64.08,1.2,.33,1.94,'send me the plan'],['is-inyo',978.24,182.82,1.2,.33,-2.3,'−51.9%. dividend, worst since 1992.'],['is-reply',1097.66,314.88,1.2,.33,-3,'sounds doable'],['is-inyo',996.64,447.33,1.2,.33,1.98,'−14.7%. permanent, 2022.'],['is-reply',1031.03,567.2,1.2,.33,2.05,'wait, really?'],['is-reply',1127.11,680.9,1.09,.25,-1.56,'i’m in'],['is-inyo',161.4,726.71,1.09,.25,-.87,'−4.4%. all-weather, dot-com.'],['is-reply',194.73,636.34,1.09,.25,.93,'go on'],['is-reply',1317.94,698.86,.99,.17,.58,'ok, show me'],['is-inyo',1160.16,786.83,.99,.17,2.41,'−40.8%. momentum, worst since 1992.'],['is-reply',116.25,788.11,.99,.17,2.64,'that tracks']];
+function heroDeck(i){var n=HERO_C.length,f=byId[HERO_C[i%n][0]],g=byId[HERO_C[(i+1)%n][0]];return '<div class="mm-spin front">'+mdl(f)+'</div><div class="mm-spin mid">'+mdl(g)+'<div class="cast"></div></div>';}
+function heroEx(i){var c=HERO_C[i%HERO_C.length];return '<div class="mm-msg is-inyo"><div class="mm-tilt"><div class="mm-bubble is-inyo"><p>'+esc(c[1])+'</p></div></div></div><div class="mm-msg is-reply"><div class="mm-tilt"><div class="mm-bubble is-reply"><p>'+esc(c[2])+'</p></div></div></div>';}
+function heroHtml(){
+  var dr=HERO_DRIFT.map(function(d){return '<div class="mm-drift" style="left:calc('+d[1]+'px + '+d[3]+' * var(--mm-spread,0px));top:'+d[2]+'px"><div class="mm-bob"><div class="mm-bubble '+d[0]+'" style="opacity:'+d[4]+';transform:rotate('+d[5]+'deg)"><p>'+esc(d[6])+'</p></div></div></div>';}).join('');
+  var ha=HERO_HALO.map(function(d,k){return '<div class="mm-halo-msg" style="left:'+d[1]+'px;top:'+d[2]+'px;--k:'+d[3]+'"><div class="mm-bob" style="animation-duration:'+(3.1+(k%7)*.12).toFixed(2)+'s;animation-delay:-'+((k*.73)%3.4).toFixed(2)+'s"><div class="mm-bubble '+d[0]+'" style="opacity:'+d[4]+';transform:rotate('+d[5]+'deg)"><p>'+esc(d[6])+'</p></div></div></div>';}).join('');
+  var heart='<span class="mm-heart"><svg viewBox="0 0 45.1241 37.8" aria-hidden="true"><path pathLength="1" d="M2.5 6C9 6 11 30 22 30C33 30 36 8 42.6 3.5"/><circle class="a" cx="2.5" cy="6" r="3.607"/><circle class="b" cx="42.6" cy="3.5" r="3.607"/></svg></span>';
+  return '<main class="mm-page"><div class="mm-fit" id="mmfit"><div class="mm-stage"><div class="mm-halo" aria-hidden="true">'+ha+'</div>'+
+   '<section class="mm-screen" aria-label="Every investing model, built as a portfolio"><div class="mm-core"><div class="mm-drifts" aria-hidden="true">'+dr+'</div><div class="mm-fade"></div>'+
+   '<div class="mm-deck" id="mmdeck" aria-hidden="true">'+heroDeck(HERO.i)+'</div><div class="mm-exch" id="mmex" aria-hidden="true">'+heroEx(HERO.i)+'</div>'+
+   '</div><div class="mm-footer"><div class="mm-headline"><h1 class="sr">Every investing model, built as a portfolio.</h1><p class="mm-line is-soft" aria-hidden="true">investing models</p><div class="mm-line-row" aria-hidden="true"><p class="mm-line">as portfolios.</p>'+heart+'</div></div>'+
+   '<div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">Free to browse · prices from the latest close</p></div></div></section></div></div></main>';
+}
+function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',window.innerHeight);}}
+function heroPaint(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e)return;d.innerHTML=heroDeck(HERO.i);e.className='mm-exch';e.innerHTML=heroEx(HERO.i);}
+function heroTick(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e){heroStop();return;}var f=d.querySelector('.front'),g=d.querySelector('.mid');if(!f||!g)return;e.classList.add('out');f.classList.add('leave');if(HERO.i%2)f.classList.add('r');g.classList.add('go');HERO.to=setTimeout(function(){HERO.i++;heroPaint();},680);}
+function heroStop(){if(HERO.timer){clearInterval(HERO.timer);HERO.timer=null;}if(HERO.to){clearTimeout(HERO.to);HERO.to=null;}}
+function heroStart(){heroStop();heroFit();if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;HERO.timer=setInterval(heroTick,4200);}
+window.addEventListener('resize',heroFit);
+function hl(soft,main){return '<h2 class="h2"><em>'+soft+'</em>'+main+'</h2>';}
 
 /* ---------- views ---------- */
 function viewHome(){
@@ -532,23 +304,21 @@ function viewHome(){
     ['What do Risk and Effort mean?','They are 1 to 5 editorial ratings written by the site’s author, not measured data. Risk is how bumpy the ride can get. Effort is how much time and attention the style asks of you.'],
     ['Can I try my own amounts?','Yes. On any model page, type a dollar amount into the calculator to see how it would split across that model’s holdings.']]
     .map(function(q,i){return '<details'+(i===0?' open':'')+'><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
-  return '<div class="wrap"><section class="hero"><div><h1 class="display">Every investing model, <em>built as a portfolio.</em></h1>'+
-    '<p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
-    '<div class="cta"><a class="btn pri lg" href="#library">Explore the library →</a><small>Free to browse · prices from the latest close</small></div></div>'+
-    '<div class="demo"><div class="demo-h"><div><h3>Value</h3><p>Example portfolio'+(DATA?' · '+asOfTxt()+' close':'')+'</p></div>'+d1+'</div>'+heroRows+
-    '<div class="demo-f"><span>If I invested</span><b>$10,000</b></div></div></section>'+
-    '<div class="ideas"><span class="eyebrow">Built from the ideas of</span><div class="names"><span>Graham</span><span>Buffett</span><span>Lynch</span><span>Bogle</span><span>Dalio</span><span>Markowitz</span><span>Fama</span></div></div>'+
-  '<section class="s"><h2 class="h2">ModelLab makes investing styles <em>simple.</em></h2><div class="simple"><div class="steps">'+stepHtml+'</div><div class="libcard"><b>Library</b>'+lib+'</div></div></section>'+
-  '<section class="s" style="padding-top:20px"><h2 class="h2">But wait, there’s more</h2><p class="sub center" style="font-size:17px;margin-top:14px">Price snapshots, a dollar calculator, and a compare view, built into every model.</p>'+
-    '<div class="bento"><div class="bcard" style="background:var(--blue)"><h3>Prices that stay current</h3><p>Closing prices and daily change for every ETF, from the latest market close.</p>'+tick+'</div>'+
-    '<div class="bcard" style="background:var(--peach)"><h3>Compare up to four</h3><p>Risk, effort, and growth profiles drawn side by side so the tradeoffs are obvious.</p>'+cb+'</div>'+
-    '<div class="bcard" style="background:var(--mint)"><h3>A dollar calculator</h3><p>Type any amount and watch it split across the holdings of each model.</p><div class="mini"><span style="color:var(--muted);font-weight:400;font-size:14px">If I invested</span><b style="font-size:20px">$10,000</b></div>'+calc+'</div></div></section>'+
-  '<section class="s" style="padding-top:20px"><h2 class="h2">Find your style.</h2><div class="grid3" style="margin-top:44px">'+feat+'</div><div class="center" style="margin-top:36px"><a class="btn light" href="#library">See all models →</a></div></section>'+
-  '<section class="s" style="padding-top:20px"><h2 class="h2">Don\u2019t just read about it. <em>Feel it.</em></h2><p class="sub center" style="font-size:17px;margin-top:14px">Match a model to how you behave, live through a real crash, then get a plan you can act on.</p><div class="grid3" style="margin-top:44px">'+
-    [['mint','Step 1 \u00b7 Match','Match Quiz','Six questions about how you would actually behave, backed by how far each model really fell.','#match','Take the quiz \u2192'],['peach','Step 2 \u00b7 Feel the risk','Pain Simulator','Invest right before a crash and decide in real time: sell, hold or buy more.','#pain','Try it \u2192'],['yellow','Step 3 \u00b7 Act','Implement It','Exact dollar amounts, share counts and a rebalance plan for any model.','#implement','Build my plan \u2192']].map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+c[5]+'</span></a>';}).join('')+
-    '</div><div class="center" style="margin-top:36px"><a class="btn light" href="#tools">See all tools \u2192</a></div></section>'+
-  '<section class="s"><h2 class="h2">Frequently asked questions</h2><p class="sub center" style="font-size:17px;margin-top:14px">Everything you need to know about ModelLab</p><div class="faq">'+faq+'</div></section></div>'+
-  '<section class="ctaband"><div class="wrap"><h2 class="h2" style="max-width:700px;margin:0 auto">Find the model that fits how you invest.</h2><a class="btn pri lg" href="#library">Explore the library →</a><small>Educational only · not investment advice</small></div></section>';
+  return heroHtml()+'<div class="wrap">'+
+  '<section class="intro"><p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
+   '<div class="demo"><div class="demo-h"><div><h3>Value</h3><p>Example portfolio'+(DATA?' · '+asOfTxt()+' close':'')+'</p></div>'+d1+'</div>'+heroRows+'<div class="demo-f"><span>If I invested</span><b>$10,000</b></div></div></section>'+
+  '<div class="ideas"><span class="eyebrow">Built from the ideas of</span><div class="names"><span>Graham</span><span>Buffett</span><span>Lynch</span><span>Bogle</span><span>Dalio</span><span>Markowitz</span><span>Fama</span></div></div>'+
+  '<section class="s">'+hl('ModelLab makes','investing styles simple.')+'<div class="simple"><div class="steps">'+stepHtml+'</div><div class="libcard"><b>Library</b>'+lib+'</div></div></section>'+
+  '<section class="s" style="padding-top:20px">'+hl('But wait,','there’s more')+'<p class="sub center">Price snapshots, a dollar calculator, and a compare view, built into every model.</p>'+
+    '<div class="bento"><div class="bcard"><h3>Prices that stay current</h3><p>Closing prices and daily change for every ETF, from the latest market close.</p>'+tick+'</div>'+
+    '<div class="bcard"><h3>Compare up to four</h3><p>Risk, effort, and growth profiles drawn side by side so the tradeoffs are obvious.</p>'+cb+'</div>'+
+    '<div class="bcard"><h3>A dollar calculator</h3><p>Type any amount and watch it split across the holdings of each model.</p><div class="mini"><span style="color:var(--muted);font-weight:400;font-size:14px">If I invested</span><b style="font-size:20px">$10,000</b></div>'+calc+'</div></div></section>'+
+  '<section class="s" style="padding-top:20px"><h2 class="h2">Find your style.</h2><div class="mgrid" style="margin-top:44px;padding-bottom:0">'+feat+'</div><div class="center" style="margin-top:36px"><a class="btn light" href="#library">See all models →</a></div></section>'+
+  '<section class="s" style="padding-top:20px">'+hl('Don’t just read about it.','Feel it.')+'<p class="sub center">Match a model to how you behave, live through a real crash, then get a plan you can act on.</p><div class="grid3" style="margin-top:44px">'+
+    [['Step 1 · Match','Match Quiz','Six questions about how you would actually behave, backed by how far each model really fell.','#match','Take the quiz →'],['Step 2 · Feel the risk','Pain Simulator','Invest right before a crash and decide in real time: sell, hold or buy more.','#pain','Try it →'],['Step 3 · Act','Implement It','Exact dollar amounts, share counts and a rebalance plan for any model.','#implement','Build my plan →']].map(function(c){return '<a class="mcard" href="'+c[3]+'"><span class="cat">'+c[0]+'</span><h3>'+c[1]+'</h3><p>'+c[2]+'</p><span class="go">'+c[4]+'</span></a>';}).join('')+
+    '</div><div class="center" style="margin-top:36px"><a class="btn light" href="#tools">See all tools →</a></div></section>'+
+  '<section class="s"><h2 class="h2">Frequently asked questions</h2><p class="sub center">Everything you need to know about ModelLab</p><div class="faq">'+faq+'</div></section></div>'+
+  '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('Find the model','that fits how you invest.').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">Educational only · not investment advice</p></div></div></section>';
 }
 
 function viewLibrary(){
@@ -561,7 +331,7 @@ function viewLibrary(){
   var opts=[['featured','Featured'],['risk','Lowest risk'],['effort','Lowest effort'],['growth','Highest growth']].map(function(o){return '<option value="'+o[0]+'"'+(state.sort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('');
   return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">Investing models, each with an example portfolio you can explore.</p></div>'+
    '<div class="filters"><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div><label class="sortw">Sort: <select id="sort">'+opts+'</select></label></div>'+
-   '<div class="grid3" style="padding-bottom:100px">'+(list.length?list.map(card).join(''):'<p class="empty">No models in this family yet.</p>')+'</div></div>';
+   '<div class="mgrid">'+(list.length?list.map(card).join(''):'<p class="empty">No models in this family yet.</p>')+'</div></div>';
 }
 
 function donut(m){
@@ -653,7 +423,7 @@ function render(keep){
   else if(hash==='about'){html=viewAbout();}
   else if(hash.indexOf('m-')===0){html=viewModel(hash.slice(2));nav='library';}
   else{html=viewHome();home=true;}
-  view.innerHTML=html;foot.innerHTML=(home?'':'')+footer(home);
+  heroStop();view.className=home?'':'page';view.innerHTML=(home?'':navrow())+html;foot.innerHTML=footer(home);if(home)heroStart();
   document.body.classList.toggle('home',home);
   document.querySelectorAll('[data-nav]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-nav')===nav);});
   if(!keep)window.scrollTo(0,0);
