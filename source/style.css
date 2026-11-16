@@ -403,3 +403,19 @@ body.home .site-footer{border-radius:0}
 .mdl .tag{top:25cqw}
 .mdl .info{bottom:7cqw}
 .mdl .rw b{font-size:6.2cqw}
+
+/* glossary */
+.gl{display:inline;padding:0;margin:0;border:0;background:none;font:inherit;color:inherit;cursor:help;text-decoration:underline dotted var(--blue);text-underline-offset:3px;text-decoration-thickness:1.5px}
+.gl:hover,.gl[aria-expanded=true]{color:var(--blue-deep)}
+.gl-pop{position:absolute;z-index:50;max-width:300px;background:var(--ink);color:#fff;border-radius:16px;padding:12px 16px;font-size:14px;line-height:20px;box-shadow:var(--shadow)}
+.gl-pop b{font-weight:600;color:var(--blue-soft)}
+/* printable plan */
+@media print{
+  .top,.navrow,#foot,.phead .sub,.tl-steps,.btns,.stack>.two,.stack>.panel .btn,[data-t-copy],[data-t-print],.gl-pop,.tl-ok+div .btn{display:none!important}
+  body{background:#fff}.page{padding-top:0}
+  .panel{box-shadow:none;border:1px solid #ccc;border-radius:12px;break-inside:avoid}
+  .phead{padding:0 0 12px}
+  .stack{padding-bottom:0}
+  .stack::after{content:"ModelLab \00b7 educational only, not investment advice. Example portfolios are hypothetical.";display:block;margin-top:16px;font-size:11px;color:#666}
+  a{text-decoration:none}
+}

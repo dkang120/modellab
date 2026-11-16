@@ -14,6 +14,9 @@ css.textContent=[
 '.tl-steps{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:22px}',
 '.tl-steps span{background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:500;color:var(--muted)}',
 '.tl-steps span b{color:var(--purple);font-weight:600}',
+'.tl-steps span.dn{border-color:var(--blue);color:var(--ink)}',
+'.tl-emb{width:100%;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:14px;font:12px/1.5 var(--mono);color:var(--ink);background:var(--t-gray,#f1f1f3);resize:none}',
+'.tl-ck{font-style:normal;color:var(--blue);font-weight:600}',
 '.tl-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}',
 '.tl-f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500;color:var(--muted)}',
 '.tl-f input,.tl-f select,.tl-f textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--white);border:1.5px solid var(--line);border-radius:999px;padding:11px 18px;outline:0;min-width:150px}',
@@ -175,8 +178,10 @@ function viewTools(){
    ['mint','Go further','Build Your Own','Pick holdings and weights. Test them against 30–100 years of history and compare with any model.','#build','Open the builder →'],
    ['peach','Compete','Leaderboard','Track a virtual portfolio from today’s close against everyone else. No real money.','#leaderboard','See the board →']
   ];
-  return head('Tools.','Match a model to how you behave, feel the risk, then act on it.','<div class="tl-steps"><span><b>1</b> Match</span><span><b>2</b> Feel the risk</span><span><b>3</b> Act</span></div>')+
-   '<div class="grid3" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+c[5]+'</span></a>';}).join('')+'</div></div>';
+  var pg=progGet(),nx=!pg.match?['#match','Start with the Match Quiz']:(!pg.pain?['#pain','Next: feel the risk with the Pain Simulator']:(!pg.implement?['#implement','Next: build your plan']:['#build','All three steps done. Try Build Your Own']));
+  var dn=function(k){return pg[k]?'<i class="tl-ck" aria-label="done">✓</i> ':'';};
+  return head('Tools.','Match a model to how you behave, feel the risk, then act on it.','<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
+   '<div class="grid3" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+(pg[c[4].slice(1)]?'Done ✓ · ':'')+c[5]+'</span></a>';}).join('')+'</div></div>';
 }
 
 /* ================= MATCH QUIZ ================= */
@@ -300,6 +305,7 @@ function painBody(){
   return out;
 }
 function painSummary(){
+  markProg('pain');
   var h=P.hold,st=pstats(P.idx),you=P.dec?painYou():h,fy=you[P.len],fh=h[P.len],inv=painInv(P.len);
   var lines=[];
   lines.push('Held the whole way, '+ML.byId[P.m].name+' fell as far as <b>'+pct1(st.mdd)+'</b> and spent <b>'+st.under+' of '+P.len+' months</b> below an earlier high'+(st.recover!=null?', taking '+st.recover+' months to climb back from the bottom.':', and had not fully recovered by the end of this window.'));
@@ -397,7 +403,7 @@ function viewImplement(arg){
    (unpriced?note(unpriced+' holding'+(unpriced>1?'s have':' has')+' no ticker (a sleeve you choose yourself); see the model page for the rule.'):'')+
    (!IM.frac&&have.total===0?'<div class="tl-ok">With whole shares you would spend about <b>'+money(spent)+'</b> of '+money(amt)+', leaving about <b>'+money(amt-spent)+'</b> in cash.</div>':'')+
    (extra.length?'<div class="tl-warn">Not in this model: '+esc(extra.join(', '))+'. They are left out of the trade list. Selling is your call.</div>':'')+
-   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="btn pri sm" data-t-copy="1">Copy plan</button><button class="btn light sm" onclick="window.print()">Print</button><a class="btn light sm" href="#m-'+m.id+'">About this model</a></div>'+note(srcLine()+' Prices are the latest close and will differ at the time you trade. Educational only, not investment advice.')+'</div>'+
+   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="btn pri sm" data-t-copy="1">Copy plan</button><button class="btn light sm" data-t-print="1">Print or save as PDF</button><a class="btn light sm" href="#m-'+m.id+'">About this model</a></div>'+note(srcLine()+' Prices are the latest close and will differ at the time you trade. Educational only, not investment advice.')+'</div>'+
    '<div class="two"><div class="panel"><h2 style="font-size:22px">Rebalance calculator</h2><p class="b" style="font-size:15px">Already own some? Paste ticker and dollar amount, one per line. We show what to buy or sell to reach the target.</p><label class="tl-f"><textarea id="im-have" placeholder="VTI 3000&#10;BND 800&#10;AAPL 500">'+esc(IM.have)+'</textarea></label></div>'+
    '<div class="panel" style="background:var(--yellow)"><h2 style="font-size:22px">Your routine</h2>'+tips.map(function(t,i){return '<div class="nstep"><i>'+(i+1)+'</i><span><b>'+t[0]+'.</b> '+esc(t[1])+'</span></div>';}).join('')+'</div></div></div></div>';
 }
@@ -547,7 +553,9 @@ function viewLeaderboard(){
 
 /* ================= model page hook ================= */
 ML.modelTools=function(m){
-  return '<div class="panel sh" style="background:var(--mint)"><h2 style="font-size:22px">Try this model</h2><p class="b" style="font-size:15px;margin-top:6px">See how it behaves and what it would take to own it.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><a class="btn pri sm" href="#pain/'+m.id+'">Pain Simulator</a><a class="btn light sm" href="#stress">Stress Test</a><a class="btn light sm" href="#implement/'+m.id+'">Implement It</a></div></div>';
+  var emb='<iframe src="'+new URL('embed/'+m.id+'/',document.baseURI).href+'" title="'+esc(m.name)+' example portfolio" width="360" height="330" style="border:0;border-radius:16px" loading="lazy"></iframe>';
+  return '<div class="panel sh" style="background:var(--mint)"><h2 style="font-size:22px">Try this model</h2><p class="b" style="font-size:15px;margin-top:6px">See how it behaves and what it would take to own it.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><a class="btn pri sm" href="#pain/'+m.id+'">Pain Simulator</a><a class="btn light sm" href="#stress">Stress Test</a><a class="btn light sm" href="#implement/'+m.id+'">Implement It</a></div></div>'+
+   '<div class="panel"><h2 style="font-size:22px">Embed this portfolio</h2><p class="b" style="font-size:15px;margin-top:6px">Put this example allocation on your own site or blog. It links back to ModelLab.</p><textarea class="tl-emb" readonly rows="3" aria-label="Embed code" onfocus="this.select()">'+esc(emb)+'</textarea><div style="margin-top:12px"><button class="btn light sm" data-t-copyemb="'+m.id+'">Copy embed code</button></div></div>';
 };
 
 /* ================= routes ================= */
@@ -600,6 +608,8 @@ function painCard(){
 }
 function painLink(){return new URL('tools/pain/?m='+encodeURIComponent(P.m)+'&s='+encodeURIComponent(P.sc),document.baseURI).href;}
 function matchCard(){var r=matchRank().slice(0,3);return {soft:'my investing style',main:r[0].m.name.toLowerCase()+'.',gray:'also fits: '+r.slice(1).map(function(x){return x.m.name.toLowerCase();}).join(', ')+'.',blue:'what would you hold when it drops?',url:shortUrl('tools/match/')};}
+function progGet(){try{return JSON.parse(localStorage.getItem('ml_prog')||'{}');}catch(e){return {};}}
+function markProg(k){var p=progGet();if(p[k])return;p[k]=1;try{localStorage.setItem('ml_prog',JSON.stringify(p));}catch(e){}}
 function emailSaved(){try{return !!localStorage.getItem('ml_email');}catch(e){return false;}}
 function qzSave(){
   var em;try{em=localStorage.getItem('ml_email');}catch(e){}
@@ -623,7 +633,7 @@ document.addEventListener('click',function(e){
     shareCard(card).then(function(b){shb.textContent=o;shb.disabled=false;shareOut(b,'modellab-'+kind+'.png',kind==='pain'?'I tried the ModelLab pain simulator. Can you hold?':'My ModelLab investing style match.',kind==='pain'?painLink():new URL('tools/match/',document.baseURI).href);});return;}
   var lkb=cap(e,'[data-t-link]');if(lkb){copyTxt(lkb.getAttribute('data-t-link')==='pain'?painLink():new URL('tools/match/',document.baseURI).href,lkb);return;}
   var el;
-  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;ML.rerender();if(Q.done)qzSave();return;}
+  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;if(Q.done){markProg('match');}ML.rerender();if(Q.done)qzSave();return;}
   if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;ML.rerender();return;}
   if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};ML.rerender();return;}
   if((el=cap(e,'[data-t-psc]'))){if(el.disabled)return;P.sc=el.getAttribute('data-t-psc');painReset();ML.rerender();return;}
@@ -632,7 +642,9 @@ document.addEventListener('click',function(e){
   if((el=cap(e,'[data-t-pdec]'))){P.dec=el.getAttribute('data-t-pdec');P.decK=P.k;painPlay();return;}
   if(cap(e,'[data-t-prestart]')){painReset();ML.rerender();window.scrollTo(0,0);return;}
   if((el=cap(e,'[data-t-ssort]'))){SX.sort=el.getAttribute('data-t-ssort');ML.rerender();return;}
-  if(cap(e,'[data-t-copy]')){
+  var ce=cap(e,'[data-t-copyemb]');if(ce){var ta=document.querySelector('.tl-emb');if(ta)copyTxt(ta.value,ce);return;}
+  if(cap(e,'[data-t-print]')){markProg('implement');window.print();return;}
+  if(cap(e,'[data-t-copy]')){markProg('implement');
     var m=ML.byId[IM.m],amt=Number(IM.amt)||0,rows=m.hold.map(function(x){var p=priceOf(x[0]),usd=amt*x[2]/100;return {t:x[0],w:x[2],usd:usd,sh:p?Math.round(usd/p*10000)/10000:null};});
     var txt=planText(m,rows,amt),b=cap(e,'[data-t-copy]');
     (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){b.textContent='Copied ✓';}).catch(function(){b.textContent='Copy failed';});return;}
