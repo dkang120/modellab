@@ -84,11 +84,12 @@ function rAt(t,g){var p=pr(t);if(!p||p.start==null)return null;var i=g-p.start;i
 function startOf(hold){var s=0;for(var i=0;i<hold.length;i++){var p=pr(hold[i][0]);if(!p||p.start==null)return Infinity;s=Math.max(s,p.start);}return s;}
 function toH(m){return m.hold.map(function(x){return [x[0],x[2]];});}
 /* Monthly total-return path with fixed target weights. rebal: 'annual' | 'none'. path[0]=start amount, path[k]=end of k-th month. */
-function sim(hold,g0,g1,amt,rebal){
+function sim(hold,g0,g1,amt,rebal,c){c=c||0;
   var tot=0,w=hold.map(function(h){tot+=h[1];return h[1];});w=w.map(function(x){return x/tot;});
   var v=w.map(function(x){return x*amt;}),path=[amt],i,k;
   for(var g=g0;g<=g1;g++){
     var s=0;
+    if(c)for(i=0;i<hold.length;i++)v[i]+=w[i]*c;
     for(i=0;i<hold.length;i++){var r=rAt(hold[i][0],g);if(r==null)return null;v[i]*=1+r/100;s+=v[i];}
     path.push(s);k=g-g0;
     if(rebal!=='none'&&k%12===11){for(i=0;i<w.length;i++)v[i]=w[i]*s;}
@@ -227,7 +228,7 @@ function viewMatch(){
 }
 
 /* ================= PAIN SIMULATOR ================= */
-var P={m:'index',sc:'gfc',amt:10000,k:0,len:0,timer:null,dec:null,decK:null,g0:0,hold:null,mkt:null,cash:null,pause:null,done:false,custom:''};
+var P={contrib:0,idx:null,m:'index',sc:'gfc',amt:10000,k:0,len:0,timer:null,dec:null,decK:null,g0:0,hold:null,mkt:null,cash:null,pause:null,done:false,custom:''};
 function painInit(arg){
   if(arg&&ML.byId[arg])P.m=arg;
   painReset();
@@ -243,17 +244,19 @@ function painReset(){
   var w=painWindow();P.g0=w.g0;
   var last=HM.length-1;P.len=Math.min(120,last-P.g0+1);
   if(P.len<6){P.hold=null;return;}
-  P.hold=sim(painCurHold(),P.g0,P.g0+P.len-1,P.amt,'annual');
-  P.mkt=sim([['VTI',100]],P.g0,P.g0+P.len-1,P.amt,'annual');
+  P.hold=sim(painCurHold(),P.g0,P.g0+P.len-1,P.amt,'annual',P.contrib);
+  P.mkt=sim([['VTI',100]],P.g0,P.g0+P.len-1,P.amt,'annual',P.contrib);
   P.cash=sim([['BIL',100]],P.g0,P.g0+P.len-1,1,'annual');
-  if(P.hold){var peak=P.hold[0];for(var i=1;i<P.hold.length;i++){if(P.hold[i]>peak)peak=P.hold[i];if(P.hold[i]/peak-1<=-0.15){P.pause=i;break;}}}
+  if(P.hold){var c0=P.contrib||0;P.idx=[1];for(var j=1;j<P.hold.length;j++)P.idx[j]=P.idx[j-1]*P.hold[j]/(P.hold[j-1]+c0);
+    var peak=P.idx[0];for(var i=1;i<P.idx.length;i++){if(P.idx[i]>peak)peak=P.idx[i];if(P.idx[i]/peak-1<=-0.15){P.pause=i;break;}}}
 }
 function painYou(){
-  var h=P.hold,k=P.decK,you=h.slice();
-  if(P.dec==='sell'){for(var j=k+1;j<h.length;j++)you[j]=h[k]*(P.cash?P.cash[j]/P.cash[k]:1);}
-  if(P.dec==='buy'){var add=P.amt*0.5;for(var j2=k+1;j2<h.length;j2++)you[j2]=(h[k]+add)*h[j2]/h[k];you[k]=h[k]+add;}
+  var h=P.hold,k=P.decK,c=P.contrib||0,you=h.slice(),j;
+  if(P.dec==='sell'){for(j=k+1;j<h.length;j++){var cr=P.cash?P.cash[j]/P.cash[j-1]:1;you[j]=(you[j-1]+c)*cr;}}
+  if(P.dec==='buy'){you[k]=h[k]+P.amt*0.5;for(j=k+1;j<h.length;j++)you[j]=(you[j-1]+c)*(h[j]/(h[j-1]+c));}
   return you;
 }
+function painInv(k){var inv=P.amt+(P.contrib||0)*k;if(P.dec==='buy'&&P.decK!=null&&k>=P.decK)inv+=P.amt*0.5;return inv;}
 function painStop(){if(P.timer){clearInterval(P.timer);P.timer=null;}}
 function painPlay(speed){
   painStop();if(!P.hold||P.done)return;
@@ -280,27 +283,27 @@ function painChartHtml(){
 }
 function painBody(){
   var m=ML.byId[P.m],h=P.hold,k=P.k;
-  var you=P.dec?painYou():h,cur=you[k],dd=painDD(h,k),curLab=HM[P.g0-1+k]?mlab(HM[P.g0-1+k]):'Start';
-  var peakNow=Math.max.apply(null,h.slice(0,k+1)),underNow=0;for(var i=1;i<=k;i++){if(h[i]<Math.max.apply(null,h.slice(0,i+1)))underNow++;}
+  var you=P.dec?painYou():h,cur=you[k],inv=painInv(k),dd=painDD(P.idx,k),curLab=HM[P.g0-1+k]?mlab(HM[P.g0-1+k]):'Start';
+  var underNow=0;for(var i=1;i<=k;i++){if(P.idx[i]<Math.max.apply(null,P.idx.slice(0,i+1)))underNow++;}
   var s='<div class="tl-stats">'+
    statBox('MONTH',k+' of '+P.len,curLab)+
-   statBox('PORTFOLIO VALUE',money(cur),(cur>=P.amt?'+':'−')+money(Math.abs(cur-P.amt))+' vs start',cur>=P.amt?'up':'dn')+
+   statBox('PORTFOLIO VALUE',money(cur),(cur>=inv?'+':'−')+money(Math.abs(cur-inv))+(P.contrib?' vs what you put in':' vs start'),cur>=inv?'up':'dn')+
    statBox('BELOW ITS PEAK',pct1(dd),underNow+' months underwater',dd<-0.005?'dn':'na')+
    statBox('US STOCK MARKET',money(P.mkt[k]),'for reference')+'</div>';
   var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#4c90f7'],P.dec&&P.dec!=='hold'?['If you had held','#c5dcff']:null,['US stock market','#dedee2']].filter(Boolean))+s;
   if(P.pause!=null&&k===P.pause&&P.dec==null){
-    out+='<div class="tl-dec" role="alertdialog" aria-live="assertive"><h3>'+curLab+': you are down '+pctAbs(dd)+' from the peak.</h3><p>Your $'+Math.round(P.amt).toLocaleString('en-US')+' is now worth <b>'+money(cur)+'</b>. The news is bad. What do you do?</p><div class="btns"><button class="btn light" data-t-pdec="sell">Sell everything</button><button class="btn light" data-t-pdec="hold">Hold</button><button class="btn pri" data-t-pdec="buy">Buy more ('+money(P.amt*0.5)+')</button></div></div>';
+    out+='<div class="tl-dec" role="alertdialog" aria-live="assertive"><h3>'+curLab+': you are down '+pctAbs(dd)+' from the peak.</h3><p>'+(P.contrib?'You have put in '+money(inv)+' and it':'Your $'+Math.round(P.amt).toLocaleString('en-US'))+' is now worth <b>'+money(cur)+'</b>. The news is bad. What do you do?</p><div class="btns"><button class="btn light" data-t-pdec="sell">Sell everything</button><button class="btn light" data-t-pdec="hold">Hold</button><button class="btn pri" data-t-pdec="buy">Buy more ('+money(P.amt*0.5)+')</button></div></div>';
   }
   if(P.done)out+=painSummary();
   return out;
 }
 function painSummary(){
-  var h=P.hold,st=pstats(h),you=P.dec?painYou():h,fy=you[P.len],fh=h[P.len],inv=P.amt+(P.dec==='buy'?P.amt*0.5:0);
+  var h=P.hold,st=pstats(P.idx),you=P.dec?painYou():h,fy=you[P.len],fh=h[P.len],inv=painInv(P.len);
   var lines=[];
   lines.push('Held the whole way, '+ML.byId[P.m].name+' fell as far as <b>'+pct1(st.mdd)+'</b> and spent <b>'+st.under+' of '+P.len+' months</b> below an earlier high'+(st.recover!=null?', taking '+st.recover+' months to climb back from the bottom.':', and had not fully recovered by the end of this window.'));
-  if(P.dec==='sell'){var d=fy-fh;lines.push('You sold in '+mlab(HM[P.g0-1+P.decK])+' at '+pct1(painDD(h,P.decK))+' and moved to Treasury bills. You finished with <b>'+money(fy)+'</b> versus <b>'+money(fh)+'</b> if you had held: '+(d<0?'<b>'+money(-d)+' less</b>. Selling locked in the drop.':'<b>'+money(d)+' more</b>. In this window, selling avoided further losses, but you also had to decide when to buy back in.'));}
+  if(P.dec==='sell'){var d=fy-fh;lines.push('You sold in '+mlab(HM[P.g0-1+P.decK])+' at '+pct1(painDD(P.idx,P.decK))+' and moved to Treasury bills. You finished with <b>'+money(fy)+'</b> versus <b>'+money(fh)+'</b> if you had held: '+(d<0?'<b>'+money(-d)+' less</b>. Selling locked in the drop.':'<b>'+money(d)+' more</b>. In this window, selling avoided further losses, but you also had to decide when to buy back in.'));}
   else if(P.dec==='buy'){lines.push('You added '+money(P.amt*0.5)+' at the low-ish point. You put in '+money(inv)+' total and finished with <b>'+money(fy)+'</b> ('+(fy>=inv?'+':'−')+money(Math.abs(fy-inv))+' vs what you put in).');}
-  else if(P.dec==='hold'){lines.push('You held. Finishing value: <b>'+money(fy)+'</b> ('+(fy>=P.amt?'+':'−')+money(Math.abs(fy-P.amt))+').');}
+  else if(P.dec==='hold'){lines.push('You held. Finishing value: <b>'+money(fy)+'</b> ('+(fy>=inv?'+':'−')+money(Math.abs(fy-inv))+(P.contrib?' vs the '+money(inv)+' you put in':'')+').');}
   else lines.push('This model never fell 15% from a peak in this window, so there was no tough choice to make. Final value: <b>'+money(fy)+'</b>.');
   return '<div class="panel" style="background:var(--lilac);margin-top:18px"><h2 style="font-size:22px">What happened</h2>'+lines.map(function(l){return '<p class="b" style="margin-top:10px">'+l+'</p>';}).join('')+'<div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button class="btn pri sm" data-t-prestart="1">Try another start date</button><a class="btn light sm" href="#implement/'+P.m+'">Build my plan for this model</a></div></div>';
 }
@@ -315,7 +318,7 @@ function viewPain(arg){
   var avail=SCEN.map(function(sc){var w=scenWin(sc),p=sim(painCurHold(),w.g0,Math.min(w.g0+5,HM.length-1),1,'annual');return {sc:sc,ok:!!p};});
   var chips=avail.map(function(a){return '<button class="chip" data-t-psc="'+a.sc.id+'" aria-pressed="'+(P.sc===a.sc.id)+'"'+(a.ok?'':' disabled style="opacity:.45;cursor:not-allowed"')+' title="'+(a.ok?esc(a.sc.blurb):'This model needs data that starts later')+'">'+esc(a.sc.name)+'</button>';}).join('');
   var curSc=SCEN.filter(function(s){return s.id===P.sc;})[0];
-  var ctl='<div class="tl-bar"><label class="tl-f">Model<select id="pn-m">'+modelOpts(P.m)+'</select></label><label class="tl-f">Amount<input id="pn-amt" type="number" inputmode="numeric" min="100" step="500" value="'+P.amt+'"></label><label class="tl-f">Start<input id="pn-date" type="month" min="1927-01" max="'+HM[HM.length-7]+'" value="'+(/^\d{4}-\d{2}$/.test(P.sc)?P.sc:'')+'"></label></div>';
+  var ctl='<div class="tl-bar"><label class="tl-f">Model<select id="pn-m">'+modelOpts(P.m)+'</select></label><label class="tl-f">Amount<input id="pn-amt" type="number" inputmode="numeric" min="100" step="500" value="'+P.amt+'"></label><label class="tl-f">Add monthly<input id="pn-contrib" type="number" inputmode="numeric" min="0" step="50" value="'+P.contrib+'"></label><label class="tl-f">Start<input id="pn-date" type="month" min="1927-01" max="'+HM[HM.length-7]+'" value="'+(/^\d{4}-\d{2}$/.test(P.sc)?P.sc:'')+'"></label></div>';
   var body=!P.hold?'<p class="b">This model has no data for that start date. Try a later one.</p>':painBody();
   return head('Pain Simulator.','Invest at a bad moment in history. Decide when it hurts.','<div class="tl-steps"><span><b>Step 2</b> Feel the risk</span></div>')+
    '<div class="stack"><div class="panel sh"><div id="pn-ctl">'+ctl+'<div class="chips" role="group" aria-label="Choose a start date">'+chips+'</div>'+(curSc?'<p class="note" style="margin-top:12px"><b>'+esc(curSc.label)+'.</b> '+esc(curSc.blurb)+'</p>':'')+
@@ -595,10 +598,11 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='pn-amt'){P.amt=Math.max(100,Number(t.value)||10000);}
+  else if(t.id==='pn-contrib'){P.contrib=Math.max(0,Math.min(100000,Number(t.value)||0));}
   else if(t.id==='im-amt'){IM.amt=Math.max(0,Number(t.value)||0);clearTimeout(viewImplement._t);viewImplement._t=setTimeout(ML.rerender,350);}
   else if(t.id==='im-have'){IM.have=t.value;clearTimeout(viewImplement._h);viewImplement._h=setTimeout(function(){var s=t.selectionStart;ML.rerender();var n=$('#im-have');if(n){n.focus();try{n.setSelectionRange(s,s);}catch(x){}}},500);}
   else if(t.id==='ov-txt'){OV.txt=t.value;clearTimeout(viewOverlap._t);viewOverlap._t=setTimeout(function(){var s=t.selectionStart;ML.rerender();var n=$('#ov-txt');if(n){n.focus();try{n.setSelectionRange(s,s);}catch(x){}}},500);}
   else if(t.id==='lb-handle'){LBS.handle=t.value;}
 });
-document.addEventListener('change',function(e){if(e.target.id==='pn-amt'){P.amt=Math.max(100,Number(e.target.value)||10000);painReset();ML.rerender();}});
+document.addEventListener('change',function(e){if(e.target.id==='pn-contrib'){P.contrib=Math.max(0,Math.min(100000,Number(e.target.value)||0));painReset();ML.rerender();return;}if(e.target.id==='pn-amt'){P.amt=Math.max(100,Number(e.target.value)||10000);painReset();ML.rerender();}});
 })();
