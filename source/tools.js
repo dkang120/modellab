@@ -430,7 +430,7 @@ function viewOverlap(){
 }
 
 /* ================= BUILD YOUR OWN ================= */
-var BD={rows:[['VTI',60],['BND',30],['GLD',10]],start:'1992-02',reb:'annual',cmp:'index',amt:10000,pick:''};
+var BD={fee:0,real:false,rows:[['VTI',60],['BND',30],['GLD',10]],start:'1992-02',reb:'annual',cmp:'index',amt:10000,pick:''};
 function tickerList(){return Object.keys(H.map).filter(function(t){return /^[A-Z.]{1,5}$/.test(t);});}
 function viewBuild(){
   if(hState!=='ready')return loadingView('Build Your Own.','Test your own mix against history.');
@@ -439,6 +439,9 @@ function viewBuild(){
   var s0=Math.max(startOf(BD.rows.map(function(r){return [r[0],r[1]||1];})),startOf(toH(cm))),want=HI[BD.start]!=null?HI[BD.start]:s0,g0=Math.max(want,s0),g1=HM.length-1;
   var mine=BD.rows.length?sim(BD.rows.map(function(r){return [r[0],Number(r[1])||0.0001];}),g0,g1,BD.amt,BD.reb):null;
   var other=sim(toH(cm),g0,g1,BD.amt,BD.reb),mk=sim([['VTI',100]],g0,g1,BD.amt,BD.reb);
+  var cpiA=H&&H.cpi,realOk=!!(cpiA&&cpiA[g0-1]!=null&&cpiA[g1]!=null),realOn=BD.real&&realOk,fee=Math.max(0,Math.min(5,Number(BD.fee)||0))/100;
+  if(mine&&fee)mine=mine.map(function(v,k){return v*Math.pow(1-fee,k/12);});
+  if(realOn){var dfl=function(p){return p&&p.map(function(v,k){return v/(cpiA[g0-1+k]/cpiA[g0-1]);});};mine=dfl(mine);other=dfl(other);mk=dfl(mk);}
   var editor=BD.rows.map(function(r,i){return '<div class="tl-hold"><select data-t-brow="'+i+'" aria-label="Holding '+(i+1)+'">'+tl.map(function(t){return '<option'+(t===r[0]?' selected':'')+'>'+t+'</option>';}).join('')+'</select><input type="number" min="0" max="100" step="1" value="'+r[1]+'" data-t-bw="'+i+'" aria-label="Weight %"><button class="tl-x" data-t-bdel="'+i+'" aria-label="Remove holding">✕</button></div>';}).join('');
   var res='';
   if(mine){
@@ -453,7 +456,7 @@ function viewBuild(){
   return head('Build Your Own.','Pick holdings and weights. Test them against history.')+
    '<div class="stack"><div class="two" style="align-items:start"><div class="panel sh"><h2 style="font-size:22px">Your mix</h2><p class="note" style="margin:6px 0 14px">Weights add to '+tot+'%'+(Math.abs(tot-100)>0.5?' (they are scaled to 100% for the test)':'')+'.</p>'+editor+
    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn light sm" data-t-badd="1"'+(BD.rows.length>=8?' disabled':'')+'>+ Add holding</button><label class="sortw"><select id="bd-pre" aria-label="Start from a model"><option value="">Start from a model…</option>'+modelOpts('')+'</select></label></div>'+
-   '<div class="tl-bar" style="margin-top:18px"><label class="tl-f">Start<input id="bd-start" type="month" min="1927-01" max="'+HM[HM.length-13]+'" value="'+BD.start+'"></label><label class="tl-f">Rebalance<select id="bd-reb"><option value="annual"'+(BD.reb==='annual'?' selected':'')+'>Every year</option><option value="none"'+(BD.reb==='none'?' selected':'')+'>Never</option></select></label><label class="tl-f">Compare with<select id="bd-cmp">'+modelOpts(BD.cmp)+'</select></label></div>'+
+   '<div class="tl-bar" style="margin-top:18px"><label class="tl-f">Start<input id="bd-start" type="month" min="1927-01" max="'+HM[HM.length-13]+'" value="'+BD.start+'"></label><label class="tl-f">Rebalance<select id="bd-reb"><option value="annual"'+(BD.reb==='annual'?' selected':'')+'>Every year</option><option value="none"'+(BD.reb==='none'?' selected':'')+'>Never</option></select></label><label class="tl-f">Compare with<select id="bd-cmp">'+modelOpts(BD.cmp)+'</select></label><label class="tl-f">Fee on your mix, % a year<input id="bd-fee" type="number" min="0" max="5" step="0.05" inputmode="decimal" value="'+BD.fee+'"></label><label class="tl-f">Dollars<select id="bd-real"><option value="0"'+(BD.real?'':' selected')+'>Nominal</option><option value="1"'+(BD.real?' selected':'')+(realOk?'':' disabled')+'>Today\u2019s dollars</option></select></label></div>'+(fee?'<p class="note">The fee is taken out of your mix only, so you can see its drag against the same holdings without it.</p>':'')+(realOn?'<p class="note">All three lines are adjusted for US consumer-price inflation (CPI-U, FRED).</p>':(BD.real?'<p class="note">Inflation adjustment needs a start in 1947 or later.</p>':''))+
    (g0>want?'<p class="note">Start moved to '+mlab(HM[g0])+', the first month all your holdings have data.</p>':'')+
    '<div style="margin-top:14px"><button class="btn pri sm" data-t-bjoin="1"'+(elig?'':' disabled')+'>Enter this on the Leaderboard →</button>'+(elig?'':'<p class="note">Leaderboard entries need every holding to have a current price.</p>')+'</div></div>'+
    '<div class="panel sh"><h2 style="font-size:22px">How it would have gone</h2><p class="note" style="margin:6px 0 10px">'+(mine?mlab(HM[g0])+' to '+mlab(HM[g1])+', starting with '+money(BD.amt)+'.':'Add a holding to begin.')+'</p>'+res+'</div></div>'+note(histNote())+'</div></div>';
@@ -589,6 +592,8 @@ document.addEventListener('change',function(e){
   else if(id==='im-frac'){IM.frac=t.value==='1';ML.rerender();}
   else if(id==='bd-pre'&&t.value){var m=ML.byId[t.value];BD.rows=m.hold.map(function(x){return [x[0],x[2]];}).filter(function(r){return H&&H.map[r[0]]&&/^[A-Z.]{1,5}$/.test(r[0]);});ML.rerender();}
   else if(id==='bd-reb'){BD.reb=t.value;ML.rerender();}
+  else if(id==='bd-real'){BD.real=t.value==='1';ML.rerender();}
+  else if(id==='bd-fee'){BD.fee=Math.max(0,Math.min(5,Number(t.value)||0));ML.rerender();}
   else if(id==='bd-cmp'){BD.cmp=t.value;ML.rerender();}
   else if(id==='bd-start'&&/^\d{4}-\d{2}$/.test(t.value)){BD.start=t.value;ML.rerender();}
   else if(id==='lb-model'){LBS.joinModel=t.value;}

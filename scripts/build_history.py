@@ -145,6 +145,12 @@ def main():
     for t in ["NKE", "CVX", "IBM", "MCD", "HD", "PG", "MRK", "UNH", "KO", "AMGN"]:
         tmap[t] = "DIV"
     out["map"] = tmap
+    # CPI-U (all items, index), aligned to the same months, carried forward for months not yet published; null before 1947
+    cpi, lastv, arrc = fred("CPIAUCSL"), None, []
+    for mo in months:
+        lastv = cpi.get(mo, lastv)
+        arrc.append(lastv)
+    out["cpi"] = arrc
     json.dump(out, open("history.json", "w"), separators=(",", ":"))
     print("wrote history.json", len(json.dumps(out)) // 1024, "KB")
 
