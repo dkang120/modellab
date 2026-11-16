@@ -38,7 +38,7 @@ for (const r of routes) {
   const rel = '../'.repeat(r.path.split('/').filter(Boolean).length), s = seoFor(r.h, MODELS), url = SITE + r.path;
   let html = src;
   html = rep(html, /<title>[^<]*<\/title>/, `<title>${esc(s.title)}</title>`).replace('<base href="./">', `<base href="${rel}">`);
-  html = rep(html, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(s.desc)}">\n<link rel="canonical" href="${url}">\n<meta property="og:title" content="${esc(s.title)}">\n<meta property="og:description" content="${esc(s.desc)}">\n<meta property="og:url" content="${url}">\n<meta property="og:type" content="website">`);
+  html = rep(html, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(s.desc)}">\n<link rel="canonical" href="${url}">\n<meta property="og:title" content="${esc(s.title)}">\n<meta property="og:description" content="${esc(s.desc)}">\n<meta property="og:url" content="${url}">\n<meta property="og:type" content="website">\n<meta property="og:image" content="${SITE}og.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="627">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="${SITE}og.png">`);
   html = rep(html, /<main id="view"><\/main>/, `<main id="view">${body(r, rel)}</main>`);
   if (r.noindex) html = html.replace('<link rel="canonical" href="' + url + '">', '<link rel="canonical" href="' + SITE + r.path.split('/').slice(0, 2).join('/') + '/">\n<meta name="robots" content="noindex,follow">');
   const out = path.join('dist', r.path, 'index.html');
@@ -62,7 +62,7 @@ for (const m of MODELS) {
 }
 // home gets canonical + og too
 let home = fs.readFileSync('dist/index.html', 'utf8');
-home = home.replace(/(<meta name="description" content="[^"]*">)/, `$1\n<link rel="canonical" href="${SITE}">\n<meta property="og:title" content="${esc(seoFor('#home').title)}">\n<meta property="og:description" content="${esc(seoFor('#home').desc)}">\n<meta property="og:url" content="${SITE}">\n<meta property="og:type" content="website">`);
+home = home.replace(/(<meta name="description" content="[^"]*">)/, `$1\n<link rel="canonical" href="${SITE}">\n<meta property="og:title" content="${esc(seoFor('#home').title)}">\n<meta property="og:description" content="${esc(seoFor('#home').desc)}">\n<meta property="og:url" content="${SITE}">\n<meta property="og:type" content="website">\n<meta property="og:image" content="${SITE}og.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="627">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="${SITE}og.png">`);
 fs.writeFileSync('dist/index.html', home);
 const urls = [SITE].concat(routes.filter(r => !r.noindex).map(r => SITE + r.path));
 fs.writeFileSync('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `<url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);
