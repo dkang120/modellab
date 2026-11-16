@@ -132,9 +132,10 @@ body.home .navrow{display:none}
 .mdl .rw .dots i.f{background:#fff}
 .mdl .rw b{font-weight:600}
 .mdl:hover{outline:2px solid var(--ink);outline-offset:3px}
-.mgrid{display:grid;grid-template-columns:1fr;gap:24px;padding-bottom:100px;justify-items:center}
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-bottom:100px;justify-items:center}
 .mgrid .mdl{width:100%;max-width:360px}
-@media(min-width:640px){.mgrid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:640px){.mgrid{gap:24px}}
+@media(min-width:760px){.mgrid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:900px){.mgrid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1200px){.mgrid{grid-template-columns:repeat(4,1fr)}}
 .mdl-row{margin-top:48px}
