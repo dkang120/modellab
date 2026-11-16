@@ -189,7 +189,7 @@ var QZ=[
  {k:'dd2',q:'Think of the worst year of your life with money. How long could you wait for a portfolio to recover?',a:[['Under a year',12],['Up to 3 years',36],['Up to 5 years',60],['As long as it takes',999]]}
 ];
 var STOCKY={dogs:1,garp:1,'core-satellite':1};
-var Q={i:0,a:[],done:false};
+var Q={i:0,a:[],done:false,saved:0};
 function minYears(m){var x=(m.horizon||'').match(/\d+/);return x?Number(x[0]):1;}
 function matchRank(){
   var T=Q.a[0],Y=Q.a[1],E=Q.a[2],G=Q.a[3],S=Q.a[4],W=Q.a[5];
@@ -216,6 +216,7 @@ function viewMatch(){
     return head('Your matches.','Based on your answers and how each model behaved in real history.')+
     '<div class="stack"><div class="tl-res">'+top.map(function(x,i){return '<a class="tl-hit" style="background:var(--'+bg[i]+')" href="#m-'+x.m.id+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(x.m.name)+'</b><span class="w">'+esc(x.m.tag)+'</span><span class="w">'+esc(x.why[0]||'')+'</span>'+(x.flag.length?'<span class="w">Watch out: '+esc(x.flag.join('; '))+'</span>':'')+'</div><span class="v">View →</span></a>';}).join('')+'</div>'+
     (avoid.length?'<div class="panel sh"><h2 style="font-size:22px">Likely poor fits</h2><p class="note" style="margin-top:6px">These clashed most with your answers.</p><div class="tl-bars" style="margin-top:8px">'+avoid.map(function(x){return '<p style="margin:10px 0"><b>'+esc(x.m.name)+'</b> <span style="color:var(--muted)">— '+esc(x.flag.join('; '))+'</span></p>';}).join('')+'</div></div>':'')+
+    '<div class="panel sh"><h2 style="font-size:22px">Share your match</h2><p class="b" style="margin-top:8px">Send friends the card and see what they get.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn light sm" data-t-share="match">Share my match</button><button class="btn light sm" data-t-link="match">Copy quiz link</button></div>'+(emailSaved()?'<p class="note">Your top match is saved to your email profile so the weekly emails fit you. Educational only.</p>':'')+'</div>'+
     '<div class="panel" style="background:var(--lilac)"><h2 style="font-size:22px">Next: feel the risk</h2><p class="b" style="margin-top:8px">See how your top match behaves when you invest at a bad time.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn pri sm" href="#pain/'+top[0].m.id+'">Run the Pain Simulator</a><a class="btn light sm" href="#implement/'+top[0].m.id+'">Build my plan</a><button class="btn light sm" data-t-qreset="1">Retake quiz</button></div></div>'+
     note('Drops and recovery times use the proxy history from Feb 1992 to today. '+histNote())+'</div></div>';
   }
@@ -230,6 +231,7 @@ function viewMatch(){
 /* ================= PAIN SIMULATOR ================= */
 var P={contrib:0,idx:null,m:'index',sc:'gfc',amt:10000,k:0,len:0,timer:null,dec:null,decK:null,g0:0,hold:null,mkt:null,cash:null,pause:null,done:false,custom:''};
 function painInit(arg){
+  painQuery();
   if(arg&&ML.byId[arg])P.m=arg;
   painReset();
 }
@@ -305,7 +307,7 @@ function painSummary(){
   else if(P.dec==='buy'){lines.push('You added '+money(P.amt*0.5)+' at the low-ish point. You put in '+money(inv)+' total and finished with <b>'+money(fy)+'</b> ('+(fy>=inv?'+':'−')+money(Math.abs(fy-inv))+' vs what you put in).');}
   else if(P.dec==='hold'){lines.push('You held. Finishing value: <b>'+money(fy)+'</b> ('+(fy>=inv?'+':'−')+money(Math.abs(fy-inv))+(P.contrib?' vs the '+money(inv)+' you put in':'')+').');}
   else lines.push('This model never fell 15% from a peak in this window, so there was no tough choice to make. Final value: <b>'+money(fy)+'</b>.');
-  return '<div class="panel" style="background:var(--lilac);margin-top:18px"><h2 style="font-size:22px">What happened</h2>'+lines.map(function(l){return '<p class="b" style="margin-top:10px">'+l+'</p>';}).join('')+'<div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button class="btn pri sm" data-t-prestart="1">Try another start date</button><a class="btn light sm" href="#implement/'+P.m+'">Build my plan for this model</a></div></div>';
+  return '<div class="panel" style="background:var(--lilac);margin-top:18px"><h2 style="font-size:22px">What happened</h2>'+lines.map(function(l){return '<p class="b" style="margin-top:10px">'+l+'</p>';}).join('')+'<div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button class="btn pri sm" data-t-prestart="1">Try another start date</button><a class="btn light sm" href="#implement/'+P.m+'">Build my plan for this model</a></div><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn light sm" data-t-share="pain">Share my result</button><button class="btn light sm" data-t-link="pain">Copy challenge link</button></div></div>';
 }
 function painPaint(){
   var el=$('#pn-body');if(!el)return;el.innerHTML=painBody();
@@ -561,12 +563,69 @@ ML.routes.__leave=function(){painStop();};
 if(ML.routeFor(ML.curH()))ML.rerender();
 
 /* ================= events ================= */
+/* ================= SHARE CARDS + QUIZ TAGGING ================= */
+function wrapLines(g,text,maxW){var ws=String(text).split(' '),ls=[],cur='';ws.forEach(function(w){var t2=cur?cur+' '+w:w;if(g.measureText(t2).width>maxW&&cur){ls.push(cur);cur=w;}else cur=t2;});if(cur)ls.push(cur);return ls;}
+function shareCard(c){
+  return Promise.all([document.fonts.load('500 70px "Open Sauce"'),document.fonts.load('400 30px Inter')]).catch(function(){}).then(function(){
+    var W=1200,Ht=630,cv=document.createElement('canvas');cv.width=W;cv.height=Ht;var g=cv.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,W,Ht);
+    function rr(x,y,w,h,r,fill){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();g.fillStyle=fill;g.fill();}
+    g.save();g.translate(64,56);g.scale(2.1,2.1);g.strokeStyle='#0a0a0a';g.lineWidth=2.2;g.lineCap='round';g.stroke(new Path2D('M3 5C10 5 12 17 21 17C31 17 33 4 45 4'));g.fillStyle='#0a0a0a';g.beginPath();g.arc(3,5,2.6,0,7);g.fill();g.beginPath();g.arc(45,4,2.6,0,7);g.fill();g.restore();
+    g.fillStyle='#0a0a0a';g.font='500 34px "Open Sauce",Inter,sans-serif';g.textBaseline='alphabetic';g.fillText('modellab',186,95);
+    if('letterSpacing' in g)g.letterSpacing='-2px';
+    var fs=68;g.font='500 '+fs+'px "Open Sauce",Inter,sans-serif';while(g.measureText(c.soft).width>590&&fs>40){fs-=2;g.font='500 '+fs+'px "Open Sauce",Inter,sans-serif';}
+    g.fillStyle='#707070';g.fillText(c.soft,64,270);
+    g.fillStyle='#0a0a0a';var ml=wrapLines(g,c.main,590).slice(0,2);ml.forEach(function(l,i){g.fillText(l,64,270+(fs+8)*(i+1));});
+    if('letterSpacing' in g)g.letterSpacing='0px';
+    g.font='400 30px Inter,sans-serif';
+    var gl=wrapLines(g,c.gray,390),bl=wrapLines(g,c.blue,390);
+    var gh=gl.length*40+36,gy=150;rr(720,gy,430,gh,36,'#dedee2');g.fillStyle='#0a0a0a';gl.forEach(function(l,i){g.fillText(l,744,gy+50+i*40);});
+    var bh=bl.length*40+36,by=gy+gh+28;rr(700,by,430,bh,36,'#4c90f7');g.fillStyle='#fff';bl.forEach(function(l,i){g.fillText(l,724,by+50+i*40);});
+    g.fillStyle='#707070';g.font='400 24px Inter,sans-serif';g.fillText(c.foot||'Educational only, not investment advice.',64,570);
+    g.textAlign='right';g.fillStyle='#0a0a0a';g.font='500 26px "Open Sauce",Inter,sans-serif';g.fillText(c.url||'',1136,570);g.textAlign='left';
+    return new Promise(function(res){cv.toBlob(function(b){res(b);},'image/png');});
+  });
+}
+function shareOut(blob,name,text,url){
+  var f;try{f=new File([blob],name,{type:'image/png'});}catch(e){}
+  if(f&&navigator.canShare&&navigator.canShare({files:[f]})){return navigator.share({files:[f],text:text,url:url}).catch(function(){});}
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+function shortUrl(path){return new URL(path,document.baseURI).href.replace(/^https?:\/\//,'').replace(/\/$/,'');}
+function painCard(){
+  var m=ML.byId[P.m],st=pstats(P.idx),you=P.dec?painYou():P.hold,fy=you[P.len],sc=SCEN.filter(function(s){return s.id===P.sc;})[0];
+  var when=sc?'before the '+sc.name.toLowerCase()+'.':'in '+mlab(HM[P.g0-1])+'.';
+  var blue=P.dec==='sell'?'i sold at '+pct1(painDD(P.idx,P.decK))+'. ended with '+money(fy)+'.':(P.dec==='buy'?'i bought more. ended with '+money(fy)+'.':(P.dec==='hold'?'i held. ended with '+money(fy)+'.':'it never fell 15%. ended with '+money(fy)+'.'));
+  return {soft:'i invested '+money(P.amt),main:when,gray:m.name.toLowerCase()+' fell '+pct1(st.mdd)+' at its worst.',blue:blue,url:shortUrl('tools/pain/')};
+}
+function painLink(){return new URL('tools/pain/?m='+encodeURIComponent(P.m)+'&s='+encodeURIComponent(P.sc),document.baseURI).href;}
+function matchCard(){var r=matchRank().slice(0,3);return {soft:'my investing style',main:r[0].m.name.toLowerCase()+'.',gray:'also fits: '+r.slice(1).map(function(x){return x.m.name.toLowerCase();}).join(', ')+'.',blue:'what would you hold when it drops?',url:shortUrl('tools/match/')};}
+function emailSaved(){try{return !!localStorage.getItem('ml_email');}catch(e){return false;}}
+function qzSave(){
+  var em;try{em=localStorage.getItem('ml_email');}catch(e){}
+  var S=ML.signup;if(!em||!S||!S.companyId||Q.saved)return;Q.saved=1;
+  var r=matchRank().slice(0,3).map(function(x){return x.m.id;});
+  fetch('https://a.klaviyo.com/client/profiles/?company_id='+encodeURIComponent(S.companyId),{method:'POST',headers:{'Content-Type':'application/json',revision:'2024-10-15'},body:JSON.stringify({data:{type:'profile',attributes:{email:em,properties:{modellab_top_match:r[0],modellab_matches:r.join(',')}}}})}).catch(function(){});
+}
+function copyTxt(txt,el){
+  function ok(){if(el){var o=el.textContent;el.textContent='Copied ✓';setTimeout(function(){el.textContent=o;},1600);}}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok,function(){window.prompt('Copy this link',txt);});else window.prompt('Copy this link',txt);
+}
+function painQuery(){
+  if(P._q)return;P._q=1;var q;try{q=new URLSearchParams(location.search);}catch(e){return;}
+  if(q.get('m')&&ML.byId[q.get('m')])P.m=q.get('m');
+  var s=q.get('s');if(s&&(SCEN.some(function(x){return x.id===s;})||/^\d{4}-\d{2}$/.test(s)))P.sc=s;
+}
+
 function cap(e,sel){return e.target.closest&&e.target.closest(sel);}
 document.addEventListener('click',function(e){
+  var shb=cap(e,'[data-t-share]');if(shb){var kind=shb.getAttribute('data-t-share'),card=kind==='pain'?painCard():matchCard(),o=shb.textContent;shb.textContent='Making image…';shb.disabled=true;
+    shareCard(card).then(function(b){shb.textContent=o;shb.disabled=false;shareOut(b,'modellab-'+kind+'.png',kind==='pain'?'I tried the ModelLab pain simulator. Can you hold?':'My ModelLab investing style match.',kind==='pain'?painLink():new URL('tools/match/',document.baseURI).href);});return;}
+  var lkb=cap(e,'[data-t-link]');if(lkb){copyTxt(lkb.getAttribute('data-t-link')==='pain'?painLink():new URL('tools/match/',document.baseURI).href,lkb);return;}
   var el;
-  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;ML.rerender();return;}
+  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;ML.rerender();if(Q.done)qzSave();return;}
   if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;ML.rerender();return;}
-  if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false};ML.rerender();return;}
+  if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};ML.rerender();return;}
   if((el=cap(e,'[data-t-psc]'))){if(el.disabled)return;P.sc=el.getAttribute('data-t-psc');painReset();ML.rerender();return;}
   if(cap(e,'[data-t-pplay]')){if(!P.hold)return;if(P.pause!=null&&P.k===P.pause&&P.dec==null)return;if(P.done){painReset();}painPlay();return;}
   if(cap(e,'[data-t-pskip]')){if(!P.hold)return;painStop();P.k=P.len;P.done=true;if(P.pause!=null&&P.dec==null){P.dec='hold';P.decK=P.pause;}ML.rerender();return;}

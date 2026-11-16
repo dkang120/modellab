@@ -470,7 +470,7 @@ document.addEventListener('submit',function(e){
   var email=(f.querySelector('input[name=email]').value||'').trim(),msg=f.parentNode.querySelector('.signup-msg'),btn=f.querySelector('button');
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='Please enter a valid email address.';return;}
   msg.textContent='';btn.disabled=true;btn.textContent='One moment\u2026';
-  function done(){setUnlocked();rerender();}
+  function done(){try{localStorage.setItem('ml_email',email);}catch(x){}setUnlocked();rerender();}
   function fail(){btn.disabled=false;btn.textContent='Unlock free access \u2192';msg.textContent='Could not sign you up right now. Please try again.';}
   if(!SIGNUP.companyId||!SIGNUP.listId){console.warn('ModelLab: SIGNUP not configured, email was not saved.');done();return;}
   fetch('https://a.klaviyo.com/client/subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{
@@ -482,7 +482,7 @@ document.addEventListener('change',function(e){if(e.target.id==='sort'){state.so
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.menu){state.menu=false;rerender();}});
 window.addEventListener('hashchange',function(){if(location.hash.length>1){history.replaceState(null,'',BASE+toPath(location.hash));}state.menu=false;render();});
 window.addEventListener('popstate',function(){state.menu=false;render();});
-window.ML={MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
+window.ML={MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
 render();
 loadLive();
 })();
