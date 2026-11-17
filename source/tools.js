@@ -182,7 +182,7 @@ function viewTools(){
   var dn=function(k){return pg[k]?'<i class="tl-ck" aria-label="done">✓</i> ':'';};
   var thread='<div class="imsg" aria-label="Conversation"><div class="im in">how would you actually handle a crash?</div><div class="im out">honestly no idea</div><div class="im in">ok. three steps. match, feel the risk, then act.</div><div class="im out">bet. where do i start?</div></div>';
   return head('Tools.','Match a model to how you behave, feel the risk, then act on it.',thread+'<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
-   '<div class="grid3" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+(pg[c[4].slice(1)]?'Done ✓ · ':'')+c[5]+'</span></a>';}).join('')+'</div></div>';
+   '<div class="grid3 tl-hub" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+(pg[c[4].slice(1)]?'Done ✓ · ':'')+c[5]+'</span></a>';}).join('')+'</div></div>';
 }
 
 /* ================= MATCH QUIZ ================= */
@@ -223,7 +223,7 @@ function viewMatch(){
     '<div class="stack"><div class="tl-res">'+top.map(function(x,i){return '<a class="tl-hit" style="background:var(--'+bg[i]+')" href="#m-'+x.m.id+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(x.m.name)+'</b><span class="w">'+esc(x.m.tag)+'</span><span class="w">'+esc(x.why[0]||'')+'</span>'+(x.flag.length?'<span class="w">Watch out: '+esc(x.flag.join('; '))+'</span>':'')+'</div><span class="v">View →</span></a>';}).join('')+'</div>'+
     (avoid.length?'<div class="panel sh"><h2 style="font-size:22px">Likely poor fits</h2><p class="note" style="margin-top:6px">These clashed most with your answers.</p><div class="tl-bars" style="margin-top:8px">'+avoid.map(function(x){return '<p style="margin:10px 0"><b>'+esc(x.m.name)+'</b> <span style="color:var(--muted)">— '+esc(x.flag.join('; '))+'</span></p>';}).join('')+'</div></div>':'')+
     '<div class="panel sh"><h2 style="font-size:22px">Share your match</h2><p class="b" style="margin-top:8px">Send friends the card and see what they get.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn light sm" data-t-share="match">Share my match</button><button class="btn light sm" data-t-link="match">Copy quiz link</button></div>'+(emailSaved()?'<p class="note">Your top match is saved to your email profile so the weekly emails fit you. Educational only.</p>':'')+'</div>'+
-    '<div class="panel" style="background:var(--lilac)"><h2 style="font-size:22px">Next: feel the risk</h2><p class="b" style="margin-top:8px">See how your top match behaves when you invest at a bad time.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn pri sm" href="#pain/'+top[0].m.id+'">Run the Pain Simulator</a><a class="btn light sm" href="#implement/'+top[0].m.id+'">Build my plan</a><button class="btn light sm" data-t-qreset="1">Retake quiz</button></div></div>'+
+    '<a class="buddy-cta" href="#text"><span class="im in">want me to text you when '+esc(top[0].m.name.toLowerCase())+' gets rocky? \uD83D\uDCF1</span><span class="im out pu">yes pls</span></a>'+'<div class="panel" style="background:var(--lilac)"><h2 style="font-size:22px">Next: feel the risk</h2><p class="b" style="margin-top:8px">See how your top match behaves when you invest at a bad time.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn pri sm" href="#pain/'+top[0].m.id+'">Run the Pain Simulator</a><a class="btn light sm" href="#implement/'+top[0].m.id+'">Build my plan</a><button class="btn light sm" data-t-qreset="1">Retake quiz</button></div></div>'+
     note('Drops and recovery times use the proxy history from Feb 1992 to today. '+histNote())+'</div></div>';
   }
   var q=QZ[Q.i];
@@ -642,6 +642,7 @@ function progGet(){try{return JSON.parse(localStorage.getItem('ml_prog')||'{}');
 function markProg(k){var p=progGet();if(p[k])return;p[k]=1;try{localStorage.setItem('ml_prog',JSON.stringify(p));}catch(e){}}
 function emailSaved(){try{return !!localStorage.getItem('ml_email');}catch(e){return false;}}
 function qzSave(){
+  try{localStorage.setItem('ml_match',matchRank()[0].m.id);}catch(e){}
   var em;try{em=localStorage.getItem('ml_email');}catch(e){}
   var S=ML.signup;if(!em||!S||!S.companyId||Q.saved)return;Q.saved=1;
   var r=matchRank().slice(0,3).map(function(x){return x.m.id;});

@@ -12,6 +12,9 @@ var D={
  overlap:['Portfolio overlap checker | ModelLab','Paste what you own and see which model it resembles and where you are concentrated. Educational only.'],
  build:['Build your own portfolio and test it | ModelLab','Pick holdings and weights, test them against decades of history and compare with any model. Educational only.'],
  leaderboard:['Virtual portfolio leaderboard | ModelLab','Track a virtual portfolio from today’s close against everyone else. No real money. Educational only.'],
+ text:['Text buddy: an investing accountability partner | ModelLab','Free texts from ModelLab that check in when markets get wild, so you stay locked in. Educational only, not investment advice.'],
+ 'sms-terms':['SMS Terms: ModelLab Text Buddy | ModelLab','Terms for ModelLab Text Buddy text messages: what we send, how often, cost, and how to reply STOP or HELP.'],
+ privacy:['Privacy Policy | ModelLab','How ModelLab collects, uses and protects your email, mobile number and other information.'],
  about:['About ModelLab','ModelLab is an educational project that shows investing philosophies as example portfolios. Not investment advice.']
 };
 function seoFor(h,M){

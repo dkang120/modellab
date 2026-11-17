@@ -174,16 +174,16 @@ var MAXCMP=4;
    companyId = your public API key (6 characters). listId = the list that receives signups.
    While both are empty the form unlocks locally without saving the email (development only). */
 var SIGNUP={companyId:'VqWQB7',listId:'WwRjNL'};
-var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0};
+var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0,tier:'risk',bd:{step:0,goal:'',freq:'',done:false,err:''}};
 
 function unlocked(){try{return localStorage.getItem('ml_sub')==='1';}catch(e){return false;}}
 function setUnlocked(){try{localStorage.setItem('ml_sub','1');}catch(e){}}
 function signupForm(ctx){
   return '<form class="signup" data-signup="'+ctx+'" novalidate><input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required><button class="btn pri" type="submit">follow @modellab \u2192</button></form>'+
-  '<p class="signup-msg" role="alert"></p><p class="signup-note">Free. Following gets you live prices here plus one short weekly post by email, the Lab Drop. Unfollow anytime. Educational only, not investment advice.</p>';
+  '<p class="signup-msg" role="alert"></p><p class="signup-note">Free. Following gets you live prices here plus one short weekly post by email, the Lab Drop. Unfollow anytime. Educational only, not investment advice. <a href="#privacy">Privacy Policy</a>.</p>';
 }
 function gatePanel(title,blurb,ctx){
-  return '<div class="panel sh gatebox" id="follow"><div class="gb-who"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b><small>new model every week · the Lab Drop</small></span></div><h2>'+title+'</h2><p>'+blurb+'</p>'+signupForm(ctx)+'</div>';
+  return '<div class="panel sh gatebox" id="follow"><div class="gb-who"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b><small>new model every week · the Lab Drop</small></span></div><h2>'+title+'</h2><p>'+blurb+'</p>'+signupForm(ctx)+'<a class="gb-text" href="#text">rather get texts? \uD83D\uDCF1 try the text buddy \u2192</a></div>';
 }
 function $(s,r){return (r||document).querySelector(s);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -269,13 +269,13 @@ function bellHtml(){
   var seen=false;try{seen=localStorage.getItem('ml_bell')==='1';}catch(e){}
   var items=LABDROP.map(function(d){var m=byId[d.id];return '<a class="bn-item" href="#m-'+d.id+'">'+av(m,'sm',true)+'<span><b>'+esc(handle(m))+'</b> new post: Lab Drop #'+d.n+' · '+esc(m.name)+'<small>'+esc(d.when)+'</small></span></a>';}).join('');
   return '<button class="bell'+(seen?'':' dot')+'" data-bell="1" aria-label="Notifications" aria-expanded="'+(!!state.bell)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>'+
-   (state.bell?'<div class="bell-pop" role="menu"><p class="bp-h">notifications</p>'+items+(unlocked()?'':'<a class="bn-item" href="#follow-cta"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> follow to get every Lab Drop by email</span></a>')+'</div>':'');
+   (state.bell?'<div class="bell-pop" role="menu"><p class="bp-h">notifications</p>'+items+'<a class="bn-item" href="#text"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> new: get a text buddy that keeps you locked in \uD83D\uDCF1</span></a>'+(unlocked()?'':'<a class="bn-item" href="#follow-cta"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> follow to get every Lab Drop by email</span></a>')+'</div>':'');
 }
 
 function footer(home){
   var L=[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
   return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
-   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
+   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
 function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'">'+a[1]+'</a>';}).join('')+'</nav></div>';}
@@ -342,25 +342,22 @@ function viewHome(){
   '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('Find the model','that fits how you invest.').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">Educational only · not investment advice</p></div></div></section>';
 }
 
+var TIERS={risk:['risk',['chill','steady','mid','spicy','full send']],effort:['effort',['set & forget','low-key','some homework','side quest','main character']],growth:['growth',['protect the bag','slow & steady','balanced','growth era','big swings']]};
 function viewLibrary(){
   var list=MODELS.filter(function(m){return state.cat==='All'||m.cat===state.cat;});
-  if(state.sort!=='featured')list=list.slice().sort(function(a,b){
-    if(state.sort==='risk')return a.risk-b.risk||a.name.localeCompare(b.name);
-    if(state.sort==='effort')return a.effort-b.effort||a.name.localeCompare(b.name);
-    return b.growth-a.growth||a.name.localeCompare(b.name);});
-  var hl=['All'].concat(CATS).map(function(c){var k=c==='All'?'all':c;return '<button class="hl" data-chip="'+esc(c)+'" aria-pressed="'+(state.cat===c)+'"><span class="hl-ring"><span class="hl-in">'+(c==='All'?LOGO:esc(k.charAt(0).toLowerCase()))+'</span></span><span class="hl-t">'+esc(k.toLowerCase())+'</span></button>';}).join('');
-  var tabs=[['featured','featured','<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>'],['risk','lowest risk','<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l3.5-5"/>'],['effort','lowest effort','<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'],['growth','highest growth','<path d="M4 17l6-6 4 4 6-7"/><path d="M15 8h5v5"/>']].map(function(t){return '<button class="igtab" data-sort="'+t[0]+'" aria-pressed="'+(state.sort===t[0])+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+t[2]+'</svg><span>'+t[1]+'</span></button>';}).join('');
-  return '<div class="wrap"><div class="igp">'+
-   '<header class="igp-head"><div class="igp-av"><span>'+LOGO+'</span></div><div class="igp-meta"><div class="igp-row"><h1 class="igp-handle">the library</h1><a class="igp-btn pri" href="#compare">compare</a><a class="igp-btn" href="#match">find your fit</a></div>'+
-   '<ul class="igp-stats"><li><b>'+CATS.length+'</b> families</li><li><b>1</b> new weekly</li><li><b>free</b> to browse</li></ul>'+
-   '<p class="igp-bio"><b>modellab</b><br>Investing models, each with an example portfolio you can explore. New model every week in the Lab Drop.</p></div></header>'+
-   '<div class="igp-hls" role="group" aria-label="Filter by family">'+hl+'</div>'+
-   '<div class="igp-tabs" role="group" aria-label="Sort">'+tabs+'</div>'+
-   '<div class="iggrid">'+(list.length?list.map(igTile).join(''):'<p class="empty">No models in this family yet.</p>')+'</div></div></div>';
+  var T=TIERS[state.tier]||TIERS.risk,key=state.tier;
+  var chips=['All'].concat(CATS).map(function(c){return '<button class="chip" data-chip="'+esc(c)+'" aria-pressed="'+(state.cat===c)+'">'+esc(c)+'</button>';}).join('');
+  var seg=Object.keys(TIERS).map(function(k){return '<button class="seg-b" data-tier="'+k+'" aria-pressed="'+(state.tier===k)+'">'+k+'</button>';}).join('');
+  var ld=LABDROP[LABDROP.length-1],lm=byId[ld.id];
+  var rows=[5,4,3,2,1].map(function(lv){var ms=list.filter(function(m){return m[key]===lv;});
+    return '<div class="tier t'+lv+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">nobody here yet</span>')+'</div></div>';}).join('');
+  return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">Every investing model, sorted into a tier list. Tap one to see the portfolio.</p>'+
+   '<a class="lib-new" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
+   '<div class="tl-ctrl"><div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
+   '<div class="tierlist">'+rows+'</div><p class="note tier-note">Rows are our 1–5 '+T[0]+' ratings, not a ranking of which model is better. Ratings are editorial.</p></div>';
 }
-function igTile(m){
-  return '<a class="igt" href="#m-'+m.id+'" aria-label="'+esc(m.name)+'"><span class="igt-cat">'+esc(m.cat)+'</span><p class="igt-tag">'+esc(m.tag)+'</p><p class="igt-nm">'+esc(m.name)+'</p>'+
-   '<span class="igt-ov" aria-hidden="true"><span>'+ico('risk')+'<b>'+m.risk+'/5</b></span><span>'+ico('effort')+'<b>'+m.effort+'/5</b></span></span></a>';
+function tCard(m){
+  return '<a class="tcard'+(isNew(m.id)?' is-new':'')+'" href="#m-'+m.id+'"><span class="tc-cat">'+esc(m.cat.toLowerCase())+'</span>'+(isNew(m.id)?'<span class="tc-new">new</span>':'')+'<span class="tc-nm">'+esc(m.name)+'</span><span class="tc-tag">'+esc(m.tag)+'</span></a>';
 }
 
 function donut(m){
@@ -447,8 +444,76 @@ function pollHtml(sel){
   return '<div class="panel poll"><p class="eyebrow">this or that</p><h2>a crash hits next month. which one do you keep?</h2><div class="poll-g">'+opt(a)+'<span class="vs-x">or</span>'+opt(b)+'</div>'+
    (pick?'<p class="note" style="margin:12px 0 0">'+esc(byId[pick].name)+' is rated '+byId[pick].risk+'/5 for risk. See how far it really fell in the <a class="lk" href="#stress">Stress Test</a>.</p>':'<p class="note" style="margin:12px 0 0">Your pick stays on this device. No votes are counted or shown.</p>')+'</div>';
 }
+var BD_GOALS=[['monthly','investing every month'],['panic','not panic selling'],['basics','learning the basics'],['model','finding my model']];
+var BD_FREQ=[['low','only when it matters','~2 texts a month'],['weekly','keep me locked in','~4 texts a month']];
+var BD_ROT=['people locking in on their first $1k','people who almost sold in a dip','people investing every payday','people who hate finance bros'];
+function viewBuddy(){
+  var b=state.bd,mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
+  var mm=mt&&byId[mt],msgs=[['in','hey! 👋'],['in','i’m your money buddy from modellab'],['in','i text you when markets get wild so you don’t do anything you regret 😅']];
+  var acts='';
+  if(b.step>=1)msgs.push(['out','yo let’s do this']);
+  if(b.step>=1)msgs.push(['in','what are you locking in on?']);
+  if(b.step>=2)msgs.push(['out',BD_GOALS.filter(function(g){return g[0]===b.goal;})[0][1]]);
+  if(b.step>=2)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'say less. bite-size only, promise':'bet. the match quiz helps, then i keep you on it'))]);
+  if(b.step>=2)msgs.push(['in','how often can i text you?']);
+  if(b.step>=3)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
+  if(b.step>=3)msgs.push(['in',mm?'perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind':'perfect. drop your number and you’re in 📱']);
+  if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','texts start as soon as our number goes live, then every lab drop after. reply STOP anytime.']);}
+  if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
+  else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
+  else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
+  else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567"><label class="bd-cons"><input type="checkbox" id="bd-ok"><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p></form>';
+  else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
+  return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+msgs.map(function(x,i){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(i>=msgs.length-3?(i-(msgs.length-3))*.25:0)+'s">'+x[1]+'</div>';}).join('')+'</div>'+acts+
+   (b.step===0?'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
+}
+function bdSubmit(){
+  var b=state.bd,ph=(document.getElementById('bd-ph').value||'').replace(/[^\d+]/g,''),ok=document.getElementById('bd-ok').checked;
+  if(ph.charAt(0)!=='+'){ph=ph.replace(/^1(?=\d{10}$)/,'');ph=(ph.length===10?'+1'+ph:'');}
+  if(!/^\+\d{10,15}$/.test(ph)){b.err='that number looks off. try a US mobile, like 555 123 4567';rerender();return;}
+  if(!ok){b.err='check the box so we’re allowed to text you';rerender();return;}
+  b.err='';var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
+  var props={buddy_goal:b.goal,buddy_freq:b.freq,buddy_consent_text_v:'2026-11-17',buddy_consent_at:new Date().toISOString(),buddy_source:'modellab.text'};if(mt)props.modellab_top_match=mt;
+  var em=null;try{em=localStorage.getItem('ml_email');}catch(e){}
+  var attrs={phone_number:ph,properties:props};if(em)attrs.email=em;
+  function done(){b.done=true;try{localStorage.setItem('ml_buddy','1');}catch(e){}rerender();}
+  if(!SIGNUP.companyId){done();return;}
+  var H={'Content-Type':'application/json','revision':'2024-10-15'},base='https://a.klaviyo.com/client/';
+  fetch(base+'subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab text buddy',profile:{data:{type:'profile',attributes:{phone_number:ph,subscriptions:{sms:{marketing:{consent:'SUBSCRIBED'}}}}}}},relationships:{list:{data:{type:'list',id:SIGNUP.listId}}}}})})
+   .catch(function(){}).then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})});})
+   .then(function(r){if(r&&(r.ok||r.status===202))done();else{b.err='couldn’t save that right now. try again?';rerender();}})
+   .catch(function(){b.err='couldn’t save that right now. try again?';rerender();});
+}
+var BDR=0;setInterval(function(){var el=document.getElementById('bdrot');if(el){BDR=(BDR+1)%BD_ROT.length;el.style.opacity=0;setTimeout(function(){el.textContent=BD_ROT[BDR];el.style.opacity=1;},250);}},2600);
+var LEGAL_UPDATED='November 17, 2026',CONTACT_URL='https://hidanielkang.com';
+function legalPage(title,sub,body){return '<div class="wrap"><article class="legal"><h1 class="display">'+title+'</h1><p class="sub">'+sub+' · Last updated '+LEGAL_UPDATED+'</p>'+body+'</article></div>';}
+function viewSmsTerms(){
+  return legalPage('SMS Terms.','ModelLab Text Buddy',
+  '<h2>1. The program</h2><p>ModelLab Text Buddy (the “program”) sends recurring automated text messages about investing habits: check-ins when the stock market falls, reminders you ask for, and our weekly Lab Drop about a new investing model. The program is free and run by ModelLab, an educational project by Daniel Kang.</p>'+
+  '<h2>2. How you join</h2><p>You join by entering your mobile number on <a href="#text">our text buddy page</a> and checking the consent box. By joining you agree to these SMS Terms and our <a href="#privacy">Privacy Policy</a>, and you confirm you are 18 or older and the account holder or authorized user of the number. Consent is not a condition of any purchase.</p>'+
+  '<h2>3. How often</h2><p>Message frequency varies with what you choose at signup: about 2 messages a month (“only when it matters”) or about 4 a month (“keep me locked in”). Texts go out between 10am and 8pm in your time zone. You can reply LESS anytime to get fewer.</p>'+
+  '<h2>4. Cost</h2><p>The program is free. Message and data rates may apply, depending on your mobile plan.</p>'+
+  '<h2>5. Stopping</h2><p>Reply <b>STOP</b> to any message to cancel. You can also reply END, CANCEL, UNSUBSCRIBE or QUIT. You’ll get one message confirming you’ve been unsubscribed, and no more texts after that. To rejoin, sign up again on the website.</p>'+
+  '<h2>6. Help</h2><p>Reply <b>HELP</b> to any message for help, or contact us through <a href="'+CONTACT_URL+'" target="_blank" rel="noopener">hidanielkang.com</a>.</p>'+
+  '<h2>7. Not investment advice</h2><p>Messages are educational. They describe investing models and historical market data. They are not investment, financial, tax or legal advice and are not a recommendation to buy, sell or hold any security. Past performance does not predict future results.</p>'+
+  '<h2>8. Carriers</h2><p>Supported on major US carriers. Carriers are not liable for delayed or undelivered messages.</p>'+
+  '<h2>9. Privacy</h2><p>We do not sell your mobile number. Mobile information and SMS opt-in consent are not shared with third parties or affiliates for their marketing or promotional purposes. See our <a href="#privacy">Privacy Policy</a> for how we handle your information.</p>'+
+  '<h2>10. Changes</h2><p>We may update these terms. If we make a material change, we’ll update the date above and, where required, tell you by text.</p>');
+}
+function viewPrivacy(){
+  return legalPage('Privacy Policy.','How ModelLab handles your information',
+  '<p>ModelLab is a free educational website about investing models, run by Daniel Kang. This policy explains what we collect, why, and the choices you have.</p>'+
+  '<h2>What we collect</h2><ul><li><b>Email address</b>, if you follow @modellab by email.</li><li><b>Mobile number</b>, if you join the text buddy, plus the goal and texting frequency you pick, the time you gave consent and the version of the consent wording.</li><li><b>Quiz results</b>, such as your top Match Quiz model, if you’ve followed or joined the text buddy.</li><li><b>Leaderboard entries</b>: the public handle and model you choose if you join the leaderboard.</li><li><b>On your device only</b>: your browser stores settings like whether you’ve followed, tools you’ve finished and poll picks. This stays in your browser and isn’t sent to us.</li></ul>'+
+  '<h2>How we use it</h2><ul><li>To send the emails and texts you signed up for, including the weekly Lab Drop.</li><li>To tailor those messages, for example mentioning your Match Quiz model.</li><li>To run the leaderboard.</li></ul><p>We don’t use your information for anything else, and we don’t sell it.</p>'+
+  '<h2>Text messages</h2><p>We do not sell or share your mobile number or SMS opt-in consent with third parties or affiliates for their marketing or promotional purposes. Text messaging data is only shared with the service provider that sends our messages, so it can deliver them. See our <a href="#sms-terms">SMS Terms</a>.</p>'+
+  '<h2>Who processes it for us</h2><ul><li><b>Klaviyo</b> stores email and SMS subscriptions and sends our messages.</li><li><b>GitHub Pages</b> hosts the website.</li><li><b>Supabase</b> stores leaderboard entries, if the shared leaderboard is turned on.</li></ul>'+
+  '<h2>Your choices</h2><ul><li>Unsubscribe from email with the link in any email.</li><li>Reply STOP to any text to stop texts.</li><li>To ask what we hold about you, or to have it deleted, contact us through <a href="'+CONTACT_URL+'" target="_blank" rel="noopener">hidanielkang.com</a>.</li></ul>'+
+  '<h2>How long we keep it</h2><p>We keep your email or number while you’re subscribed. After you unsubscribe, we keep only the record that you opted out, so we don’t contact you again.</p>'+
+  '<h2>Age</h2><p>ModelLab isn’t directed at children under 13, and the text buddy is for people 18 and older.</p>'+
+  '<h2>Changes</h2><p>If this policy changes, we’ll update the date above.</p>');
+}
 function viewAbout(){
-  var links=[['#library','the library','every model, as a portfolio'],['#tools','tools','match quiz, pain simulator, stress test'],['#compare','compare','line up to four models'],['#leaderboard','leaderboard','virtual portfolios, no real money'],[unlocked()?'#m-'+LABDROP[LABDROP.length-1].id:'#follow-cta','lab drop','a new model every week'+(unlocked()?' · latest: '+byId[LABDROP[LABDROP.length-1].id].name:' · follow to get it')],['https://hidanielkang.com','made by daniel kang','hidanielkang.com']];
+  var links=[['#library','the library','every model, as a portfolio'],['#tools','tools','match quiz, pain simulator, stress test'],['#compare','compare','line up to four models'],['#leaderboard','leaderboard','virtual portfolios, no real money'],['#text','text buddy','free texts that keep you locked in \uD83D\uDCF1'],[unlocked()?'#m-'+LABDROP[LABDROP.length-1].id:'#follow-cta','lab drop','a new model every week'+(unlocked()?' · latest: '+byId[LABDROP[LABDROP.length-1].id].name:' · follow to get it')],['https://hidanielkang.com','made by daniel kang','hidanielkang.com']];
   return '<div class="wrap"><div class="bio"><span class="av xl ring"><span>'+LOGO+'</span></span><h1 class="bio-h">@modellab</h1><p class="bio-t">investing models, made understandable. free to browse.</p>'+
    '<div class="bio-l">'+links.map(function(l){var ext=l[0].indexOf('http')===0;return '<a class="bio-a" href="'+l[0]+'"'+(ext?' target="_blank" rel="noopener"':'')+'><b>'+l[1]+'</b><small>'+l[2]+'</small></a>';}).join('')+'</div>'+(unlocked()?'':'<div id="follow-cta"></div>'+gatePanel('follow @modellab','Get the Lab Drop every week and unlock live prices.','about'))+'</div><div class="about">'+
    '<div class="panel" style="background:var(--lilac)"><h2>Why it exists</h2><p class="b">Terms like value, momentum and all-weather get thrown around, but it is hard to see what each one looks like as a real portfolio. ModelLab shows the belief behind each style, the rules, and an example allocation, so you can understand the tradeoffs before you decide anything.</p></div>'+
@@ -503,7 +568,7 @@ function glClose(){if(glPop){glPop.remove();glPop=null;}document.querySelectorAl
 function glOpen(b){glClose();var p=document.createElement('div');p.className='gl-pop';p.setAttribute('role','tooltip');p.innerHTML='<b>'+esc(b.textContent)+'</b> '+esc(b.getAttribute('data-gl'));document.body.appendChild(p);
   var r=b.getBoundingClientRect(),pw=p.offsetWidth,x=Math.max(12,Math.min(window.innerWidth-pw-12,r.left+r.width/2-pw/2)),above=r.top>p.offsetHeight+24;
   p.style.left=(x+window.scrollX)+'px';p.style.top=((above?r.top-p.offsetHeight-8:r.bottom+8)+window.scrollY)+'px';b.setAttribute('aria-expanded','true');glPop=p;}
-var ROUTES={};
+var ROUTES={};ROUTES.text={view:viewBuddy};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};
 var view=$('#view'),foot=$('#foot');
 function render(keep){
   var hash=curH().slice(1),html,nav='',home=false;
@@ -532,12 +597,13 @@ document.addEventListener('click',function(e){
     if(hr==='#follow-cta'){e.preventDefault();state.bell=false;paintBell();var fc=document.getElementById('follow');if(fc){fc.scrollIntoView({behavior:'smooth',block:'center'});var fi=fc.querySelector('input');if(fi)setTimeout(function(){fi.focus({preventScroll:true});},400);}else go('#about');return;}
     if(hr.charAt(0)==='#'&&hr.length>1){e.preventDefault();go(hr);return;}
     if(u.origin===location.origin&&u.pathname.indexOf(BASE)===0&&!/\.[a-z0-9]+$/i.test(u.pathname)&&!u.hash){e.preventDefault();go(fromPath(decodeURIComponent(u.pathname).slice(BASE.length)));return;}}
+  var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
   var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell','1');}catch(x){}paintBell();return;}
   if(state.bell&&!t.closest('.bell-pop')){state.bell=false;paintBell();}
   var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
   var cb=t.closest('[data-carb]');if(cb){var cr=cb.closest('.post').querySelector('.car');cr.scrollBy({left:Number(cb.getAttribute('data-carb'))*cr.clientWidth,behavior:'smooth'});return;}
   var sn=t.closest('[data-seen]');if(sn){try{var sv=JSON.parse(localStorage.getItem('ml_seen')||'{}');sv[sn.getAttribute('data-seen')]=1;localStorage.setItem('ml_seen',JSON.stringify(sv));}catch(x){}}
-  var chip=t.closest('[data-chip]');if(chip){state.cat=chip.getAttribute('data-chip');rerender();return;}var srt=t.closest('[data-sort]');if(srt){state.sort=srt.getAttribute('data-sort');rerender();return;}
+  var chip=t.closest('[data-chip]');if(chip){state.cat=chip.getAttribute('data-chip');rerender();return;}var tr=t.closest('[data-tier]');if(tr){state.tier=tr.getAttribute('data-tier');rerender();return;}var srt=t.closest('[data-sort]');if(srt){state.sort=srt.getAttribute('data-sort');rerender();return;}
   var st=t.closest('[data-step]');if(st){state.step=Number(st.getAttribute('data-step'));rerender();return;}
   var mn=t.closest('[data-menu]');if(mn){state.menu=!state.menu;rerender();return;}
   var cmp=t.closest('[data-cmp]');
@@ -556,6 +622,7 @@ document.addEventListener('input',function(e){
   if(t.id==='amt'){state.amount=Math.max(0,Number(t.value)||0);var id=curH().slice(3);if(byId[id]){$('#hold').innerHTML=holdRows(byId[id]);var cr=$('#calcres');if(cr)cr.innerHTML=valueInner(byId[id]);}}
 });
 document.addEventListener('submit',function(e){
+  if(e.target.closest&&e.target.closest('form[data-bdform]')){e.preventDefault();bdSubmit();return;}
   var f=e.target.closest&&e.target.closest('form[data-signup]');if(!f)return;
   e.preventDefault();
   var email=(f.querySelector('input[name=email]').value||'').trim(),msg=f.parentNode.querySelector('.signup-msg'),btn=f.querySelector('button');
