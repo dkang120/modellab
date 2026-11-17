@@ -43,15 +43,25 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   const d = await r.json();
   let out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
   if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
-  if (out && canRetry && clean(out).length > 160) {
-    return askClaude(env, profile, [...messages, { role: "assistant", content: out }], "(system note, not from them: too long. rewrite it under 140 characters, same voice, keep only the most useful point)", false);
-  }
+  if (out && canRetry && clean(out).length > 160) out = (await shorten(env, out)) || out;
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
 
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
+async function shorten(env, text) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
+      system: "you shorten text messages. rewrite the text you're given to UNDER 150 characters total. keep it lowercase, casual, no period at the end, no emoji. keep any link exactly as written, it counts toward the limit; drop extra points instead. output only the rewritten text.",
+      messages: [{ role: "user", content: text }] }),
+  });
+  if (!r.ok) return null;
+  const d = await r.json();
+  return (d.content || []).filter(c => c.type === "text").map(c => c.text).join("").trim();
+}
 function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
   t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*(but\s+)?/gi, "");
