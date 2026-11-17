@@ -81,6 +81,12 @@ Replies:
 ## Cost check
 About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS credits a month (1 US text = 1 credit), roughly 40–75 subscribers. Every text above is plain text and under 160 characters.
 
+## What's set up in Klaviyo (Nov 17, 2026)
+- Sending number: toll-free +1 833-653-0604 (US + Canada), carrier registration in review.
+- List: **ModelLab Text Buddy (SMS)** (id Ybnjeu). The site's text buddy signup subscribes phones here, separate from the email list.
+- Flow: **ModelLab Text Buddy: Welcome (SMS)** (id RppiPm), **draft**. 1a welcome, then 2 minutes later a 1b text picked by `buddy_goal`. The first text carries the "ModelLab:" prefix so people know who's texting; the rest don't.
+- Account settings: org prefix "ModelLab", opt-out text "Text STOP to opt-out".
+
 ## Before the first send (in Klaviyo)
 1. Settings → SMS: add a US sending number (toll-free is quickest) and finish carrier registration.
 2. Segment on `buddy_source = modellab.text`; confirm consent status before the first send.
