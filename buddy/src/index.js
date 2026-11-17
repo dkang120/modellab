@@ -80,7 +80,9 @@ function clean(reply) {
 async function handle(env, body) {
   const kv = env.BUDDY_KV, m = month();
   const phone = String(body.phone || "").trim();
-  const text = String(body.text || "").trim();
+  // Klaviyo's inbound-SMS event field name varies, so the webhook sends several candidates.
+  const text = String(body.text || ["t1","t2","t3","t4","t5","t6"].map(k => body[k]).find(v => v && String(v).trim()) || "").trim();
+  if (env.BUDDY_KV && !(await env.BUDDY_KV.get("seen_payload"))) await env.BUDDY_KV.put("seen_payload", JSON.stringify(body).slice(0, 2000));
   if (!phone || !text || KEYWORDS.test(text)) return { skipped: "no phone/text or a compliance keyword" };
 
   const used = await getNum(kv, `credits:${m}`);
@@ -129,7 +131,7 @@ export default {
     if (req.headers.get("x-buddy-secret") !== env.BUDDY_SECRET) return json({ error: "unauthorized" }, 401);
     if (url.pathname === "/status") {
       const m = month();
-      return json({ month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
+      return json({ last_payload_keys: Object.keys(JSON.parse((await env.BUDDY_KV.get("seen_payload")) || "{}")), month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
     }
     if (url.pathname === "/reply" && req.method === "POST") {
       let body = {};
