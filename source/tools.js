@@ -560,7 +560,7 @@ function viewLeaderboard(){
    '<div class="tl-bar"><label class="tl-f">Handle<input id="lb-handle" maxlength="20" autocomplete="off" placeholder="e.g. steady_eddie" value="'+esc(LBS.handle)+'"></label>'+
    (LBS.custom?'<label class="tl-f">Portfolio<input value="Custom mix ('+LBS.custom.rows.map(function(r){return r[0];}).join(', ')+')" disabled></label><button class="chip" data-t-lbclear="1">Use a model instead</button>':'<label class="tl-f">Model<select id="lb-model">'+myModels+'</select></label>')+
    '<button class="btn pri" data-t-lbjoin="1">Join →</button></div>'+(LBS.msg?'<p class="note" role="status" style="margin:0">'+esc(LBS.msg)+'</p>':'')+'</div>';
-  var local=!LB.url?'<div class="tl-warn"><b>Local mode.</b> The shared board is not connected yet, so entries are saved on this device only. Add a Supabase project (see README) to turn on the shared board.</div>':'';
+  var local=!LB.url?'<div class="tl-soon"><span class="im in">the global board drops soon \uD83D\uDC40 for now your entry saves on this device, so you can still track your streak</span></div>':'';
   return head('Leaderboard.','Virtual portfolios from the latest close. No real money.','<div class="tl-steps"><span><b>Compete</b> Track against everyone</span></div>')+
    '<div class="stack">'+local+recap+join+'<div class="panel sh"><div class="tl-lbhead"><h2 style="font-size:22px">The board</h2></div><div class="chips" style="margin:12px 0 18px" role="group" aria-label="Filter by model">'+chips+'</div>'+(LBS.err?'<div class="tl-warn">'+esc(LBS.err)+'</div>':'')+table+'</div>'+
    note('For fun and learning. Hypothetical portfolios, price-only returns, not investment advice or a record of real performance. '+srcLine())+'</div></div>';

@@ -710,3 +710,4 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 .legal ul{padding-left:20px;margin:6px 0}
 .legal a,.bd-cons a{color:#6a35e0}
 .legal-links a{color:inherit}
+.tl-soon{display:flex}.tl-soon .im{max-width:100%;font-family:var(--inter)}
