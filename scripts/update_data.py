@@ -60,12 +60,17 @@ def main():
         prev = json.load(open("data.json"))["tickers"]
     except Exception:
         prev = {}
-    out, last_date, missing = {}, None, []
+    out, last_date, missing, spy_dd = {}, None, [], None
     for t in T:
         s = daily(t)
         if not s:
             missing.append(t)
             continue
+        if t == "SPY":
+            yr = s[-252:]
+            hi_d, hi = max(yr, key=lambda x: x[1])
+            spy_dd = {"last": s[-1][1], "lastDate": s[-1][0], "high": hi, "highDate": hi_d,
+                      "pct": round((s[-1][1] / hi - 1) * 100, 2)}
         last_date = max(last_date or s[-1][0], s[-1][0])
         d, last = s[-1]
         ld = dt.date.fromisoformat(d)
@@ -97,6 +102,8 @@ def main():
         "longBase": {"y5": f"{ld.year-5}-{ld.month:02d}", "y10": f"{ld.year-10}-{ld.month:02d}"},
         "tickers": out,
     }
+    if spy_dd:
+        data["spyDrawdown"] = spy_dd  # S&P 500 (SPY) vs its 52-week closing high, used by dip_check.py
     json.dump(data, open("data.json", "w"), separators=(",", ":"))
     print("wrote data.json as of", last_date)
 
