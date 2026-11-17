@@ -69,11 +69,19 @@ def main():
         print("dip check: no spyDrawdown in data.json, skipping")
         return 0
     today = dt.date.today()
+    key = os.environ.get("KLAVIYO_PRIVATE_KEY", "")
+    if key:
+        try:
+            req = urllib.request.Request("https://a.klaviyo.com/api/campaigns/?filter=equals(messages.channel,'sms')&page[size]=1",
+                headers={"Authorization": "Klaviyo-API-Key " + key, "revision": "2024-10-15", "Accept": "application/vnd.api+json"})
+            urllib.request.urlopen(req, timeout=30).read()
+            print("dip check: Klaviyo key works")
+        except Exception as e:
+            print(f"dip check: Klaviyo key problem ({e})")
     state = load("dip_state.json", {"episodeLevel": 0, "lastSent": None})
     level, state = decide(dd["pct"], state, today)
     print(f"dip check: SPY {dd['last']:.2f} vs 52w high {dd['high']:.2f} ({dd['highDate']}) = {dd['pct']}%")
     if level:
-        key = os.environ.get("KLAVIYO_PRIVATE_KEY", "")
         if not key:
             print(f"dip check: would send the -{level}% text, but KLAVIYO_PRIVATE_KEY is not set")
             return 0
