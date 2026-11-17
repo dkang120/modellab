@@ -1,7 +1,7 @@
 /* Per-route title and description. Used by the browser (index.html) and by scripts/build_pages.mjs. */
 (function(root){
 var D={
- home:['ModelLab: every investing model, built as a portfolio','Explore investing philosophies as example portfolios, with price snapshots, a dollar calculator and side-by-side comparisons. Educational only.'],
+ home:['ModelLab: your personalized investing tool','Explore investing philosophies as example portfolios, with price snapshots, a dollar calculator and side-by-side comparisons. Educational only.'],
  library:['Investing model library | ModelLab','Browse investing styles like index, value, growth, dividend and all-weather, each with an example portfolio. Educational only.'],
  compare:['Compare investing models side by side | ModelLab','Compare up to four investing models on risk, effort, growth and holdings, and find the style that fits you. Educational only.'],
  tools:['Investing tools: quiz, pain simulator, stress test | ModelLab','Match a model to how you behave, live through a real market crash, then get a plan you can act on. Educational only.'],
