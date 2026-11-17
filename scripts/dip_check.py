@@ -9,7 +9,7 @@ Rules
 - When SPY recovers to within 3% of its high, the dip is over and the levels reset.
 - Needs the KLAVIYO_PRIVATE_KEY secret (scope: campaigns write). Without it, it only logs.
 """
-import datetime as dt, json, os, sys, urllib.request
+import datetime as dt, json, os, sys, urllib.request, urllib.parse, urllib.error
 
 LIST_ID = "Ybnjeu"  # ModelLab Text Buddy (SMS)
 LEVELS = [20, 10, 5]
@@ -72,10 +72,12 @@ def main():
     key = os.environ.get("KLAVIYO_PRIVATE_KEY", "")
     if key:
         try:
-            req = urllib.request.Request("https://a.klaviyo.com/api/campaigns/?filter=equals(messages.channel,'sms')&page[size]=1",
+            req = urllib.request.Request("https://a.klaviyo.com/api/campaigns/?filter=" + urllib.parse.quote("equals(messages.channel,'sms')"),
                 headers={"Authorization": "Klaviyo-API-Key " + key, "revision": "2024-10-15", "Accept": "application/vnd.api+json"})
             urllib.request.urlopen(req, timeout=30).read()
             print("dip check: Klaviyo key works")
+        except urllib.error.HTTPError as e:
+            print(f"dip check: Klaviyo key problem ({e.code}: {e.read().decode()[:300]})")
         except Exception as e:
             print(f"dip check: Klaviyo key problem ({e})")
     state = load("dip_state.json", {"episodeLevel": 0, "lastSent": None})
