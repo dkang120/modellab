@@ -54,7 +54,7 @@ const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
 function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
-  t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*/gi, "");
+  t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*(but\s+)?/gi, "");
   t = t.replace(BANNED, "");
   const emojis = t.match(EMOJI) || [];
   // An emoji makes the whole text cost UCS-2 rates (70 chars/credit), so only keep one in very short replies.
