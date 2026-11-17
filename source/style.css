@@ -832,3 +832,5 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 .nw-promo i{font-style:normal;background:var(--grad);color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
 .nw-promo span{flex:1;font-size:17px}.nw-promo em{font-style:normal;color:#6a35e0;font-weight:600;font-size:15px}
 @media(max-width:900px){.nw-grid{grid-template-columns:1fr}.nw-out{position:static}.nw-promo{border-radius:22px;flex-wrap:wrap}.nw-promo em{width:100%}}
+@media(min-width:1000px){.navl.navr{left:auto;right:84px;gap:28px}}
+@media(min-width:1000px) and (max-width:1180px){.navl{gap:22px}.navl.navr{gap:20px}}

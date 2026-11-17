@@ -84,7 +84,12 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 ## What's set up in Klaviyo (Nov 17, 2026)
 - Sending number: toll-free +1 833-653-0604 (US + Canada), carrier registration in review.
 - List: **ModelLab Text Buddy (SMS)** (id Ybnjeu). The site's text buddy signup subscribes phones here, separate from the email list.
-- Flow: **ModelLab Text Buddy: Welcome (SMS)** (id RppiPm), **draft**. 1a welcome, then 2 minutes later a 1b text picked by `buddy_goal`. The first text carries the "ModelLab:" prefix so people know who's texting; the rest don't.
+- Flow: **Welcome** (RppiPm), **live**. 1a welcome, then 2 minutes later a 1b text picked by `buddy_goal`. The first text carries the "ModelLab:" prefix.
+- Flow: **Now What? plan check-in** (WKYd6p), draft. Only for `buddy_source = modellab.now`. 14 days after signup, one text based on the first step in `now_plan` (emergency fund, card debt, park it, 401(k) match, or model auto-buy).
+- Flow: **Re-engage at 45 days** (WiNVcU), draft. 45 days after signup, only if they never clicked or replied: section 5 text.
+- Segment: **Text Buddy: goal = investing monthly** (Re3hUw).
+- Campaign drafts: Lab Drop #1 dogs of the dow (duplicate weekly); dip check-ins at -5%, -10%, -20% (send only when it happens, max 1 a week); monthly habit check to segment Re3hUw (duplicate monthly).
+- Keyword replies (HELP text, LESS, Y/N, SELL): set up by hand in Klaviyo, Settings > SMS > Keywords. No API for it.
 - Account settings: org prefix "ModelLab", opt-out text "Text STOP to opt-out".
 
 ## Before the first send (in Klaviyo)
