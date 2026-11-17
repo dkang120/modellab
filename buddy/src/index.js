@@ -66,6 +66,8 @@ function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
   t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*(but\s+)?/gi, "");
   t = t.replace(BANNED, "");
+  t = t.replace(/^[^:\n]{0,40}(shorter|rewritten|version)[^:\n]{0,20}:\s*/i, "");   // shortener preamble
+  if (/^[A-Z][a-z]/.test(t)) t = t[0].toLowerCase() + t.slice(1);            // rulebook: lowercase
   const emojis = t.match(EMOJI) || [];
   // An emoji makes the whole text cost UCS-2 rates (70 chars/credit), so only keep one in very short replies.
   if (emojis.length > 1 || (emojis.length && t.length > 68)) t = t.replace(EMOJI, "");
