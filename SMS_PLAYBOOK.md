@@ -39,13 +39,13 @@ Send window: 10am–8pm in the subscriber's time zone.
   - panic: `quick q: what almost made you sell last time? one word is fine`
   - monthly: `what day do you get paid? i'll nudge you that day`
   - basics: `rate your investing knowledge 1-10. no judgment fr`
-  - model: `took the match quiz yet? 2 min and i'll know your vibe: dkang120.github.io/modellab/tools/match/`
+  - model: `took the match quiz yet? 2 min and i'll know your vibe: modellab.hidanielkang.com/tools/match/`
 
 (👋 appears once, in the opener only.)
 
 ## 2. Lab Drop (weekly campaign, everyone)
-- normal: `new drop 🧪 dogs of the dow: 10 high-yield dow stocks, reset once a year. see it: dkang120.github.io/modellab/models/dogs/`
-- high: `NEW DROP 🧪 dogs of the dow just landed. 10 dow stocks, reset once a year: dkang120.github.io/modellab/models/dogs/`
+- normal: `new drop 🧪 dogs of the dow: 10 high-yield dow stocks, reset once a year. see it: modellab.hidanielkang.com/models/dogs/`
+- high: `NEW DROP 🧪 dogs of the dow just landed. 10 dow stocks, reset once a year: modellab.hidanielkang.com/models/dogs/`
 
 Template: `new drop 🧪 {{ model }}: {{ one-line idea }}. see it: {{ link }}`
 
@@ -58,7 +58,7 @@ Template: `new drop 🧪 {{ model }}: {{ one-line idea }}. see it: {{ link }}`
 
 Replies:
 - YES / GOOD / any calm reply: `that's the energy 🔒 i'll check back in a week`
-- SELL / NO / panic words: `heard. before you do anything, see how holding vs selling played out last time: dkang120.github.io/modellab/tools/pain/` (no emoji, no jokes)
+- SELL / NO / panic words: `heard. before you do anything, see how holding vs selling played out last time: modellab.hidanielkang.com/tools/pain/` (no emoji, no jokes)
 
 ## 4. Monthly habit check (goal = monthly, payday or day 1)
 `did you invest this month? reply Y or N`

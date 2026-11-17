@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const SITE = 'https://dkang120.github.io/modellab/';
+const SITE = 'https://modellab.hidanielkang.com/';
 const src = fs.readFileSync('source/index.html', 'utf8');
 const a = src.indexOf('var MODELS=[') + 'var MODELS='.length, b = src.indexOf('\n];', a) + 2;
 const MODELS = new Function('return ' + src.slice(a, b))();

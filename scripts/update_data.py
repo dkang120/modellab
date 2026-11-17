@@ -8,7 +8,7 @@ T = ["VTI","VXUS","BND","VTV","VBR","EFV","VUG","QQQ","VBK","SPY","BIL","QUAL","
      "SCHD","VIG","VYM","MTUM","VLUE","USMV","TLT","GLD","IEF","DBC",
      "AMGN","NKE","CVX","IBM","MCD","HD","PG","MRK","UNH","KO"]
 
-UA = {"User-Agent": "Mozilla/5.0 (ModelLab price refresh; +https://dkang120.github.io/modellab/)"}
+UA = {"User-Agent": "Mozilla/5.0 (ModelLab price refresh; +https://modellab.hidanielkang.com/)"}
 
 def _get(url):
     req = urllib.request.Request(url, headers=UA)
