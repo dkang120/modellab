@@ -1,4 +1,5 @@
 # ModelLab AI text buddy (Cloudflare Worker).
+# Workers Builds: root dir = buddy, deploy = npx wrangler deploy
 # Deployed automatically by Cloudflare Workers Builds from this folder on every push to main.
 name = "modellab-buddy"
 main = "src/index.js"
