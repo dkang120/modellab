@@ -24,5 +24,18 @@ function seoFor(h,M){
     if(m)return {title:m.name+' investing model: example portfolio | ModelLab',desc:m.tag+' See the belief, the rules and an example allocation. Educational only.'};}
   var d=D[h.split('/')[0]]||D.home;return {title:d[0],desc:d[1]};
 }
-root.seoFor=seoFor;if(typeof module!=='undefined')module.exports={seoFor:seoFor};
+// Plain-language FAQ per model. Shown on the model page and emitted as FAQPage schema by the build.
+function lc(t){t=String(t).replace(/\.$/,'');return t.charAt(0).toLowerCase()+t.slice(1);}
+var RL=['','very low','low','medium','high','very high'];
+function faqFor(m){
+  return [
+    ['What is the '+m.name+' investing model?',m.belief],
+    ['How risky is '+m.name+'?','ModelLab rates it '+m.risk+'/5 for risk and '+m.effort+'/5 for effort ('+RL[m.risk]+' risk, '+RL[m.effort]+' effort), with a suggested horizon of '+m.horizon+'. Ratings are editorial and compare styles with each other, not a prediction.'],
+    ['When does '+m.name+' work best?','Historically it has done best in '+lc(m.best)+'.'],
+    ['When does '+m.name+' struggle?','It has had the hardest time in '+lc(m.worst)+'.'],
+    ['Where does the idea come from?',m.origin],
+    ['Is this investment advice?','No. The example portfolio is hypothetical and for education only. It shows what the style looks like with public funds; it is not a recommendation to buy or sell anything.']
+  ];
+}
+root.seoFor=seoFor;root.faqFor=faqFor;if(typeof module!=='undefined')module.exports={seoFor:seoFor,faqFor:faqFor};
 })(typeof window!=='undefined'?window:globalThis);

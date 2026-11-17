@@ -8,24 +8,29 @@ const SITE = 'https://modellab.hidanielkang.com/';
 const src = fs.readFileSync('source/index.html', 'utf8');
 const a = src.indexOf('var MODELS=[') + 'var MODELS='.length, b = src.indexOf('\n];', a) + 2;
 const MODELS = new Function('return ' + src.slice(a, b))();
-const { seoFor } = require(path.resolve('source/seo.js'));
+const { seoFor, faqFor } = require(path.resolve('source/seo.js'));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const TOOLS = ['match', 'pain', 'stress', 'implement', 'overlap', 'build'];
-const routes = [['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', '']]
-  .map(([n]) => ({ path: n + '/', h: '#' + n }))
+const routes = [{ path: '', h: '#home' }].concat([['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', '']]
+  .map(([n]) => ({ path: n + '/', h: '#' + n })))
   .concat(TOOLS.map(n => ({ path: 'tools/' + n + '/', h: '#' + n })))
   .concat(MODELS.map(m => ({ path: 'models/' + m.id + '/', h: '#m-' + m.id })))
   .concat(MODELS.flatMap(m => ['pain', 'implement'].map(t => ({ path: 'tools/' + t + '/' + m.id + '/', h: '#' + t + '/' + m.id, noindex: true }))));
 const nav = rel => ['library', 'compare', 'tools', 'leaderboard', 'about'].map(n => `<a href="${rel}${n}/">${n[0].toUpperCase() + n.slice(1)}</a>`).join(' · ');
 function body(r, rel) {
   const s = seoFor(r.h, MODELS);
-  let h = `<div class="wrap page"><p>${nav(rel)}</p><h1>${esc(s.title.replace(/ \| ModelLab$/, ''))}</h1><p>${esc(s.desc)}</p>`;
+  const h1 = r.h === '#home' ? 'Investing models as portfolios' : s.title.replace(/ \| ModelLab$/, '');
+  let h = `<div class="wrap page"><p>${nav(rel)}</p><h1>${esc(h1)}</h1><p>${esc(s.desc)}</p>`;
   const m = r.h.startsWith('#m-') && MODELS.find(x => x.id === r.h.slice(3));
   if (m) {
     h += `<h2>The belief</h2><p>${esc(m.belief)}</p><h2>How it works</h2><ol>${m.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`;
     h += `<h2>Example portfolio</h2><ul>${m.hold.map(x => `<li>${esc(x[0])} (${esc(x[1])}): ${x[2]}%</li>`).join('')}</ul>`;
     h += `<h2>Strengths</h2><ul>${m.pros.map(x => `<li>${esc(x)}</li>`).join('')}</ul><h2>Risks and criticisms</h2><ul>${m.cons.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
     h += `<p>Works best when: ${esc(m.best)}. Struggles when: ${esc(m.worst)}.</p><p>${esc(m.origin)}</p>`;
+    h += `<h2>FAQ</h2>${faqFor(m).map(q => `<h3>${esc(q[0])}</h3><p>${esc(q[1])}</p>`).join('')}`;
+  } else if (r.h === '#home') {
+    h += `<ul>${MODELS.map(x => `<li><a href="${rel}models/${x.id}/">${esc(x.name)}</a>: ${esc(x.tag)}</li>`).join('')}</ul>`;
+    h += `<p>New here? Try <a href="${rel}tools/match/">the investing style quiz</a>, <a href="${rel}now/">Now what?</a>, or <a href="${rel}text/">Text Buddy</a>.</p>`;
   } else if (r.h === '#library') {
     h += `<ul>${MODELS.map(x => `<li><a href="${rel}models/${x.id}/">${esc(x.name)}</a>: ${esc(x.tag)}</li>`).join('')}</ul>`;
   } else if (r.h === '#tools') {
@@ -33,12 +38,23 @@ function body(r, rel) {
   }
   return h + `<p>Educational only, not investment advice. Example portfolios are hypothetical.</p></div>`;
 }
+const TOOLD = { match: 'quiz', pain: 'simulator', stress: 'chart', implement: 'calculator', overlap: 'checker', build: 'backtester' };
+function schemaFor(r, url) {
+  const ld = [];
+  const id = r.h.slice(1).split('/')[0];
+  if (r.h === '#home') ld.push({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'ModelLab', url: SITE, description: seoFor('#home').desc, publisher: { '@type': 'Person', name: 'Daniel Kang' } });
+  const m = r.h.startsWith('#m-') && MODELS.find(x => x.id === r.h.slice(3));
+  if (m) ld.push({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqFor(m).map(q => ({ '@type': 'Question', name: q[0], acceptedAnswer: { '@type': 'Answer', text: q[1] } })) });
+  if (TOOLD[id] && !r.noindex) { const s = seoFor(r.h); ld.push({ '@context': 'https://schema.org', '@type': 'WebApplication', name: s.title.replace(/ \| ModelLab$/, ''), url, description: s.desc, applicationCategory: 'FinanceApplication', operatingSystem: 'Any', isAccessibleForFree: true, offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } }); }
+  return ld.map(o => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`).join('\n');
+}
 const rep = (html, re, to) => { if (!re.test(html)) throw new Error('template changed: ' + re); return html.replace(re, to); };
 for (const r of routes) {
   const rel = '../'.repeat(r.path.split('/').filter(Boolean).length), s = seoFor(r.h, MODELS), url = SITE + r.path;
   let html = src;
-  html = rep(html, /<title>[^<]*<\/title>/, `<title>${esc(s.title)}</title>`).replace('<base href="./">', `<base href="${rel}">`);
+  html = rep(html, /<title>[^<]*<\/title>/, `<title>${esc(s.title)}</title>`).replace('<base href="./">', `<base href="${rel || './'}">`);
   html = rep(html, /<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(s.desc)}">\n<link rel="canonical" href="${url}">\n<meta property="og:title" content="${esc(s.title)}">\n<meta property="og:description" content="${esc(s.desc)}">\n<meta property="og:url" content="${url}">\n<meta property="og:type" content="website">\n<meta property="og:image" content="${SITE}og.png?v=2">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="${SITE}og.png?v=2">`);
+  html = html.replace('</head>', `${schemaFor(r, url)}\n</head>`);
   html = rep(html, /<main id="view"><\/main>/, `<main id="view">${body(r, rel)}</main>`);
   if (r.noindex) html = html.replace('<link rel="canonical" href="' + url + '">', '<link rel="canonical" href="' + SITE + r.path.split('/').slice(0, 2).join('/') + '/">\n<meta name="robots" content="noindex,follow">');
   const out = path.join('dist', r.path, 'index.html');
@@ -60,11 +76,8 @@ for (const m of MODELS) {
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, html);
 }
-// home gets canonical + og too
-let home = fs.readFileSync('dist/index.html', 'utf8');
-home = home.replace(/(<meta name="description" content="[^"]*">)/, `$1\n<link rel="canonical" href="${SITE}">\n<meta property="og:title" content="${esc(seoFor('#home').title)}">\n<meta property="og:description" content="${esc(seoFor('#home').desc)}">\n<meta property="og:url" content="${SITE}">\n<meta property="og:type" content="website">\n<meta property="og:image" content="${SITE}og.png?v=2">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="${SITE}og.png?v=2">`);
-fs.writeFileSync('dist/index.html', home);
-const urls = [SITE].concat(routes.filter(r => !r.noindex).map(r => SITE + r.path));
+// home is now generated in the route loop above (canonical, og and a crawlable body)
+const urls = routes.filter(r => !r.noindex).map(r => SITE + r.path);
 fs.writeFileSync('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `<url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`);
 fs.writeFileSync('dist/robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE}sitemap.xml\n`);
-console.log('pages:', routes.length + 1);
+console.log('pages:', routes.length);

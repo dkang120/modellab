@@ -7,6 +7,11 @@
 <title>ModelLab: every investing model, built as a portfolio</title>
 <meta name="description" content="Explore investing philosophies as example portfolios, with price snapshots, a dollar calculator and side-by-side comparisons. Educational only.">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#7c4def">
 <script src="seo.js"></script>
 </head>
 <body>
@@ -278,7 +283,7 @@ function footer(home){
    '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
-function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy'],['now','Now what?'],['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'">'+a[1]+'</a>';}).join('')+'</nav></div>';}
+function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy <i>new</i>'],['now','Now what?'],['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'"'+(a[0]==='text'?' class="nav-hl"':'')+'>'+a[1]+'</a>';}).join('')+'</nav></div>';}
 
 /* ---------- landing stage ---------- */
 var HERO={i:0,timer:null,to:null};
@@ -406,6 +411,7 @@ function viewModel(id){
    '<div class="two"><div class="panel wb"><h3>Works best when</h3><p>'+esc(m.best)+'</p><h3 style="margin-top:6px">Struggles when</h3><p>'+esc(m.worst)+'</p></div>'+
    '<div class="panel wb" style="background:var(--lilac)"><h3>Who it suits</h3><p>'+esc(m.suits)+'</p><div class="btns"><button class="btn pri sm" data-cmp="'+m.id+'" aria-pressed="false">'+(inCmp?'In comparison ✓':'Add to compare')+'</button><a class="btn light sm" href="#compare">Open compare</a></div></div></div>'+
    (window.ML&&ML.modelTools?ML.modelTools(m):'')+
+   (window.faqFor?'<div class="panel mfaq"><h2>FAQ</h2>'+faqFor(m).map(function(q){return '<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>';}).join('')+'</div>':'')+
    '<div class="pager"><a class="btn light" href="#m-'+prev.id+'">← '+esc(prev.name)+'</a><a class="btn light" href="#m-'+next.id+'">'+esc(next.name)+' →</a></div></div></div>';
 }
 
@@ -637,6 +643,14 @@ function viewAbout(){
    '<div class="panel" style="background:var(--lilac)"><h2>Why it exists</h2><p class="b">Terms like value, momentum and all-weather get thrown around, but it is hard to see what each one looks like as a real portfolio. ModelLab shows the belief behind each style, the rules, and an example allocation, so you can understand the tradeoffs before you decide anything.</p></div>'+
    '<div class="panel"><h2>What you can do here</h2><ul><li>Read how each investing model thinks, in plain language.</li><li>See an example portfolio, its weights, and a dollar calculator.</li><li>Check price snapshots from the latest close.</li><li>Compare models side by side and find the ones closest to how you think about risk.</li><li>Take the Match Quiz, live through a real crash in the Pain Simulator, stress test every model, and turn one into a dollar-by-dollar plan.</li><li>Test your own mix against up to 100 years of history and compete on the leaderboard with a virtual portfolio.</li></ul></div>'+
    '<div class="panel"><h2>How it can help you</h2><ul><li>Learn faster, without jargon.</li><li>Understand what each style asks of you in risk and effort.</li><li>Free to browse, no signup, nothing to buy.</li></ul></div>'+
+   '<div class="panel" id="method"><h2>How ModelLab works</h2><ul>'+
+    '<li><b>Ratings.</b> Risk, effort and growth are 1–5 editorial ratings that compare the models with each other. They describe the style, not a forecast.</li>'+
+    '<li><b>Example portfolios.</b> Each model is shown with public funds or stocks at fixed weights, chosen to illustrate the style. They are not optimized, backtested picks.</li>'+
+    '<li><b>Prices.</b> Daily closing prices from Yahoo Finance, refreshed automatically every weekday after the US close. Changes are price only and exclude dividends, fees and taxes.</li>'+
+    '<li><b>Crash history.</b> Drawdowns use long-run proxy series for each holding, rebalanced yearly, so they show how the style behaved, not any fund\u2019s actual returns.</li>'+
+    '<li><b>Recommendations.</b> The quiz and Now what? use fixed, published rules (your answers mapped to risk and effort limits). Nobody pays to be featured.</li>'+
+    '<li><b>Limits.</b> History doesn\u2019t repeat exactly, proxies are approximations, and a style can lag for years. Use ModelLab to understand options, then decide for yourself or with a licensed professional.</li>'+
+   '</ul><p class="b" style="margin-top:12px">Built by Daniel Kang, a business marketing student, as an independent educational project. Questions or corrections: <a href="mailto:modellab@hidanielkang.com">modellab@hidanielkang.com</a>.</p></div>'+
    '<div class="panel" style="background:var(--peach)"><h2>The fine print</h2><p class="b">ModelLab is an educational project by Daniel Kang. Every allocation is a hypothetical example using public funds. Nothing here is investment advice, a recommendation, or a record of performance. Price changes are price only and exclude dividends, fees and rebalancing. Historical tool results use long-run proxy series (see each tool\u2019s notes) and are not the funds\u2019 own returns. Risk, effort and growth ratings are editorial judgments, not measured data.</p></div></div></div>';
 }
 
@@ -698,7 +712,7 @@ function render(keep){
   else if(hash==='about'){html=viewAbout();}
   else if(hash.indexOf('m-')===0){html=viewModel(hash.slice(2));nav='library';}
   else{html=viewHome();home=true;}
-  heroStop();view.className=home?'':'page';view.innerHTML=(home?'':navrow())+html;foot.innerHTML=footer(home);if(home)heroStart();
+  heroStop();view.className=home?'':'page';view.innerHTML=(home?'<div class="home-nav">'+navrow()+'</div>':navrow())+html;foot.innerHTML=footer(home);if(home)heroStart();
   paintBell();paintPop();if(home)popAuto();document.body.classList.toggle('home',home);document.body.classList.toggle('sec-tools',nav==='tools');fixLinks();glClose();if(!home)glossary();
   if(window.seoFor){var sx=seoFor(curH(),MODELS),dm=document.querySelector('meta[name=description]');document.title=sx.title;if(dm)dm.setAttribute('content',sx.desc);}
   document.querySelectorAll('[data-nav]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-nav')===nav);});

@@ -3,7 +3,7 @@
 set -euo pipefail
 rm -rf dist && mkdir dist
 cp source/index.html source/style.css source/tools.js source/seo.js dist/
-cp source/og.png dist/
+cp source/og.png source/favicon.svg source/favicon.ico source/apple-touch-icon.png source/icon-192.png source/icon-512.png source/site.webmanifest source/404.html dist/
 cp -r source/fonts dist/fonts
 cp data.json dist/data.json
 cp history.json dist/history.json
