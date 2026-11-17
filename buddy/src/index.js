@@ -34,7 +34,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: env.MODEL || "claude-haiku-5-5", max_tokens: 400, thinking: { type: "disabled" },
+      model: env.MODEL || "claude-haiku-5-5", max_tokens: 300, thinking: { type: "disabled" },
       system: [{ type: "text", text: RULEBOOK, cache_control: { type: "ephemeral" } }, { type: "text", text: contextBlock(profile) }],
       messages,
     }),
@@ -43,7 +43,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   const d = await r.json();
   let out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
   if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
-  if (out && canRetry && clean(out).length > 160) out = (await shorten(env, out)) || out;
+  if (out && canRetry && clean(out).length > 150) out = (await shorten(env, out)) || out;
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
@@ -55,7 +55,7 @@ async function shorten(env, text) {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
-      system: "you shorten text messages. rewrite the text you're given to UNDER 150 characters total. keep it lowercase, casual, no period at the end, no emoji. keep any link exactly as written, it counts toward the limit; drop extra points instead. output only the rewritten text.",
+      system: "you shorten text messages. rewrite the text you're given to UNDER 140 characters total, sounding like a friend texting. keep it lowercase, casual, no period at the end, no emoji. keep any link exactly as written, it counts toward the limit; drop extra points instead. output only the rewritten text.",
       messages: [{ role: "user", content: text }] }),
   });
   if (!r.ok) return null;
@@ -73,7 +73,17 @@ function clean(reply) {
   if (emojis.length > 1 || (emojis.length && t.length > 68)) t = t.replace(EMOJI, "");
   t = t.replace(/\s{2,}/g, " ").trim();
   t = t.replace(/\.$/, "");             // rulebook: no ending period
-  if (t.length > 300) t = t.slice(0, 297).replace(/\s+\S*$/, "") + "…";
+  if (t.length > 160) {
+    const link = (t.match(/modellab\.hidanielkang\.com\/\S*/) || [""])[0];
+    let body = t.replace(link, "").trim();
+    const room = 158 - (link ? link.length + 1 : 0);
+    if (body.length > room) {
+      const cut = body.slice(0, room);
+      const end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(", "), cut.lastIndexOf("? "));
+      body = (end > room * 0.5 ? cut.slice(0, end + (cut[end] === "?" ? 1 : 0)) : cut.replace(/\s+\S*$/, "")).replace(/[.,]$/, "");
+    }
+    t = link ? body + " " + link : body;
+  }
   return t;
 }
 
