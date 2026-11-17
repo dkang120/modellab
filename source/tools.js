@@ -180,7 +180,8 @@ function viewTools(){
   ];
   var pg=progGet(),nx=!pg.match?['#match','Start with the Match Quiz']:(!pg.pain?['#pain','Next: feel the risk with the Pain Simulator']:(!pg.implement?['#implement','Next: build your plan']:['#build','All three steps done. Try Build Your Own']));
   var dn=function(k){return pg[k]?'<i class="tl-ck" aria-label="done">✓</i> ':'';};
-  return head('Tools.','Match a model to how you behave, feel the risk, then act on it.','<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
+  var thread='<div class="imsg" aria-label="Conversation"><div class="im in">how would you actually handle a crash?</div><div class="im out">honestly no idea</div><div class="im in">ok. three steps. match, feel the risk, then act.</div><div class="im out">bet. where do i start?</div></div>';
+  return head('Tools.','Match a model to how you behave, feel the risk, then act on it.',thread+'<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
    '<div class="grid3" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+(pg[c[4].slice(1)]?'Done ✓ · ':'')+c[5]+'</span></a>';}).join('')+'</div></div>';
 }
 
@@ -227,8 +228,8 @@ function viewMatch(){
   }
   var q=QZ[Q.i];
   return head('Match Quiz.','Six questions about how you would actually behave.')+
-   '<div class="stack"><div class="panel sh tl-q"><div class="tl-prog" role="progressbar" aria-valuemin="0" aria-valuemax="'+QZ.length+'" aria-valuenow="'+Q.i+'"><i style="width:'+(Q.i/QZ.length*100)+'%"></i></div>'+
-   '<small class="eyebrow">Question '+(Q.i+1)+' of '+QZ.length+'</small><h2 style="margin-top:8px">'+esc(q.q)+'</h2><div class="tl-opts">'+
+   '<div class="stack"><div class="panel sh tl-q story-q"><div class="sq-bars" role="progressbar" aria-valuemin="0" aria-valuemax="'+QZ.length+'" aria-valuenow="'+Q.i+'">'+QZ.map(function(x,j){return '<i class="'+(j<Q.i?'done':(j===Q.i?'cur':''))+'"></i>';}).join('')+'</div>'+
+   '<div class="sq-who"><span class="av sm">'+ML.LOGO+'</span><b>@modellab</b><span>· quiz · '+(Q.i+1)+'/'+QZ.length+'</span></div><div class="im in sq-q">'+esc(q.q)+'</div><p class="sq-hint">tap your answer</p><div class="tl-opts">'+
    q.a.map(function(a,j){return '<button class="tl-opt" data-t-q="'+j+'">'+esc(a[0])+(a[2]?'<small>'+esc(a[2])+'</small>':'')+'</button>';}).join('')+'</div>'+
    (Q.i>0?'<p style="margin-top:18px"><button class="chip" data-t-qback="1">← Back</button></p>':'')+'</div></div></div>';
 }
@@ -283,8 +284,8 @@ function painChartHtml(){
   var all=h.concat(P.mkt);if(P.dec==='buy')all=all.concat(painYou());
   var lo=Math.min.apply(null,all)*0.92,hi=Math.max.apply(null,all)*1.06;
   series.push({vals:P.mkt.map(function(v,j){return j<=k?v:null;}),color:'#dedee2',w:2});
-  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#d9cbfb',w:2.2,dash:'6 5'});
-  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#7c4def',w:3});
+  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#c5dcff',w:2.2,dash:'6 5'});
+  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#4c90f7',w:3});
   var marks=P.decK!=null&&k>=P.decK?[{i:P.decK,label:P.dec==='sell'?'You sold':(P.dec==='buy'?'You bought more':'You held')}]:[];
   return chart({n:P.len+1,labels:labs,series:series,ymin:lo,ymax:hi,base:P.amt,marks:marks,aria:'Portfolio value over time',tick:function(l){return l.slice(0,4);}});
 }
@@ -297,12 +298,22 @@ function painBody(){
    statBox('PORTFOLIO VALUE',money(cur),(cur>=inv?'+':'−')+money(Math.abs(cur-inv))+(P.contrib?' vs what you put in':' vs start'),cur>=inv?'up':'dn')+
    statBox('BELOW ITS PEAK',pct1(dd),underNow+' months underwater',dd<-0.005?'dn':'na')+
    statBox('US STOCK MARKET',money(P.mkt[k]),'for reference')+'</div>';
-  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#7c4def'],P.dec&&P.dec!=='hold'?['If you had held','#d9cbfb']:null,['US stock market','#dedee2']].filter(Boolean))+s;
+  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#4c90f7'],P.dec&&P.dec!=='hold'?['If you had held','#c5dcff']:null,['US stock market','#dedee2']].filter(Boolean))+s;
+  out+=painThread(dd,k,curLab);
   if(P.pause!=null&&k===P.pause&&P.dec==null){
     out+='<div class="tl-dec" role="alertdialog" aria-live="assertive"><h3>'+curLab+': you are down '+pctAbs(dd)+' from the peak.</h3><p>'+(P.contrib?'You have put in '+money(inv)+' and it':'Your $'+Math.round(P.amt).toLocaleString('en-US'))+' is now worth <b>'+money(cur)+'</b>. The news is bad. What do you do?</p><div class="btns"><button class="btn light" data-t-pdec="sell">Sell everything</button><button class="btn light" data-t-pdec="hold">Hold</button><button class="btn pri" data-t-pdec="buy">Buy more ('+money(P.amt*0.5)+')</button></div></div>';
   }
   if(P.done)out+=painSummary();
   return out;
+}
+function painThread(dd,k,curLab){
+  var lo=0,msgs=[];for(var i=1;i<=k;i++){var d=painDD(P.idx,i);if(d<lo)lo=d;}
+  var T=[[-0.10,'down 10%. you good?'],[-0.20,'down 20%. this is where it starts to sting.'],[-0.30,'down 30%. this is where most people sell.'],[-0.40,'down 40%. still with me?'],[-0.50,'down 50%. half of it, on paper.']];
+  T.forEach(function(t){if(lo<=t[0])msgs.push(['in',t[1]]);});
+  if(P.dec){msgs.push(['out',P.dec==='sell'?'i’m out. selling everything.':(P.dec==='buy'?'buying more. it’s on sale.':'holding. not touching it.')]);}
+  if(P.done)msgs.push(['in',dd>-0.005?'it’s back above its old high.':'window’s over. here’s what happened ↓']);
+  if(!msgs.length)msgs.push(['in',k?'so far so good.':'you just invested. here we go.']);
+  return '<div class="imsg pn-thread" aria-live="polite">'+msgs.slice(-5).map(function(x){return '<div class="im '+x[0]+'">'+esc(x[1])+'</div>';}).join('')+'</div>';
 }
 function painSummary(){
   markProg('pain');
@@ -456,7 +467,7 @@ function viewBuild(){
     var a=pstats(mine),b=pstats(other),c=pstats(mk),labs=[];
     for(var i=0;i<=g1-g0+1;i++)labs.push(HM[g0-1+i]||'');
     var all=mine.concat(other,mk);
-    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#dedee2',w:2},{vals:other,color:'#d9cbfb',w:2.2},{vals:mine,color:'#7c4def',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#7c4def'],[cm.name,'#d9cbfb'],['US stock market','#dedee2']])+
+    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#dedee2',w:2},{vals:other,color:'#c5dcff',w:2.2},{vals:mine,color:'#4c90f7',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#4c90f7'],[cm.name,'#c5dcff'],['US stock market','#dedee2']])+
      '<div class="tw" style="margin-top:14px"><table><thead><tr><th></th><th>YOUR MIX</th><th>'+esc(cm.name.toUpperCase())+'</th><th>US STOCKS</th></tr></thead><tbody>'+
      [['Ending value',function(s,p){return money(p[p.length-1]);}],['Per year (CAGR)',function(s){return s.cagr==null?'n/a':pct1(s.cagr);}],['Worst fall',function(s){return pct1(s.mdd);}],['Months to recover',function(s){return s.recover!=null?s.recover:(s.mdd<0?'not yet':'—');}],['Worst 12 months',function(s){return s.worst12==null?'n/a':pct1(s.worst12);}],['Best 12 months',function(s){return s.best12==null?'n/a':pct1(s.best12);}]].map(function(r){return '<tr><td>'+r[0]+'</td><td class="m">'+r[1](a,mine)+'</td><td>'+r[1](b,other)+'</td><td>'+r[1](c,mk)+'</td></tr>';}).join('')+'</tbody></table></div>';
   }
@@ -535,11 +546,15 @@ function viewLeaderboard(){
   var elig=eligibleModels(),cnt={};(LBS.rows||[]).forEach(function(r){cnt[r.model_id]=(cnt[r.model_id]||0)+1;});
   var chips=[['all','All']].concat(elig.map(function(m){return [m.id,m.name];})).map(function(c){return '<button class="chip" data-t-lbf="'+c[0]+'" aria-pressed="'+(LBS.filter===c[0])+'">'+esc(c[1])+(c[0]!=='all'&&cnt[c[0]]?' ('+cnt[c[0]]+')':'')+'</button>';}).join('');
   function tr(x,i,rank){var mine=me&&x.r.handle.toLowerCase()===me.toLowerCase();
-    return '<tr'+(mine?' class="tl-me"':'')+'><td class="m">'+(rank?i+1:'—')+'</td><td><b>'+esc(x.r.handle)+'</b>'+(mine?' <span class="pill na">you</span>':'')+'</td><td>'+esc(x.r.label)+'</td><td class="m">'+ML.chg(x.p.ret*100,1)+'</td><td>'+(x.p.alpha==null?'n/a':ML.chg(x.p.alpha*100,1))+'</td><td>'+x.age+'d</td></tr>';}
+    return '<tr'+(mine?' class="tl-me"':'')+'><td class="m">'+(rank?i+1:'—')+'</td><td><b>'+esc(x.r.handle)+'</b>'+(mine?' <span class="pill na">you</span>':'')+'</td><td>'+esc(x.r.label)+'</td><td class="m">'+ML.chg(x.p.ret*100,1)+'</td><td>'+(x.p.alpha==null?'n/a':ML.chg(x.p.alpha*100,1))+'</td><td>'+(x.age>=7?'🔥 ':'')+x.age+'d</td></tr>';}
   var table='';
   if(data){
-    table=(data.ranked.length||data.fresh.length)?'<div class="tw"><table><thead><tr><th>#</th><th style="text-align:left">PLAYER</th><th style="text-align:left">PORTFOLIO</th><th>RETURN</th><th>VS SPY</th><th>DAYS</th></tr></thead><tbody>'+data.ranked.map(function(x,i){return tr(x,i,true);}).join('')+data.fresh.map(function(x,i){return tr(x,i,false);}).join('')+'</tbody></table></div>'+note('Ranked after '+MINAGE+' days so one lucky day cannot top the board. Newer entries are listed below the ranked ones. Return is price-only since the entry close; SPY is measured over the same window.'):'<p class="b" style="padding:12px 0">No entries yet. Be the first on the board.</p>';
+    table=(data.ranked.length||data.fresh.length)?'<div class="tw"><table><thead><tr><th>#</th><th style="text-align:left">PLAYER</th><th style="text-align:left">PORTFOLIO</th><th>RETURN</th><th>VS SPY</th><th>STREAK</th></tr></thead><tbody>'+data.ranked.map(function(x,i){return tr(x,i,true);}).join('')+data.fresh.map(function(x,i){return tr(x,i,false);}).join('')+'</tbody></table></div>'+note('Ranked after '+MINAGE+' days so one lucky day cannot top the board. Newer entries are listed below the ranked ones. Return is price-only since the entry close; SPY is measured over the same window.'):'<p class="b" style="padding:12px 0">No entries yet. Be the first on the board.</p>';
   }else table='<p class="b" aria-busy="true">Loading the board…</p>';
+  var recap='';
+  if(data&&me){var all=data.ranked.concat(data.fresh),mi=-1;all.forEach(function(x,i){if(x.r.handle.toLowerCase()===me.toLowerCase())mi=i;});
+    if(mi>-1){var x=all[mi],rk=mi<data.ranked.length?'#'+(mi+1)+' of '+data.ranked.length:'unranked until day '+MINAGE;
+      recap='<div class="recap"><p class="rc-k">your recap</p><p class="rc-h">@'+esc(x.r.handle)+'</p><div class="rc-g"><div><small>held</small><b>'+(x.age>=7?'🔥 ':'')+x.age+' days</b></div><div><small>return</small><b>'+ML.fmt(x.p.ret*100,1)+'</b></div><div><small>vs spy</small><b>'+(x.p.alpha==null?'n/a':ML.fmt(x.p.alpha*100,1))+'</b></div><div><small>rank</small><b>'+rk+'</b></div></div><p class="rc-f">'+esc(x.r.label)+' · modellab leaderboard</p></div>';}}
   var myModels=elig.map(function(m){return '<option value="'+m.id+'"'+(m.id===LBS.joinModel&&!LBS.custom?' selected':'')+'>'+esc(m.name)+'</option>';}).join('');
   var join='<div class="panel sh"><h2 style="font-size:22px">Join the board</h2><p class="note" style="margin:6px 0 14px">Pick a model (or send one from Build Your Own). Your virtual portfolio starts at the latest close. Handles are public; use no personal details.</p>'+
    '<div class="tl-bar"><label class="tl-f">Handle<input id="lb-handle" maxlength="20" autocomplete="off" placeholder="e.g. steady_eddie" value="'+esc(LBS.handle)+'"></label>'+
@@ -547,9 +562,24 @@ function viewLeaderboard(){
    '<button class="btn pri" data-t-lbjoin="1">Join →</button></div>'+(LBS.msg?'<p class="note" role="status" style="margin:0">'+esc(LBS.msg)+'</p>':'')+'</div>';
   var local=!LB.url?'<div class="tl-warn"><b>Local mode.</b> The shared board is not connected yet, so entries are saved on this device only. Add a Supabase project (see README) to turn on the shared board.</div>':'';
   return head('Leaderboard.','Virtual portfolios from the latest close. No real money.','<div class="tl-steps"><span><b>Compete</b> Track against everyone</span></div>')+
-   '<div class="stack">'+local+join+'<div class="panel sh"><div class="tl-lbhead"><h2 style="font-size:22px">The board</h2></div><div class="chips" style="margin:12px 0 18px" role="group" aria-label="Filter by model">'+chips+'</div>'+(LBS.err?'<div class="tl-warn">'+esc(LBS.err)+'</div>':'')+table+'</div>'+
+   '<div class="stack">'+local+recap+join+'<div class="panel sh"><div class="tl-lbhead"><h2 style="font-size:22px">The board</h2></div><div class="chips" style="margin:12px 0 18px" role="group" aria-label="Filter by model">'+chips+'</div>'+(LBS.err?'<div class="tl-warn">'+esc(LBS.err)+'</div>':'')+table+'</div>'+
    note('For fun and learning. Hypothetical portfolios, price-only returns, not investment advice or a record of real performance. '+srcLine())+'</div></div>';
 }
+
+/* ================= model page: crash history as comments ================= */
+ML.crashComments=function(m){
+  ensureHist();
+  var me=ML.handle(m),hav='<span class="av sm hist"><span>h</span></span>';
+  var head='<div class="panel post cm"><div class="post-h">'+ML.av(m,'sm',true)+'<b>'+esc(me)+'</b><span>· crash history</span></div>';
+  if(hState!=='ready')return head+'<p class="note">Loading real crash history…</p></div>';
+  var rows=[],ms=MS[m.id];
+  if(ms)rows.push(['since 1992','worst fall '+pct1(ms.mdd)+(ms.recover!=null?' · back to its old high in '+ms.recover+' months':' · not back to its old high yet')]);
+  SCEN.forEach(function(sc){var c=stressCell(m,sc);if(c)rows.push([sc.name.toLowerCase(),'fell '+pct1(c.mdd)+' at the worst · '+pct1(c.tot)+' by '+mlab(sc.to)]);});
+  var reply=ms?(ms.mdd<-0.4?'that is a lot of pain. could you hold through it?':(ms.mdd<-0.2?'real dips, but it came back.':'pretty calm, all things considered.')):'';
+  return head+'<div class="cm-l">'+rows.map(function(r){return '<div class="cm-r">'+hav+'<p><b>@history</b> <span class="cm-y">'+esc(r[0])+'</span><br>'+esc(r[1])+'</p></div>';}).join('')+
+   (reply?'<div class="cm-r reply">'+ML.av(m,'sm',true)+'<p><b>'+esc(me)+'</b> '+esc(reply)+'</p></div>':'')+'</div>'+
+   '<a class="lk cm-more" href="#pain/'+m.id+'">live through one in the Pain Simulator →</a>'+note('Real history from long-run proxy series, rebalanced yearly, price only. Not the funds’ own returns.')+'</div>';
+};
 
 /* ================= model page hook ================= */
 ML.modelTools=function(m){
@@ -588,7 +618,7 @@ function shareCard(c){
     g.font='400 30px Inter,sans-serif';
     var gl=wrapLines(g,c.gray,390),bl=wrapLines(g,c.blue,390);
     var gh=gl.length*40+36,gy=150;rr(720,gy,430,gh,36,'#dedee2');g.fillStyle='#0a0a0a';gl.forEach(function(l,i){g.fillText(l,744,gy+50+i*40);});
-    var bh=bl.length*40+36,by=gy+gh+28;rr(700,by,430,bh,36,'#7c4def');g.fillStyle='#fff';bl.forEach(function(l,i){g.fillText(l,724,by+50+i*40);});
+    var bh=bl.length*40+36,by=gy+gh+28;rr(700,by,430,bh,36,'#4c90f7');g.fillStyle='#fff';bl.forEach(function(l,i){g.fillText(l,724,by+50+i*40);});
     g.fillStyle='#707070';g.font='400 24px Inter,sans-serif';g.fillText(c.foot||'Educational only, not investment advice.',64,570);
     g.textAlign='right';g.fillStyle='#0a0a0a';g.font='500 26px "Open Sauce",Inter,sans-serif';g.fillText(c.url||'',1136,570);g.textAlign='left';
     return new Promise(function(res){cv.toBlob(function(b){res(b);},'image/png');});

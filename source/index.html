@@ -10,7 +10,7 @@
 <script src="seo.js"></script>
 </head>
 <body>
-<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a></nav></header>
+<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a></nav><div class="bellw" id="bellw"></div></header>
 <main id="view"></main>
 <div id="foot"></div>
 <script>
@@ -179,11 +179,11 @@ var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-we
 function unlocked(){try{return localStorage.getItem('ml_sub')==='1';}catch(e){return false;}}
 function setUnlocked(){try{localStorage.setItem('ml_sub','1');}catch(e){}}
 function signupForm(ctx){
-  return '<form class="signup" data-signup="'+ctx+'" novalidate><input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required><button class="btn pri" type="submit">Unlock free access \u2192</button></form>'+
-  '<p class="signup-msg" role="alert"></p><p class="signup-note">Free. You get one short weekly email about a different investing model. Unsubscribe anytime. Educational only, not investment advice.</p>';
+  return '<form class="signup" data-signup="'+ctx+'" novalidate><input type="email" name="email" placeholder="you@email.com" autocomplete="email" aria-label="Email address" required><button class="btn pri" type="submit">follow @modellab \u2192</button></form>'+
+  '<p class="signup-msg" role="alert"></p><p class="signup-note">Free. Following gets you live prices here plus one short weekly post by email, the Lab Drop. Unfollow anytime. Educational only, not investment advice.</p>';
 }
 function gatePanel(title,blurb,ctx){
-  return '<div class="panel sh gatebox"><h2>'+title+'</h2><p>'+blurb+'</p>'+signupForm(ctx)+'</div>';
+  return '<div class="panel sh gatebox" id="follow"><div class="gb-who"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b><small>new model every week · the Lab Drop</small></span></div><h2>'+title+'</h2><p>'+blurb+'</p>'+signupForm(ctx)+'</div>';
 }
 function $(s,r){return (r||document).querySelector(s);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -253,6 +253,25 @@ function mdl(m,link){
   return link?'<a class="mdl" href="#m-'+m.id+'">'+inner+'</a>':'<div class="mdl">'+inner+'</div>';
 }
 function card(m){return mdl(m,true);}
+/* ---------- social pieces: avatars, stories, bell ---------- */
+var LABDROP=[{n:1,id:'dogs',when:'this week'}];
+function initials(m){var w=m.name.replace(/[^A-Za-z ]/g,' ').trim().split(/\s+/);return (w.length>1&&w[1].length>2?w[0][0]+w[1][0]:w[0].slice(0,2)).toLowerCase();}
+function av(m,size,ring){return '<span class="av '+(size||'')+(ring?' ring':'')+'"><span>'+esc(initials(m))+'</span></span>';}
+function handle(m){return '@'+m.id.replace(/-/g,'');}
+function isNew(id){return LABDROP.some(function(d){return d.id===id;});}
+function storiesRow(){
+  var seen={};try{seen=JSON.parse(localStorage.getItem('ml_seen')||'{}');}catch(e){}
+  var ids=LABDROP.map(function(d){return d.id;}).concat(MODELS.map(function(m){return m.id;}).filter(function(id){return !isNew(id);}));
+  return '<div class="stories" role="list" aria-label="Models">'+ids.map(function(id){var m=byId[id],fresh=isNew(id)&&!seen[id];
+    return '<a role="listitem" class="story'+(fresh?' fresh':'')+'" href="#m-'+id+'" data-seen="'+id+'">'+av(m,'lg',true)+'<span class="st-t">'+(fresh?'<b>new</b> ':'')+esc(handle(m).slice(1))+'</span></a>';}).join('')+'</div>';
+}
+function bellHtml(){
+  var seen=false;try{seen=localStorage.getItem('ml_bell')==='1';}catch(e){}
+  var items=LABDROP.map(function(d){var m=byId[d.id];return '<a class="bn-item" href="#m-'+d.id+'">'+av(m,'sm',true)+'<span><b>'+esc(handle(m))+'</b> new post: Lab Drop #'+d.n+' · '+esc(m.name)+'<small>'+esc(d.when)+'</small></span></a>';}).join('');
+  return '<button class="bell'+(seen?'':' dot')+'" data-bell="1" aria-label="Notifications" aria-expanded="'+(!!state.bell)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>'+
+   (state.bell?'<div class="bell-pop" role="menu"><p class="bp-h">notifications</p>'+items+(unlocked()?'':'<a class="bn-item" href="#follow-cta"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> follow to get every Lab Drop by email</span></a>')+'</div>':'');
+}
+
 function footer(home){
   var L=[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
   return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
@@ -306,7 +325,7 @@ function viewHome(){
     ['What do Risk and Effort mean?','They are 1 to 5 editorial ratings written by the site’s author, not measured data. Risk is how bumpy the ride can get. Effort is how much time and attention the style asks of you.'],
     ['Can I try my own amounts?','Yes. On any model page, type a dollar amount into the calculator to see how it would split across that model’s holdings.']]
     .map(function(q,i){return '<details'+(i===0?' open':'')+'><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
-  return heroHtml()+'<div class="wrap">'+
+  return heroHtml()+'<div class="wrap"><section class="home-stories"><p class="eyebrow">the models · tap to view</p>'+storiesRow()+'</section>'+
   '<section class="intro"><p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
    '<div class="demo"><div class="demo-h"><div><h3>Value</h3><p>Example portfolio'+(DATA?' · '+asOfTxt()+' close':'')+'</p></div>'+d1+'</div>'+heroRows+'<div class="demo-f"><span>If I invested</span><b>$10,000</b></div></div></section>'+
   '<div class="ideas"><span class="eyebrow">Built from the ideas of</span><div class="names"><span>Graham</span><span>Buffett</span><span>Lynch</span><span>Bogle</span><span>Dalio</span><span>Markowitz</span><span>Fama</span></div></div>'+
@@ -329,11 +348,19 @@ function viewLibrary(){
     if(state.sort==='risk')return a.risk-b.risk||a.name.localeCompare(b.name);
     if(state.sort==='effort')return a.effort-b.effort||a.name.localeCompare(b.name);
     return b.growth-a.growth||a.name.localeCompare(b.name);});
-  var chips=['All'].concat(CATS).map(function(c){return '<button class="chip" data-chip="'+esc(c)+'" aria-pressed="'+(state.cat===c)+'">'+esc(c)+'</button>';}).join('');
-  var opts=[['featured','Featured'],['risk','Lowest risk'],['effort','Lowest effort'],['growth','Highest growth']].map(function(o){return '<option value="'+o[0]+'"'+(state.sort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('');
-  return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">Investing models, each with an example portfolio you can explore.</p></div>'+
-   '<div class="filters"><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div><label class="sortw">Sort: <select id="sort">'+opts+'</select></label></div>'+
-   '<div class="mgrid">'+(list.length?list.map(card).join(''):'<p class="empty">No models in this family yet.</p>')+'</div></div>';
+  var hl=['All'].concat(CATS).map(function(c){var k=c==='All'?'all':c;return '<button class="hl" data-chip="'+esc(c)+'" aria-pressed="'+(state.cat===c)+'"><span class="hl-ring"><span class="hl-in">'+(c==='All'?LOGO:esc(k.charAt(0).toLowerCase()))+'</span></span><span class="hl-t">'+esc(k.toLowerCase())+'</span></button>';}).join('');
+  var tabs=[['featured','featured','<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>'],['risk','lowest risk','<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l3.5-5"/>'],['effort','lowest effort','<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'],['growth','highest growth','<path d="M4 17l6-6 4 4 6-7"/><path d="M15 8h5v5"/>']].map(function(t){return '<button class="igtab" data-sort="'+t[0]+'" aria-pressed="'+(state.sort===t[0])+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+t[2]+'</svg><span>'+t[1]+'</span></button>';}).join('');
+  return '<div class="wrap"><div class="igp">'+
+   '<header class="igp-head"><div class="igp-av"><span>'+LOGO+'</span></div><div class="igp-meta"><div class="igp-row"><h1 class="igp-handle">the library</h1><a class="igp-btn pri" href="#compare">compare</a><a class="igp-btn" href="#match">find your fit</a></div>'+
+   '<ul class="igp-stats"><li><b>'+CATS.length+'</b> families</li><li><b>1</b> new weekly</li><li><b>free</b> to browse</li></ul>'+
+   '<p class="igp-bio"><b>modellab</b><br>Investing models, each with an example portfolio you can explore. New model every week in the Lab Drop.</p></div></header>'+
+   '<div class="igp-hls" role="group" aria-label="Filter by family">'+hl+'</div>'+
+   '<div class="igp-tabs" role="group" aria-label="Sort">'+tabs+'</div>'+
+   '<div class="iggrid">'+(list.length?list.map(igTile).join(''):'<p class="empty">No models in this family yet.</p>')+'</div></div></div>';
+}
+function igTile(m){
+  return '<a class="igt" href="#m-'+m.id+'" aria-label="'+esc(m.name)+'"><span class="igt-cat">'+esc(m.cat)+'</span><p class="igt-tag">'+esc(m.tag)+'</p><p class="igt-nm">'+esc(m.name)+'</p>'+
+   '<span class="igt-ov" aria-hidden="true"><span>'+ico('risk')+'<b>'+m.risk+'/5</b></span><span>'+ico('effort')+'<b>'+m.effort+'/5</b></span></span></a>';
 }
 
 function donut(m){
@@ -354,12 +381,20 @@ function viewModel(id){
   var cells=ms?[['1D',ms.d1],['1W',ms.w1],['MTD',ms.mtd],['YTD',ms.ytd],['~1Y',ms.y1]]:[];
   var perf=ms?'<div class="perf">'+cells.map(function(c){return '<div class="pt '+sign(c[1])+'"><small>'+c[0]+'</small><b class="'+(sign(c[1])==='na'?'':sign(c[1]))+'">'+fmt(c[1],c[0]==='1D'||c[0]==='1W'||c[0]==='MTD'?2:1)+'</b></div>';}).join('')+'</div>':'';
   var note='Fixed weights, price only. Excludes dividends, fees and rebalancing. Not a backtest. '+srcTxt()+(ms&&ms.cov<99.9?' Covers '+ms.cov.toFixed(0)+'% of the portfolio; holdings without a ticker are left out.':'');
-  return '<div class="wrap"><div class="mhead"><div class="crumb"><a href="#library">Library</a> &nbsp;/&nbsp; '+esc(m.cat)+'</div><h1>'+esc(m.name)+'</h1><p class="sub">'+esc(m.tag)+'</p>'+
-   '<div class="facts"><div class="fact"><small>Horizon</small><b>'+esc(m.horizon)+'</b></div><div class="fact"><small>Turnover</small><b>'+esc(m.turnover)+'</b></div><div class="fact"><small>Risk</small>'+dots(m.risk,'p big')+'</div><div class="fact"><small>Effort</small>'+dots(m.effort,'p big')+'</div></div></div>'+
+  var fol=unlocked()?'<span class="igp-btn on">following ✓</span>':'<a class="igp-btn pri" href="#follow-cta">follow</a>';
+  var slides=m.steps.map(function(x,i){return '<div class="car-s"><span class="car-n">'+(i+1)+'</span><p>'+esc(x)+'</p></div>';}).join('');
+  var car='<div class="panel post"><div class="post-h">'+av(m,'sm',true)+'<b>'+esc(handle(m))+'</b><span>· how it works</span></div>'+
+   '<div class="car" data-car="1" tabindex="0" aria-label="How it works, '+m.steps.length+' slides">'+slides+'</div>'+
+   '<div class="car-f"><button class="car-b" data-carb="-1" aria-label="Previous">‹</button><span class="car-dots">'+m.steps.map(function(x,i){return '<i'+(i===0?' class="on"':'')+'></i>';}).join('')+'</span><span class="car-c">1/'+m.steps.length+'</span><button class="car-b" data-carb="1" aria-label="Next">›</button></div>'+
+   '<p class="post-cap"><b>'+esc(handle(m))+'</b> '+esc(m.belief)+'</p><p class="note" style="margin:6px 0 0">'+esc(m.origin)+'</p></div>';
+  var comments=(window.ML&&ML.crashComments)?ML.crashComments(m):'';
+  return '<div class="wrap"><div class="mprof"><div class="crumb"><a href="#library">Library</a> &nbsp;/&nbsp; '+esc(m.cat)+'</div>'+
+   '<header class="igp-head mp-head">'+av(m,'xl',true)+'<div class="igp-meta"><div class="igp-row"><h1 class="igp-handle">'+esc(handle(m))+(isNew(m.id)?' <span class="newtag">new</span>':'')+'</h1>'+fol+'<button class="igp-btn" data-cmp="'+m.id+'" aria-pressed="'+inCmp+'">'+(inCmp?'in compare ✓':'add to compare')+'</button></div>'+
+   '<ul class="igp-stats"><li><b>'+m.risk+'/5</b> risk</li><li><b>'+m.effort+'/5</b> effort</li><li><b>'+esc(m.horizon)+'</b> horizon</li><li><b>'+esc(m.turnover.toLowerCase())+'</b> turnover</li></ul>'+
+   '<p class="igp-bio"><b>'+esc(m.name)+'</b> · '+esc(m.cat.toLowerCase())+'<br>'+esc(m.tag)+'</p></div></header></div>'+
    '<div class="stack">'+
-   (unlocked()?'<div class="panel sh"><div class="ph"><h2 style="font-size:22px">Price change of the example portfolio</h2>'+badge()+'</div>'+perf+'<p class="note">'+esc(note)+'</p></div>':gatePanel('See live price changes','Enter your email to unlock free price snapshots, the Compare tool and Find your fit.','model'))+
-   '<div class="two"><div class="panel" style="background:var(--lilac)"><h2>The belief</h2><p class="b">'+esc(m.belief)+'</p><p class="note" style="margin:0">'+esc(m.origin)+'</p></div>'+
-   '<div class="panel"><h2>How it works</h2>'+m.steps.map(function(s,i){return '<div class="nstep"><i>'+(i+1)+'</i><span>'+esc(s)+'</span></div>';}).join('')+'</div></div>'+
+   (unlocked()?'<div class="panel sh"><div class="ph"><h2 style="font-size:22px">Price change of the example portfolio</h2>'+badge()+'</div>'+perf+'<p class="note">'+esc(note)+'</p></div>':'<div id="follow-cta"></div>'+gatePanel('follow to see live prices','Follow @modellab with your email to unlock price snapshots, Compare and Find your fit.','model'))+
+   '<div class="two post-row">'+car+comments+'</div>'+
    '<div class="panel sh" style="padding:36px"><div class="ph"><div><h2>Example portfolio</h2><p class="note" style="margin-top:6px">Hypothetical and for illustration only. Weights add to 100%.'+(m.note?' '+esc(m.note):'')+'</p></div><label class="calc" for="amt">If I invested <span>$</span><input id="amt" type="number" inputmode="numeric" min="0" step="500" value="'+state.amount+'"></label></div>'+
    '<div class="pb">'+donut(m)+'<div class="tw"><table><thead><tr><th>HOLDING</th><th>WEIGHT</th><th>AMOUNT</th><th>PRICE</th><th>1D</th><th>YTD</th></tr></thead><tbody id="hold">'+holdRows(m)+'</tbody></table></div></div><div id="calcres">'+valueInner(m)+'</div></div>'+
    '<div class="two pc-wrap"><div class="panel pc g"><h3>Strengths</h3><ul>'+m.pros.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></div><div class="panel pc r"><h3>Risks and criticisms</h3><ul>'+m.cons.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></div></div>'+
@@ -386,7 +421,7 @@ function rankHtml(){
 }
 function slider(k,label,val){return '<div class="sl"><label for="s-'+k+'">'+label+'<span id="v-'+k+'">'+val+'/5</span></label><input type="range" id="s-'+k+'" data-fit="'+k+'" min="1" max="5" step="1" value="'+val+'" style="--p:'+((val-1)*25)+'%"></div>';}
 function viewCompare(){
-  if(!unlocked())return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div><div class="cgate">'+gatePanel('Unlock Compare','Free with your email. You also get price snapshots on every model and a weekly email about one model.','compare')+'</div></div>';
+  if(!unlocked())return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div><div class="cgate">'+gatePanel('follow to unlock Compare','Free with your email. You also get live prices on every model and the weekly Lab Drop.','compare')+'</div></div>';
   var sel=state.compare.map(function(id){return byId[id];}).filter(Boolean);
   var chips=sel.map(function(m){return '<button class="cp" data-cmp="'+m.id+'" aria-label="Remove '+esc(m.name)+'">'+esc(m.name)+' <i>✕</i></button>';}).join('');
   var rest=MODELS.filter(function(m){return state.compare.indexOf(m.id)<0;});
@@ -399,13 +434,23 @@ function viewCompare(){
    '<p class="note">Price changes are fixed-weight price returns'+(DATA?' as of the '+asOfTxt()+' close':'')+'. Ratings are editorial.</p>';
   var f=state.fit;
   return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div>'+
-   '<div class="sel"><span>Comparing</span>'+chips+addBtn+menu+'</div>'+table+
+   (sel.length>=2?'<div class="vs">'+sel.map(function(m,i){return (i?'<span class="vs-x">vs</span>':'')+'<a class="vs-m" href="#m-'+m.id+'">'+av(m,'lg',true)+'<b>'+esc(handle(m))+'</b><small>risk '+m.risk+'/5 · effort '+m.effort+'/5</small></a>';}).join('')+'</div>':'')+
+   '<div class="sel"><span>Comparing</span>'+chips+addBtn+menu+'</div>'+table+pollHtml(sel)+
    '<div class="fit" style="margin:28px 0 100px"><div><h2>Find your fit</h2><p>Tell us how you invest and we will rank the library.</p>'+slider('risk','Risk tolerance',f.risk)+slider('effort','Effort you will spend',f.effort)+slider('growth','Growth you want',f.growth)+'</div>'+
    '<div class="bm"><small>BEST MATCHES</small><div id="rank">'+rankHtml()+'</div></div></div></div>';
 }
 
+function pollHtml(sel){
+  if(sel.length<2)return '';
+  var a=sel[0],b=sel[1],key='ml_poll_'+a.id+'_'+b.id,pick=null;try{pick=localStorage.getItem(key);}catch(e){}
+  function opt(m){var on=pick===m.id;return '<button class="poll-o'+(on?' on':'')+'" data-poll="'+key+'|'+m.id+'">'+av(m,'sm',true)+'<span><b>'+esc(m.name)+'</b><small>'+esc(m.tag)+'</small></span>'+(on?'<i>your pick</i>':'')+'</button>';}
+  return '<div class="panel poll"><p class="eyebrow">this or that</p><h2>a crash hits next month. which one do you keep?</h2><div class="poll-g">'+opt(a)+'<span class="vs-x">or</span>'+opt(b)+'</div>'+
+   (pick?'<p class="note" style="margin:12px 0 0">'+esc(byId[pick].name)+' is rated '+byId[pick].risk+'/5 for risk. See how far it really fell in the <a class="lk" href="#stress">Stress Test</a>.</p>':'<p class="note" style="margin:12px 0 0">Your pick stays on this device. No votes are counted or shown.</p>')+'</div>';
+}
 function viewAbout(){
-  return '<div class="wrap"><div class="phead"><h1 class="display">About ModelLab.</h1><p class="sub">Investing philosophies, made understandable.</p></div><div class="about">'+
+  var links=[['#library','the library','every model, as a portfolio'],['#tools','tools','match quiz, pain simulator, stress test'],['#compare','compare','line up to four models'],['#leaderboard','leaderboard','virtual portfolios, no real money'],[unlocked()?'#m-'+LABDROP[LABDROP.length-1].id:'#follow-cta','lab drop','a new model every week'+(unlocked()?' · latest: '+byId[LABDROP[LABDROP.length-1].id].name:' · follow to get it')],['https://hidanielkang.com','made by daniel kang','hidanielkang.com']];
+  return '<div class="wrap"><div class="bio"><span class="av xl ring"><span>'+LOGO+'</span></span><h1 class="bio-h">@modellab</h1><p class="bio-t">investing models, made understandable. free to browse.</p>'+
+   '<div class="bio-l">'+links.map(function(l){var ext=l[0].indexOf('http')===0;return '<a class="bio-a" href="'+l[0]+'"'+(ext?' target="_blank" rel="noopener"':'')+'><b>'+l[1]+'</b><small>'+l[2]+'</small></a>';}).join('')+'</div>'+(unlocked()?'':'<div id="follow-cta"></div>'+gatePanel('follow @modellab','Get the Lab Drop every week and unlock live prices.','about'))+'</div><div class="about">'+
    '<div class="panel" style="background:var(--lilac)"><h2>Why it exists</h2><p class="b">Terms like value, momentum and all-weather get thrown around, but it is hard to see what each one looks like as a real portfolio. ModelLab shows the belief behind each style, the rules, and an example allocation, so you can understand the tradeoffs before you decide anything.</p></div>'+
    '<div class="panel"><h2>What you can do here</h2><ul><li>Read how each investing model thinks, in plain language.</li><li>See an example portfolio, its weights, and a dollar calculator.</li><li>Check price snapshots from the latest close.</li><li>Compare models side by side and find the ones closest to how you think about risk.</li><li>Take the Match Quiz, live through a real crash in the Pain Simulator, stress test every model, and turn one into a dollar-by-dollar plan.</li><li>Test your own mix against up to 100 years of history and compete on the leaderboard with a virtual portfolio.</li></ul></div>'+
    '<div class="panel"><h2>How it can help you</h2><ul><li>Learn faster, without jargon.</li><li>Understand what each style asks of you in risk and effort.</li><li>Free to browse, no signup, nothing to buy.</li></ul></div>'+
@@ -471,7 +516,7 @@ function render(keep){
   else if(hash.indexOf('m-')===0){html=viewModel(hash.slice(2));nav='library';}
   else{html=viewHome();home=true;}
   heroStop();view.className=home?'':'page';view.innerHTML=(home?'':navrow())+html;foot.innerHTML=footer(home);if(home)heroStart();
-  document.body.classList.toggle('home',home);fixLinks();glClose();if(!home)glossary();
+  paintBell();document.body.classList.toggle('home',home);document.body.classList.toggle('sec-tools',nav==='tools');fixLinks();glClose();if(!home)glossary();
   if(window.seoFor){var sx=seoFor(curH(),MODELS),dm=document.querySelector('meta[name=description]');document.title=sx.title;if(dm)dm.setAttribute('content',sx.desc);}
   document.querySelectorAll('[data-nav]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-nav')===nav);});
   if(!keep)window.scrollTo(0,0);
@@ -484,9 +529,15 @@ document.addEventListener('click',function(e){
   var glb=t.closest&&t.closest('.gl');if(glb){glOpen(glb);return;}if(glPop&&!(t.closest&&t.closest('.gl-pop')))glClose();
   var ln=t.closest&&t.closest('a[href]');
   if(ln&&!ln.target&&e.button===0&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey){var hr=ln.getAttribute('href'),u=new URL(ln.href,location.href);
+    if(hr==='#follow-cta'){e.preventDefault();state.bell=false;paintBell();var fc=document.getElementById('follow');if(fc){fc.scrollIntoView({behavior:'smooth',block:'center'});var fi=fc.querySelector('input');if(fi)setTimeout(function(){fi.focus({preventScroll:true});},400);}else go('#about');return;}
     if(hr.charAt(0)==='#'&&hr.length>1){e.preventDefault();go(hr);return;}
     if(u.origin===location.origin&&u.pathname.indexOf(BASE)===0&&!/\.[a-z0-9]+$/i.test(u.pathname)&&!u.hash){e.preventDefault();go(fromPath(decodeURIComponent(u.pathname).slice(BASE.length)));return;}}
-  var chip=t.closest('[data-chip]');if(chip){state.cat=chip.getAttribute('data-chip');rerender();return;}
+  var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell','1');}catch(x){}paintBell();return;}
+  if(state.bell&&!t.closest('.bell-pop')){state.bell=false;paintBell();}
+  var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
+  var cb=t.closest('[data-carb]');if(cb){var cr=cb.closest('.post').querySelector('.car');cr.scrollBy({left:Number(cb.getAttribute('data-carb'))*cr.clientWidth,behavior:'smooth'});return;}
+  var sn=t.closest('[data-seen]');if(sn){try{var sv=JSON.parse(localStorage.getItem('ml_seen')||'{}');sv[sn.getAttribute('data-seen')]=1;localStorage.setItem('ml_seen',JSON.stringify(sv));}catch(x){}}
+  var chip=t.closest('[data-chip]');if(chip){state.cat=chip.getAttribute('data-chip');rerender();return;}var srt=t.closest('[data-sort]');if(srt){state.sort=srt.getAttribute('data-sort');rerender();return;}
   var st=t.closest('[data-step]');if(st){state.step=Number(st.getAttribute('data-step'));rerender();return;}
   var mn=t.closest('[data-menu]');if(mn){state.menu=!state.menu;rerender();return;}
   var cmp=t.closest('[data-cmp]');
@@ -497,6 +548,8 @@ document.addEventListener('click',function(e){
   }
   if(state.menu&&!t.closest('.menu')){state.menu=false;if(curH()==='#compare')rerender();}
 });
+document.addEventListener('scroll',function(e){var c=e.target;if(!c.classList||!c.classList.contains('car'))return;var n=c.children.length,i=Math.round(c.scrollLeft/c.clientWidth),p=c.closest('.post');p.querySelectorAll('.car-dots i').forEach(function(d,k){d.classList.toggle('on',k===i);});p.querySelector('.car-c').textContent=(i+1)+'/'+n;},true);
+function paintBell(){var w=document.getElementById('bellw');if(w)w.innerHTML=bellHtml();}
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.hasAttribute&&t.hasAttribute('data-fit')){var k=t.getAttribute('data-fit');state.fit[k]=Number(t.value);t.style.setProperty('--p',((t.value-1)*25)+'%');$('#v-'+k).textContent=t.value+'/5';$('#rank').innerHTML=rankHtml();}
@@ -509,7 +562,7 @@ document.addEventListener('submit',function(e){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='Please enter a valid email address.';return;}
   msg.textContent='';btn.disabled=true;btn.textContent='One moment\u2026';
   function done(){try{localStorage.setItem('ml_email',email);}catch(x){}setUnlocked();rerender();}
-  function fail(){btn.disabled=false;btn.textContent='Unlock free access \u2192';msg.textContent='Could not sign you up right now. Please try again.';}
+  function fail(){btn.disabled=false;btn.textContent='follow @modellab \u2192';msg.textContent='Could not sign you up right now. Please try again.';}
   if(!SIGNUP.companyId||!SIGNUP.listId){console.warn('ModelLab: SIGNUP not configured, email was not saved.');done();return;}
   fetch('https://a.klaviyo.com/client/subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{
     method:'POST',headers:{'Content-Type':'application/json','revision':'2024-10-15'},
@@ -520,7 +573,7 @@ document.addEventListener('change',function(e){if(e.target.id==='sort'){state.so
 document.addEventListener('keydown',function(e){if(e.key==='Escape')glClose();if(e.key==='Escape'&&state.menu){state.menu=false;rerender();}});
 window.addEventListener('hashchange',function(){if(location.hash.length>1){history.replaceState(null,'',BASE+toPath(location.hash));}state.menu=false;render();});
 window.addEventListener('popstate',function(){state.menu=false;render();});
-window.ML={MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
+window.ML={av:av,handle:handle,LOGO:LOGO,MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
 render();
 loadLive();
 })();
