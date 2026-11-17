@@ -59,6 +59,9 @@ def send(level, key, today):
             "render_options": {"shorten_links": True, "add_org_prefix": True,
                                "add_info_link": False, "add_opt_out_language": False}}}]}}}}, key)
     cid = camp["data"]["id"]
+    if os.environ.get("DIP_TEST") == "true":
+        print(f"dip check: TEST created draft campaign {cid}, not sent")
+        return cid
     klaviyo("campaign-send-jobs/", {"data": {"type": "campaign-send-job", "id": cid}}, key)
     return cid
 
@@ -82,6 +85,12 @@ def main():
             print(f"dip check: Klaviyo key problem ({e})")
     state = load("dip_state.json", {"episodeLevel": 0, "lastSent": None})
     level, state = decide(dd["pct"], state, today)
+    if os.environ.get("DIP_TEST") == "true" and key:
+        try:
+            send(10, key, today)
+        except urllib.error.HTTPError as e:
+            print(f"dip check: TEST failed ({e.code}: {e.read().decode()[:400]})")
+        return 0
     print(f"dip check: SPY {dd['last']:.2f} vs 52w high {dd['high']:.2f} ({dd['highDate']}) = {dd['pct']}%")
     if level:
         if not key:
