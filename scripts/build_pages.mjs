@@ -47,14 +47,14 @@ for (const r of routes) {
 }
 
 // Embeddable example-portfolio cards: /embed/<model>/ (small, no JS, links back)
-const bar = ['#4c90f7', '#3d6bf4', '#a3a3a8', '#707070', '#c5dcff', '#38383b', '#dedee2'];
+const bar = ['#7c4def', '#6a35e0', '#a3a3a8', '#707070', '#d9cbfb', '#38383b', '#dedee2'];
 for (const m of MODELS) {
   const rows = m.hold.map((x, i) => `<div class="r"><div class="t"><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div><div class="b"><i style="width:${Math.min(100, x[2] * 1.4)}%;background:${bar[i % bar.length]}"></i></div><div class="w">${x[2]}%</div></div>`).join('');
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>${esc(m.name)} example portfolio | ModelLab</title>
 <style>@font-face{font-family:Inter;src:url(../../fonts/inter-latin-400-normal.woff2) format("woff2");font-weight:400}@font-face{font-family:Inter;src:url(../../fonts/inter-latin-600-normal.woff2) format("woff2");font-weight:600}
-*{box-sizing:border-box}body{margin:0;font:14px/1.4 Inter,system-ui,sans-serif;color:#0a0a0a;background:#fff}.c{padding:18px 18px 14px}.k{display:inline-block;background:#4c90f7;color:#fff;border-radius:16px;padding:6px 12px;font-size:12px}h1{margin:12px 0 2px;font-size:24px;letter-spacing:-.04em;font-weight:600}.d{color:#666;margin:0 0 14px;font-size:13px}
+*{box-sizing:border-box}body{margin:0;font:14px/1.4 Inter,system-ui,sans-serif;color:#0a0a0a;background:#fff}.c{padding:18px 18px 14px}.k{display:inline-block;background:#7c4def;color:#fff;border-radius:16px;padding:6px 12px;font-size:12px}h1{margin:12px 0 2px;font-size:24px;letter-spacing:-.04em;font-weight:600}.d{color:#666;margin:0 0 14px;font-size:13px}
 .r{display:grid;grid-template-columns:96px 1fr 38px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid #e9e9eb}.t b{display:block;font-weight:600}.t span{display:block;color:#666;font-size:11px;line-height:1.2}.b{height:8px;background:#dedee2;border-radius:4px;overflow:hidden}.b i{display:block;height:100%;border-radius:4px}.w{text-align:right;font-weight:600}
-.f{display:flex;justify-content:space-between;gap:8px;margin-top:10px;color:#666;font-size:11px}.f a{color:#3d6bf4;font-weight:600;text-decoration:none}</style></head>
+.f{display:flex;justify-content:space-between;gap:8px;margin-top:10px;color:#666;font-size:11px}.f a{color:#6a35e0;font-weight:600;text-decoration:none}</style></head>
 <body><div class="c"><span class="k">${esc(m.cat)}</span><h1>${esc(m.name)}</h1><p class="d">${esc(m.tag)}</p>${rows}<div class="f"><span>Example only, not advice</span><a href="${SITE}models/${m.id}/" target="_top">View on ModelLab →</a></div></div></body></html>`;
   const out = path.join('dist', 'embed', m.id, 'index.html');
   fs.mkdirSync(path.dirname(out), { recursive: true });

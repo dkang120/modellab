@@ -283,8 +283,8 @@ function painChartHtml(){
   var all=h.concat(P.mkt);if(P.dec==='buy')all=all.concat(painYou());
   var lo=Math.min.apply(null,all)*0.92,hi=Math.max.apply(null,all)*1.06;
   series.push({vals:P.mkt.map(function(v,j){return j<=k?v:null;}),color:'#dedee2',w:2});
-  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#c5dcff',w:2.2,dash:'6 5'});
-  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#4c90f7',w:3});
+  if(P.dec&&P.dec!=='hold')series.push({vals:h.map(function(v,j){return j<=k?v:null;}),color:'#d9cbfb',w:2.2,dash:'6 5'});
+  series.push({vals:you.map(function(v,j){return j<=k?v:null;}),color:'#7c4def',w:3});
   var marks=P.decK!=null&&k>=P.decK?[{i:P.decK,label:P.dec==='sell'?'You sold':(P.dec==='buy'?'You bought more':'You held')}]:[];
   return chart({n:P.len+1,labels:labs,series:series,ymin:lo,ymax:hi,base:P.amt,marks:marks,aria:'Portfolio value over time',tick:function(l){return l.slice(0,4);}});
 }
@@ -297,7 +297,7 @@ function painBody(){
    statBox('PORTFOLIO VALUE',money(cur),(cur>=inv?'+':'−')+money(Math.abs(cur-inv))+(P.contrib?' vs what you put in':' vs start'),cur>=inv?'up':'dn')+
    statBox('BELOW ITS PEAK',pct1(dd),underNow+' months underwater',dd<-0.005?'dn':'na')+
    statBox('US STOCK MARKET',money(P.mkt[k]),'for reference')+'</div>';
-  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#4c90f7'],P.dec&&P.dec!=='hold'?['If you had held','#c5dcff']:null,['US stock market','#dedee2']].filter(Boolean))+s;
+  var out='<div id="pn-chart">'+painChartHtml()+'</div>'+legend([[P.dec&&P.dec!=='hold'?'Your choice':m.name,'#7c4def'],P.dec&&P.dec!=='hold'?['If you had held','#d9cbfb']:null,['US stock market','#dedee2']].filter(Boolean))+s;
   if(P.pause!=null&&k===P.pause&&P.dec==null){
     out+='<div class="tl-dec" role="alertdialog" aria-live="assertive"><h3>'+curLab+': you are down '+pctAbs(dd)+' from the peak.</h3><p>'+(P.contrib?'You have put in '+money(inv)+' and it':'Your $'+Math.round(P.amt).toLocaleString('en-US'))+' is now worth <b>'+money(cur)+'</b>. The news is bad. What do you do?</p><div class="btns"><button class="btn light" data-t-pdec="sell">Sell everything</button><button class="btn light" data-t-pdec="hold">Hold</button><button class="btn pri" data-t-pdec="buy">Buy more ('+money(P.amt*0.5)+')</button></div></div>';
   }
@@ -456,7 +456,7 @@ function viewBuild(){
     var a=pstats(mine),b=pstats(other),c=pstats(mk),labs=[];
     for(var i=0;i<=g1-g0+1;i++)labs.push(HM[g0-1+i]||'');
     var all=mine.concat(other,mk);
-    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#dedee2',w:2},{vals:other,color:'#c5dcff',w:2.2},{vals:mine,color:'#4c90f7',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#4c90f7'],[cm.name,'#c5dcff'],['US stock market','#dedee2']])+
+    res='<div id="bd-chart">'+chart({n:mine.length,labels:labs,series:[{vals:mk,color:'#dedee2',w:2},{vals:other,color:'#d9cbfb',w:2.2},{vals:mine,color:'#7c4def',w:3}],ymin:Math.min.apply(null,all)*0.9,ymax:Math.max.apply(null,all)*1.1,log:true,aria:'Growth of a custom portfolio versus a model',tick:function(l){return l.slice(0,4);}})+'</div>'+legend([['Your mix','#7c4def'],[cm.name,'#d9cbfb'],['US stock market','#dedee2']])+
      '<div class="tw" style="margin-top:14px"><table><thead><tr><th></th><th>YOUR MIX</th><th>'+esc(cm.name.toUpperCase())+'</th><th>US STOCKS</th></tr></thead><tbody>'+
      [['Ending value',function(s,p){return money(p[p.length-1]);}],['Per year (CAGR)',function(s){return s.cagr==null?'n/a':pct1(s.cagr);}],['Worst fall',function(s){return pct1(s.mdd);}],['Months to recover',function(s){return s.recover!=null?s.recover:(s.mdd<0?'not yet':'—');}],['Worst 12 months',function(s){return s.worst12==null?'n/a':pct1(s.worst12);}],['Best 12 months',function(s){return s.best12==null?'n/a':pct1(s.best12);}]].map(function(r){return '<tr><td>'+r[0]+'</td><td class="m">'+r[1](a,mine)+'</td><td>'+r[1](b,other)+'</td><td>'+r[1](c,mk)+'</td></tr>';}).join('')+'</tbody></table></div>';
   }
@@ -588,7 +588,7 @@ function shareCard(c){
     g.font='400 30px Inter,sans-serif';
     var gl=wrapLines(g,c.gray,390),bl=wrapLines(g,c.blue,390);
     var gh=gl.length*40+36,gy=150;rr(720,gy,430,gh,36,'#dedee2');g.fillStyle='#0a0a0a';gl.forEach(function(l,i){g.fillText(l,744,gy+50+i*40);});
-    var bh=bl.length*40+36,by=gy+gh+28;rr(700,by,430,bh,36,'#4c90f7');g.fillStyle='#fff';bl.forEach(function(l,i){g.fillText(l,724,by+50+i*40);});
+    var bh=bl.length*40+36,by=gy+gh+28;rr(700,by,430,bh,36,'#7c4def');g.fillStyle='#fff';bl.forEach(function(l,i){g.fillText(l,724,by+50+i*40);});
     g.fillStyle='#707070';g.font='400 24px Inter,sans-serif';g.fillText(c.foot||'Educational only, not investment advice.',64,570);
     g.textAlign='right';g.fillStyle='#0a0a0a';g.font='500 26px "Open Sauce",Inter,sans-serif';g.fillText(c.url||'',1136,570);g.textAlign='left';
     return new Promise(function(res){cv.toBlob(function(b){res(b);},'image/png');});

@@ -13,9 +13,9 @@ Source of every number below: the reference site's published CSS and rendered la
 | line | `#e9e9eb` | card border (inner pages) |
 | bubble | `#dedee2` | gray ("inyo") message bubble |
 | typing | `#e9e9ea` / dots `#8e8e93` | typing bubble |
-| blue | `#4c90f7` | reply bubble, ticket chip, focus ring |
-| blue-soft | `#c5dcff` | ticket chip sub-label |
-| blue-deep | `#3d6bf4` | inner-page primary (pill) |
+| blue | `#7c4def` | reply bubble, ticket chip, focus ring |
+| blue-soft | `#d9cbfb` | ticket chip sub-label |
+| blue-deep | `#6a35e0` | inner-page primary (pill) |
 | red | `#E51317` | heart stroke and dots |
 | page | `#ffffff` landing, `#fcfcfc` inner pages | `--bg-main` |
 | footer-line | `#38383b` | footer divider |
@@ -71,7 +71,7 @@ Voice: headlines, buttons and bubbles are lowercase in the reference; footer and
 | Chips and filters | Small bubbles: h32, r16; active = blue |
 | Section headings | Two-tone headline pattern, centered |
 | Panels | Inner-page card: white, 1px line, r28, shadow |
-| Tints | Gray `#f1f1f3` (bubble at 45%), blue `#e2edff` (blue-soft at 50%), red `#fdecec` (red at 8%) |
+| Tints | Gray `#f1f1f3` (bubble at 45%), blue `#efe8fd` (blue-soft at 50%), red `#fdecec` (red at 8%) |
 | Positive / user / primary series | blue |
 | Negative / drawdown | red |
 | Reference series, gridlines | muted-2 / bubble |
