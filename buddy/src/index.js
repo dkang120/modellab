@@ -28,7 +28,7 @@ async function klaviyoEvent(env, metric, phone, email, properties) {
   if (!r.ok) throw new Error(`klaviyo ${r.status}: ${(await r.text()).slice(0, 300)}`);
 }
 
-async function askClaude(env, profile, history, text) {
+async function askClaude(env, profile, history, text, canRetry = true) {
   const messages = [...history, { role: "user", content: text }];
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -41,14 +41,25 @@ async function askClaude(env, profile, history, text) {
   });
   if (!r.ok) throw new Error(`anthropic ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const d = await r.json();
-  const out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
+  let out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
   if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
+  if (out && canRetry && clean(out).length > 160) {
+    return askClaude(env, profile, [...messages, { role: "assistant", content: out }], "(system note, not from them: too long. rewrite it under 140 characters, same voice, keep only the most useful point)", false);
+  }
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
 
+const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
+const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
 function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
+  t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*/gi, "");
+  t = t.replace(BANNED, "");
+  const emojis = t.match(EMOJI) || [];
+  // An emoji makes the whole text cost UCS-2 rates (70 chars/credit), so only keep one in very short replies.
+  if (emojis.length > 1 || (emojis.length && t.length > 68)) t = t.replace(EMOJI, "");
+  t = t.replace(/\s{2,}/g, " ").trim();
   t = t.replace(/\.$/, "");             // rulebook: no ending period
   if (t.length > 300) t = t.slice(0, 297).replace(/\s+\S*$/, "") + "…";
   return t;
