@@ -89,7 +89,7 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 - Flow: **Re-engage at 45 days** (WiNVcU), draft. 45 days after signup, only if they never clicked or replied: section 5 text.
 - Flow: **Lab Drop series** (QSmw8B), draft. Starts 7 days after signup, then one model every 2 weeks (13 drops, ~2 texts a month to stay inside the consent wording). No emoji, so each text stays 1 credit.
 - Segment: **Text Buddy: goal = investing monthly** (Re3hUw).
-- Campaign drafts: Lab Drop #1 dogs of the dow (one-off, optional now that the series flow exists); dip check-ins at -5%, -10%, -20% (send only when it happens, max 1 a week); monthly habit check to segment Re3hUw (duplicate monthly).
+- Campaign drafts: Lab Drop #1 dogs of the dow (one-off, optional now that the series flow exists); monthly habit check to segment Re3hUw (duplicate monthly).
 - Keyword replies (HELP text, LESS, Y/N, SELL): set up by hand in Klaviyo, Settings > SMS > Keywords. No API for it.
 - Account settings: org prefix "ModelLab", opt-out text "Text STOP to opt-out".
 
@@ -101,3 +101,10 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 
 ## Email (redesigned Nov 17, 2026)
 - **ModelLab Welcome** (WxP5LZ) and **Weekly Series, 13 weeks** (UMtJqn): live, automatic, new Gen Z design (gradient, chat bubbles, @model profiles) with a text buddy block in every email. Subjects: `new drop 🧪 @model: hook`.
+
+## Market dip texts (automatic, since Nov 17, 2026)
+- The daily price job (weekdays 2:30pm PT) checks SPY against its 52-week closing high (`scripts/dip_check.py`).
+- At -5%, -10% or -20% it creates and sends an SMS campaign to the whole Text Buddy list via the Klaviyo API (`KLAVIYO_PRIVATE_KEY` GitHub secret).
+- Max one dip text every 7 days, only when a deeper level is hit, and levels reset once SPY is back within 3% of its high. State lives in `dip_state.json`.
+- Nov 17, 2026: SPY was -5.02%; -5% was marked handled on purpose, so the first text goes out at -10%.
+- Test without sending: run the workflow manually with `dip_test` = true (creates a draft, then delete it in Klaviyo).
