@@ -1,0 +1,22 @@
+# ModelLab AI text buddy (Cloudflare Worker).
+# Deployed automatically by Cloudflare Workers Builds from this folder on every push to main.
+name = "modellab-buddy"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+# Reply counters + short chat history. No id: Cloudflare creates the namespace on first deploy.
+[[kv_namespaces]]
+binding = "BUDDY_KV"
+
+[vars]
+MODEL = "claude-haiku-5-5"
+# Klaviyo free plan = 150 SMS credits/month shared with the scheduled texts.
+# The AI may use at most this many credits a month; scheduled texts keep the rest.
+MONTHLY_CREDIT_CAP = "80"
+PER_PERSON_MONTHLY = "6"
+ALERT_EMAIL = "kangd@masters.edu"
+
+# Secrets (set in the Cloudflare dashboard, never in this file):
+#   ANTHROPIC_API_KEY  - Claude API key
+#   KLAVIYO_BUDDY_KEY  - Klaviyo private key with Events: Full access
+#   BUDDY_SECRET       - shared secret Klaviyo sends in the x-buddy-secret header
