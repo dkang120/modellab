@@ -873,7 +873,7 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 .srch-b{position:absolute;right:62px;top:27px;width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
 .srch-b svg{width:22px;height:22px}
 .srch-b:hover{background:var(--t-gray)}
-@media(min-width:1000px){.navl.navr{right:124px}}
+@media(min-width:1000px){.navl.navr{right:32px}}
 #srch{position:fixed;inset:0;z-index:90;background:rgba(10,10,10,.35);display:none;padding:72px 16px 16px}
 #srch.on{display:block}
 .srch-in{max-width:620px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 30px 80px -30px rgba(0,0,0,.45);overflow:hidden}
@@ -886,3 +886,16 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 #srch-r b{font-weight:500;font-size:15px}
 #srch-r small{color:var(--muted);font-size:13px;line-height:1.35}
 .srch-none{padding:16px;color:var(--muted);font-size:14px;margin:0}
+/* simplified home */
+.doors .mcard{min-height:0;text-decoration:none}
+.doors .mcard h3{text-transform:none}
+/* slim model page */
+.take-g{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:10px}
+@media(max-width:700px){.take-g{grid-template-columns:1fr;gap:12px}}
+.take h3{font-size:15px;margin:0 0 6px}
+.take ul{margin:0;padding-left:18px;color:var(--soft);font-size:15px;line-height:23px}
+.take-l{margin:14px 0 0;color:var(--soft);font-size:15px;line-height:23px}
+.take-l b{color:var(--ink);font-weight:500}
+.try-row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:4px 4px 0;font-size:15px}
+.try-row span{color:var(--muted)}
+.try-row a,.try-row .lk{color:#6a35e0;font-weight:500;text-decoration:none;background:none;border:0;padding:0;font:inherit;font-weight:500;cursor:pointer}

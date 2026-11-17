@@ -1,12 +1,10 @@
-/* ModelLab tools: Match quiz, Pain Simulator, Stress Test, Implement It, Overlap Checker, Build Your Own, Leaderboard.
+/* ModelLab tools: Match quiz, Pain Simulator, Stress Test, Implement It, Overlap Checker, Build Your Own, Goal Simulator.
    Loaded after index.html's main script. Uses window.ML (exposed by index.html) and history.json (long-run proxy returns). */
 (function(){
 var ML=window.ML;if(!ML)return;
 var esc=ML.esc,money=ML.money,fmt=ML.fmt,sign=ML.sign,$=ML.$;
 
 /* ---------- config ---------- */
-/* Leaderboard backend (Supabase). Leave empty to run in local-only mode. See supabase/schema.sql and README. */
-var LB={url:'',key:''};
 
 /* ---------- styles (reuse the site's tokens; only layout glue lives here) ---------- */
 var css=document.createElement('style');
@@ -185,7 +183,6 @@ function viewTools(){
    ['blue','Step 3 · Act','Overlap Checker','paste what you own. see which model it already looks like and where you’re too concentrated','#overlap','Check my holdings →'],
    ['lilac','Go further','Goal Simulator','run your plan 1,000 ways. see the typical outcome, the rough one and your odds of hitting a goal','#goal','Simulate my plan →'],
    ['mint','Go further','Build Your Own','pick your own holdings and weights. test them against 30–100 years of history','#build','Open the builder →'],
-   ['peach','Compete','Leaderboard','track a virtual portfolio from today’s close against everyone else. no real money','#leaderboard','See the board →']
   ];
   var pg=progGet(),nx=!pg.match?['#match','Start with the Match Quiz']:(!pg.pain?['#pain','Next: feel the risk with the Pain Simulator']:(!pg.implement?['#implement','Next: build your plan']:['#build','All three steps done. Try Build Your Own']));
   var dn=function(k){return pg[k]?'<i class="tl-ck" aria-label="done">✓</i> ':'';};
@@ -480,13 +477,12 @@ function viewBuild(){
      '<div class="tw" style="margin-top:14px"><table><thead><tr><th></th><th>YOUR MIX</th><th>'+esc(cm.name.toUpperCase())+'</th><th>US STOCKS</th></tr></thead><tbody>'+
      [['Ending value',function(s,p){return money(p[p.length-1]);}],['Per year (CAGR)',function(s){return s.cagr==null?'n/a':pct1(s.cagr);}],['Worst fall',function(s){return pct1(s.mdd);}],['Months to recover',function(s){return s.recover!=null?s.recover:(s.mdd<0?'not yet':'—');}],['Worst 12 months',function(s){return s.worst12==null?'n/a':pct1(s.worst12);}],['Best 12 months',function(s){return s.best12==null?'n/a':pct1(s.best12);}]].map(function(r){return '<tr><td>'+r[0]+'</td><td class="m">'+r[1](a,mine)+'</td><td>'+r[1](b,other)+'</td><td>'+r[1](c,mk)+'</td></tr>';}).join('')+'</tbody></table></div>';
   }
-  var elig=BD.rows.every(function(r){return priceOf(r[0])!=null;})&&tot>0;
   return head('Build Your Own.','Pick holdings and weights. Test them against history.')+
    '<div class="stack"><div class="two" style="align-items:start"><div class="panel sh"><h2 style="font-size:22px">Your mix</h2><p class="note" style="margin:6px 0 14px">Weights add to '+tot+'%'+(Math.abs(tot-100)>0.5?' (they are scaled to 100% for the test)':'')+'.</p>'+editor+
    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn light sm" data-t-badd="1"'+(BD.rows.length>=8?' disabled':'')+'>+ Add holding</button><label class="sortw"><select id="bd-pre" aria-label="Start from a model"><option value="">Start from a model…</option>'+modelOpts('')+'</select></label></div>'+
    '<div class="tl-bar" style="margin-top:18px"><label class="tl-f">Start<input id="bd-start" type="month" min="1927-01" max="'+HM[HM.length-13]+'" value="'+BD.start+'"></label><label class="tl-f">Rebalance<select id="bd-reb"><option value="annual"'+(BD.reb==='annual'?' selected':'')+'>Every year</option><option value="none"'+(BD.reb==='none'?' selected':'')+'>Never</option></select></label><label class="tl-f">Compare with<select id="bd-cmp">'+modelOpts(BD.cmp)+'</select></label><label class="tl-f">Fee on your mix, % a year<input id="bd-fee" type="number" min="0" max="5" step="0.05" inputmode="decimal" value="'+BD.fee+'"></label><label class="tl-f">Dollars<select id="bd-real"><option value="0"'+(BD.real?'':' selected')+'>Nominal</option><option value="1"'+(BD.real?' selected':'')+(realOk?'':' disabled')+'>Today\u2019s dollars</option></select></label></div>'+(fee?'<p class="note">The fee is taken out of your mix only, so you can see its drag against the same holdings without it.</p>':'')+(realOn?'<p class="note">All three lines are adjusted for US consumer-price inflation (CPI-U, FRED).</p>':(BD.real?'<p class="note">Inflation adjustment needs a start in 1947 or later.</p>':''))+
    (g0>want?'<p class="note">Start moved to '+mlab(HM[g0])+', the first month all your holdings have data.</p>':'')+
-   '<div style="margin-top:14px"><button class="btn pri sm" data-t-bjoin="1"'+(elig?'':' disabled')+'>Enter this on the Leaderboard →</button>'+(elig?'':'<p class="note">Leaderboard entries need every holding to have a current price.</p>')+'</div></div>'+
+   '</div>'+
    '<div class="panel sh"><h2 style="font-size:22px">How it would have gone</h2><p class="note" style="margin:6px 0 10px">'+(mine?mlab(HM[g0])+' to '+mlab(HM[g1])+', starting with '+money(BD.amt)+'.':'Add a holding to begin.')+'</p>'+res+'</div></div>'+note(histNote())+'</div></div>';
 }
 
@@ -558,91 +554,6 @@ function viewGoal(){
    '<div class="panel" style="background:var(--lilac)"><h2 style="font-size:20px">How to read this</h2><p class="b">Markets don’t move in a straight line, so one projected number hides most of the story. This runs the plan 1,000 times with different sequences of good and bad years. The purple line is the middle outcome; the light lines are the rough and good cases. Sticking with monthly adds through the rough paths is usually what decides how it ends.</p></div></div>';
 }
 
-/* ================= LEADERBOARD ================= */
-var LBS={rows:null,err:null,loading:false,filter:'all',joinModel:'index',handle:'',custom:null,msg:''};
-function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function uuid(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16);});}
-function sha256(s){
-  if(!window.crypto||!crypto.subtle)return Promise.resolve(s);
-  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2);}).join('');});
-}
-function priced(hold){return hold.length>0&&hold.every(function(h){return priceOf(h[0])!=null;});}
-function eligibleModels(){return ML.MODELS.filter(function(m){return priced(toH(m));});}
-function lbReq(path,opt){
-  opt=opt||{};opt.headers=Object.assign({apikey:LB.key,Authorization:'Bearer '+LB.key,'Content-Type':'application/json'},opt.headers||{});
-  return fetch(LB.url+'/rest/v1/'+path,opt);
-}
-function lbLoad(){
-  if(LBS.loading)return;
-  if(!LB.url){LBS.rows=lsGet('ml_lb_local',[]);return;}
-  LBS.loading=true;
-  lbReq('leaderboard_public?select=*&order=joined_at.desc&limit=500').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){LBS.rows=j;LBS.err=null;LBS.loading=false;ML.rerender();}).catch(function(){LBS.err='Could not load the leaderboard right now.';LBS.rows=[];LBS.loading=false;ML.rerender();});
-}
-function perf(row){
-  var d=ML.data(),hold=row.holdings||[],ep=row.entry_prices||{},tot=0,ret=0;
-  hold.forEach(function(h){tot+=h[1];});
-  for(var i=0;i<hold.length;i++){var t=hold[i][0],cur=d&&d.tickers&&d.tickers[t]?d.tickers[t].last:null,e=ep[t];if(!cur||!e)return null;ret+=(h2(hold[i][1])/tot)*(cur/e-1);}
-  var spy=d&&d.tickers&&d.tickers.SPY?d.tickers.SPY.last:null,es=ep.SPY,sr=(spy&&es)?spy/es-1:null;
-  return {ret:ret,spy:sr,alpha:sr==null?null:ret-sr};
-}
-function h2(x){return Number(x)||0;}
-function ageDays(row){return Math.floor((Date.now()-new Date(row.joined_at).getTime())/86400000);}
-var MINAGE=14;
-function lbRows(){
-  var rows=(LBS.rows||[]).map(function(r){var p=perf(r);return {r:r,p:p,age:ageDays(r)};}).filter(function(x){return x.p;});
-  if(LBS.filter!=='all')rows=rows.filter(function(x){return x.r.model_id===LBS.filter;});
-  var ranked=rows.filter(function(x){return x.age>=MINAGE;}).sort(function(a,b){return b.p.ret-a.p.ret;}),fresh=rows.filter(function(x){return x.age<MINAGE;}).sort(function(a,b){return b.r.joined_at<a.r.joined_at?-1:1;});
-  return {ranked:ranked,fresh:fresh};
-}
-function lbJoin(){
-  var handle=(LBS.handle||'').trim(),hold,label,mid;
-  if(!/^[A-Za-z0-9_]{3,20}$/.test(handle)){LBS.msg='Handle must be 3–20 letters, numbers or underscores.';ML.rerender();return;}
-  if(LBS.custom){hold=LBS.custom.rows.map(function(r){return [r[0],Number(r[1])||0];}).filter(function(h){return h[1]>0;});label='Custom mix';mid='custom';}
-  else{var m=ML.byId[LBS.joinModel];hold=toH(m);label=m.name;mid=m.id;}
-  if(!priced(hold)){LBS.msg='Every holding needs a current price to enter.';ML.rerender();return;}
-  var d=ML.data(),ep={};hold.forEach(function(h){ep[h[0]]=d.tickers[h[0]].last;});if(d.tickers.SPY)ep.SPY=d.tickers.SPY.last;
-  var token=lsGet('ml_lb_token',null);if(!token){token=uuid();lsSet('ml_lb_token',token);}
-  var row={handle:handle,label:label,model_id:mid,holdings:hold,entry_prices:ep,price_asof:d.asOf.slice(0,10),joined_at:new Date().toISOString()};
-  LBS.msg='';
-  if(!LB.url){
-    var loc=lsGet('ml_lb_local',[]);if(loc.some(function(x){return x.handle.toLowerCase()===handle.toLowerCase();})){LBS.msg='That handle is taken on this device.';ML.rerender();return;}
-    loc.push(row);lsSet('ml_lb_local',loc);LBS.rows=loc;LBS.msg='Saved on this device.';lsSet('ml_lb_me',handle);ML.rerender();return;
-  }
-  sha256(token).then(function(hash){
-    return lbReq('entries',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({handle:handle,label:label,model_id:mid,holdings:hold,owner_hash:hash})});
-  }).then(function(r){
-    if(r.status===201||r.ok){lsSet('ml_lb_me',handle);LBS.rows=null;LBS.msg='You are on the board.';lbLoad();}
-    else return r.json().then(function(j){LBS.msg=(j&&j.message)?j.message:'Could not join right now.';ML.rerender();});
-  }).catch(function(){LBS.msg='Could not join right now.';ML.rerender();});
-}
-function viewLeaderboard(){
-  if(!ML.unlocked())return gateView('Leaderboard','Track a virtual portfolio against everyone else.','Free to join, no real money.','leaderboard');
-  if(LBS.rows==null)lbLoad();
-  var data=LBS.rows==null?null:lbRows(),me=lsGet('ml_lb_me',null);
-  var elig=eligibleModels(),cnt={};(LBS.rows||[]).forEach(function(r){cnt[r.model_id]=(cnt[r.model_id]||0)+1;});
-  var chips=[['all','All']].concat(elig.map(function(m){return [m.id,m.name];})).map(function(c){return '<button class="chip" data-t-lbf="'+c[0]+'" aria-pressed="'+(LBS.filter===c[0])+'">'+esc(c[1])+(c[0]!=='all'&&cnt[c[0]]?' ('+cnt[c[0]]+')':'')+'</button>';}).join('');
-  function tr(x,i,rank){var mine=me&&x.r.handle.toLowerCase()===me.toLowerCase();
-    return '<tr'+(mine?' class="tl-me"':'')+'><td class="m">'+(rank?i+1:'—')+'</td><td><b>'+esc(x.r.handle)+'</b>'+(mine?' <span class="pill na">you</span>':'')+'</td><td>'+esc(x.r.label)+'</td><td class="m">'+ML.chg(x.p.ret*100,1)+'</td><td>'+(x.p.alpha==null?'n/a':ML.chg(x.p.alpha*100,1))+'</td><td>'+(x.age>=7?'🔥 ':'')+x.age+'d</td></tr>';}
-  var table='';
-  if(data){
-    table=(data.ranked.length||data.fresh.length)?'<div class="tw"><table><thead><tr><th>#</th><th style="text-align:left">PLAYER</th><th style="text-align:left">PORTFOLIO</th><th>RETURN</th><th>VS SPY</th><th>STREAK</th></tr></thead><tbody>'+data.ranked.map(function(x,i){return tr(x,i,true);}).join('')+data.fresh.map(function(x,i){return tr(x,i,false);}).join('')+'</tbody></table></div>'+note('Ranked after '+MINAGE+' days so one lucky day cannot top the board. Newer entries are listed below the ranked ones. Return is price-only since the entry close; SPY is measured over the same window.'):'<p class="b" style="padding:12px 0">No entries yet. Be the first on the board.</p>';
-  }else table='<p class="b" aria-busy="true">Loading the board…</p>';
-  var recap='';
-  if(data&&me){var all=data.ranked.concat(data.fresh),mi=-1;all.forEach(function(x,i){if(x.r.handle.toLowerCase()===me.toLowerCase())mi=i;});
-    if(mi>-1){var x=all[mi],rk=mi<data.ranked.length?'#'+(mi+1)+' of '+data.ranked.length:'unranked until day '+MINAGE;
-      recap='<div class="recap"><p class="rc-k">your recap</p><p class="rc-h">@'+esc(x.r.handle)+'</p><div class="rc-g"><div><small>held</small><b>'+(x.age>=7?'🔥 ':'')+x.age+' days</b></div><div><small>return</small><b>'+ML.fmt(x.p.ret*100,1)+'</b></div><div><small>vs spy</small><b>'+(x.p.alpha==null?'n/a':ML.fmt(x.p.alpha*100,1))+'</b></div><div><small>rank</small><b>'+rk+'</b></div></div><p class="rc-f">'+esc(x.r.label)+' · modellab leaderboard</p></div>';}}
-  var myModels=elig.map(function(m){return '<option value="'+m.id+'"'+(m.id===LBS.joinModel&&!LBS.custom?' selected':'')+'>'+esc(m.name)+'</option>';}).join('');
-  var join='<div class="panel sh"><h2 style="font-size:22px">Join the board</h2><p class="note" style="margin:6px 0 14px">Pick a model (or send one from Build Your Own). Your virtual portfolio starts at the latest close. Handles are public; use no personal details.</p>'+
-   '<div class="tl-bar"><label class="tl-f">Handle<input id="lb-handle" maxlength="20" autocomplete="off" placeholder="e.g. steady_eddie" value="'+esc(LBS.handle)+'"></label>'+
-   (LBS.custom?'<label class="tl-f">Portfolio<input value="Custom mix ('+LBS.custom.rows.map(function(r){return r[0];}).join(', ')+')" disabled></label><button class="chip" data-t-lbclear="1">Use a model instead</button>':'<label class="tl-f">Model<select id="lb-model">'+myModels+'</select></label>')+
-   '<button class="btn pri" data-t-lbjoin="1">Join →</button></div>'+(LBS.msg?'<p class="note" role="status" style="margin:0">'+esc(LBS.msg)+'</p>':'')+'</div>';
-  var local=!LB.url?'<div class="tl-soon"><span class="im in">the global board drops soon \uD83D\uDC40 for now your entry saves on this device, so you can still track your streak</span></div>':'';
-  return head('Leaderboard.','Virtual portfolios from the latest close. No real money.','<div class="tl-steps"><span><b>Compete</b> Track against everyone</span></div>')+
-   '<div class="stack">'+local+recap+join+'<div class="panel sh"><div class="tl-lbhead"><h2 style="font-size:22px">The board</h2></div><div class="chips" style="margin:12px 0 18px" role="group" aria-label="Filter by model">'+chips+'</div>'+(LBS.err?'<div class="tl-warn">'+esc(LBS.err)+'</div>':'')+table+'</div>'+
-   note('For fun and learning. Hypothetical portfolios, price-only returns, not investment advice or a record of real performance. '+srcLine())+'</div></div>';
-}
-
 /* ================= model page: crash history as comments ================= */
 ML.crashComments=function(m){
   ensureHist();
@@ -684,14 +595,13 @@ ML.modelTools=function(m){
 
 /* ================= routes ================= */
 ML.routes.tools={nav:'tools',view:viewTools};
-ML.routes.match={nav:'tools',view:viewMatch,before:ensureHist};
+ML.routes.match={nav:'match',view:viewMatch,before:ensureHist};
 ML.routes.pain={nav:'tools',view:viewPain,before:ensureHist,after:function(){if(P.timer)painPlay();}};
 ML.routes.stress={nav:'tools',view:viewStress,before:ensureHist};
 ML.routes.implement={nav:'tools',view:viewImplement};
 ML.routes.overlap={nav:'tools',view:viewOverlap,before:ensureHist};
 ML.routes.build={nav:'tools',view:viewBuild,before:ensureHist};
 ML.routes.goal={nav:'tools',view:viewGoal,before:ensureHist};
-ML.routes.leaderboard={nav:'leaderboard',view:viewLeaderboard};
 ML.routes.__leave=function(){painStop();};
 if(ML.routeFor(ML.curH()))ML.rerender();
 
@@ -776,10 +686,6 @@ document.addEventListener('click',function(e){
     (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){b.textContent='Copied ✓';}).catch(function(){b.textContent='Copy failed';});return;}
   if(cap(e,'[data-t-badd]')){BD.rows.push(['VTI',0]);ML.rerender();return;}
   if((el=cap(e,'[data-t-bdel]'))){BD.rows.splice(Number(el.getAttribute('data-t-bdel')),1);ML.rerender();return;}
-  if(cap(e,'[data-t-bjoin]')){LBS.custom={rows:BD.rows.map(function(r){return [r[0],r[1]];})};ML.go('#leaderboard');return;}
-  if((el=cap(e,'[data-t-lbf]'))){LBS.filter=el.getAttribute('data-t-lbf');ML.rerender();return;}
-  if(cap(e,'[data-t-lbclear]')){LBS.custom=null;ML.rerender();return;}
-  if(cap(e,'[data-t-lbjoin]')){lbJoin();return;}
 });
 document.addEventListener('change',function(e){
   var t=e.target,id=t.id;
@@ -793,7 +699,6 @@ document.addEventListener('change',function(e){
   else if(id==='bd-fee'){BD.fee=Math.max(0,Math.min(5,Number(t.value)||0));ML.rerender();}
   else if(id==='bd-cmp'){BD.cmp=t.value;ML.rerender();}
   else if(id==='bd-start'&&/^\d{4}-\d{2}$/.test(t.value)){BD.start=t.value;ML.rerender();}
-  else if(id==='lb-model'){LBS.joinModel=t.value;}
   else if(t.hasAttribute&&t.hasAttribute('data-t-brow')){BD.rows[Number(t.getAttribute('data-t-brow'))][0]=t.value;ML.rerender();}
   else if(t.hasAttribute&&t.hasAttribute('data-t-bw')){BD.rows[Number(t.getAttribute('data-t-bw'))][1]=Number(t.value)||0;ML.rerender();}
 });
@@ -814,7 +719,6 @@ document.addEventListener('input',function(e){
   else if(t.id==='im-amt'){IM.amt=Math.max(0,Number(t.value)||0);clearTimeout(viewImplement._t);viewImplement._t=setTimeout(ML.rerender,350);}
   else if(t.id==='im-have'){IM.have=t.value;clearTimeout(viewImplement._h);viewImplement._h=setTimeout(function(){var s=t.selectionStart;ML.rerender();var n=$('#im-have');if(n){n.focus();try{n.setSelectionRange(s,s);}catch(x){}}},500);}
   else if(t.id==='ov-txt'){OV.txt=t.value;clearTimeout(viewOverlap._t);viewOverlap._t=setTimeout(function(){var s=t.selectionStart;ML.rerender();var n=$('#ov-txt');if(n){n.focus();try{n.setSelectionRange(s,s);}catch(x){}}},500);}
-  else if(t.id==='lb-handle'){LBS.handle=t.value;}
 });
 document.addEventListener('change',function(e){if(e.target.id==='pn-contrib'){P.contrib=Math.max(0,Math.min(100000,Number(e.target.value)||0));painReset();ML.rerender();return;}if(e.target.id==='pn-amt'){P.amt=Math.max(100,Number(e.target.value)||10000);painReset();ML.rerender();}});
 })();

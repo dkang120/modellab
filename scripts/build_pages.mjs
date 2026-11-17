@@ -11,12 +11,12 @@ const MODELS = new Function('return ' + src.slice(a, b))();
 const { seoFor, faqFor } = require(path.resolve('source/seo.js'));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const TOOLS = ['match', 'pain', 'stress', 'implement', 'overlap', 'build', 'goal'];
-const routes = [{ path: '', h: '#home' }].concat([['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', ''], ['data', '']]
+const routes = [{ path: '', h: '#home' }].concat([['library', ''], ['compare', ''], ['tools', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', ''], ['data', '']]
   .map(([n]) => ({ path: n + '/', h: '#' + n })))
   .concat(TOOLS.map(n => ({ path: 'tools/' + n + '/', h: '#' + n })))
   .concat(MODELS.map(m => ({ path: 'models/' + m.id + '/', h: '#m-' + m.id })))
   .concat(MODELS.flatMap(m => ['pain', 'implement'].map(t => ({ path: 'tools/' + t + '/' + m.id + '/', h: '#' + t + '/' + m.id, noindex: true }))));
-const nav = rel => ['library', 'compare', 'tools', 'leaderboard', 'about'].map(n => `<a href="${rel}${n}/">${n[0].toUpperCase() + n.slice(1)}</a>`).join(' · ');
+const nav = rel => ['library', 'compare', 'tools', 'about'].map(n => `<a href="${rel}${n}/">${n[0].toUpperCase() + n.slice(1)}</a>`).join(' · ');
 function body(r, rel) {
   const s = seoFor(r.h, MODELS);
   const h1 = r.h === '#home' ? 'Investing models as portfolios' : s.title.replace(/ \| ModelLab$/, '');
