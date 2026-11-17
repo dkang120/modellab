@@ -34,7 +34,7 @@ async function askClaude(env, profile, history, text) {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: env.MODEL || "claude-haiku-5-5", max_tokens: 220,
+      model: env.MODEL || "claude-haiku-5-5", max_tokens: 400, thinking: { type: "disabled" },
       system: [{ type: "text", text: RULEBOOK, cache_control: { type: "ephemeral" } }, { type: "text", text: contextBlock(profile) }],
       messages,
     }),
