@@ -11,7 +11,7 @@ const MODELS = new Function('return ' + src.slice(a, b))();
 const { seoFor } = require(path.resolve('source/seo.js'));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const TOOLS = ['match', 'pain', 'stress', 'implement', 'overlap', 'build'];
-const routes = [['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['text', ''], ['sms-terms', ''], ['privacy', '']]
+const routes = [['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', '']]
   .map(([n]) => ({ path: n + '/', h: '#' + n }))
   .concat(TOOLS.map(n => ({ path: 'tools/' + n + '/', h: '#' + n })))
   .concat(MODELS.map(m => ({ path: 'models/' + m.id + '/', h: '#m-' + m.id })))

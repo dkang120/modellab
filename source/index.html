@@ -10,7 +10,7 @@
 <script src="seo.js"></script>
 </head>
 <body>
-<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a><a href="#text" data-nav="text" class="nav-hl">text buddy <i>new</i></a></nav><div class="bellw" id="bellw"></div></header>
+<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#now" data-nav="now">Now what?</a><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a><a href="#text" data-nav="text" class="nav-hl">text buddy <i>new</i></a></nav><div class="bellw" id="bellw"></div></header>
 <main id="view"></main>
 <div id="foot"></div>
 <script>
@@ -174,7 +174,7 @@ var MAXCMP=4;
    companyId = your public API key (6 characters). listId = the list that receives signups.
    While both are empty the form unlocks locally without saving the email (development only). */
 var SIGNUP={companyId:'VqWQB7',listId:'WwRjNL',smsListId:'Ybnjeu'};
-var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0,tier:'risk',bd:{step:0,goal:'',freq:'',done:false,err:''}};
+var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0,tier:'risk',bd:{step:0,goal:'',freq:'',done:false,err:''},nw:{amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:false,shared:''}};
 
 function unlocked(){try{return localStorage.getItem('ml_sub')==='1';}catch(e){return false;}}
 function setUnlocked(){try{localStorage.setItem('ml_sub','1');}catch(e){}}
@@ -278,7 +278,7 @@ function footer(home){
    '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
-function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy'],['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'">'+a[1]+'</a>';}).join('')+'</nav></div>';}
+function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy'],['now','Now what?'],['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'">'+a[1]+'</a>';}).join('')+'</nav></div>';}
 
 /* ---------- landing stage ---------- */
 var HERO={i:0,timer:null,to:null};
@@ -334,7 +334,7 @@ function viewHome(){
     ['Can I try my own amounts?','Yes. On any model page, type a dollar amount into the calculator to see how it would split across that model’s holdings.']]
     .map(function(q,i){return '<details'+(i===0?' open':'')+'><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
   return heroHtml()+'<div class="wrap"><section class="home-stories"><p class="eyebrow">the models · tap to view</p>'+storiesRow()+'</section>'+
-  buddySection()+'<section class="intro"><p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
+  '<a class="nw-promo" href="#now"><i>new</i><span>got money sitting there? <b>now what?</b></span><em>tap your situation \u2192</em></a>'+buddySection()+'<section class="intro"><p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
    '<div class="demo"><div class="demo-h"><div><h3>Value</h3><p>Example portfolio'+(DATA?' · '+asOfTxt()+' close':'')+'</p></div>'+d1+'</div>'+heroRows+'<div class="demo-f"><span>If I invested</span><b>$10,000</b></div></div></section>'+
   '<div class="ideas"><span class="eyebrow">Built from the ideas of</span><div class="names"><span>Graham</span><span>Buffett</span><span>Lynch</span><span>Bogle</span><span>Dalio</span><span>Markowitz</span><span>Fama</span></div></div>'+
   '<section class="s">'+hl('ModelLab makes','investing styles simple.')+'<div class="simple"><div class="steps">'+stepHtml+'</div><div class="libcard"><b>Library</b>'+lib+'</div></div></section>'+
@@ -477,9 +477,9 @@ function viewBuddy(){
 }
 function normPhone(v){var ph=(v||'').replace(/[^\d+]/g,'');if(ph.charAt(0)!=='+'){ph=ph.replace(/^1(?=\d{10}$)/,'');ph=(ph.length===10?'+1'+ph:'');}return /^\+\d{10,15}$/.test(ph)?ph:null;}
 function buddyIn(){try{return localStorage.getItem('ml_buddy')==='1';}catch(e){return false;}}
-function smsJoin(ph,goal,freq,source,ok,fail){
+function smsJoin(ph,goal,freq,source,ok,fail,extra){
   var mt=null,em=null;try{mt=localStorage.getItem('ml_match');em=localStorage.getItem('ml_email');}catch(e){}
-  var props={buddy_goal:goal,buddy_freq:freq,buddy_consent_text_v:'2026-11-17',buddy_consent_at:new Date().toISOString(),buddy_source:source};if(mt)props.modellab_top_match=mt;
+  var props={buddy_goal:goal,buddy_freq:freq,buddy_consent_text_v:'2026-11-17',buddy_consent_at:new Date().toISOString(),buddy_source:source};if(mt)props.modellab_top_match=mt;if(extra)for(var xk in extra)props[xk]=extra[xk];
   var attrs={phone_number:ph,properties:props};if(em)attrs.email=em;
   function done(){try{localStorage.setItem('ml_buddy','1');}catch(e){}setUnlocked();ok();}
   if(!SIGNUP.companyId){done();return;}
@@ -493,6 +493,86 @@ function bdSubmit(){
   if(!ph){b.err='that number looks off. try a US mobile, like 555 123 4567';rerender();return;}
   if(!ok){b.err='check the box so we\u2019re allowed to text you';rerender();return;}
   b.err='';smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(){b.err='couldn\u2019t save that right now. try again?';rerender();});
+}
+/* ---------- now what? (situation -> common next steps) ---------- */
+var NW_Q=[
+ ['ef','got an emergency fund?',[['yes','yep, 3+ months'],['some','kinda, some'],['no','nope']]],
+ ['debt','credit card debt you don\u2019t pay off monthly?',[['yes','yeah'],['no','nah']]],
+ ['match','does your job match 401(k) money?',[['yes','yes'],['no','no'],['na','not sure / no 401(k)']]],
+ ['time','when might you need this money?',[['lt1','within a year'],['1-3','1\u20133 years'],['3-10','3\u201310 years'],['10+','10+ years']]],
+ ['react','it drops 30% in a month. you\u2026',[['calm','chill, keep going'],['nervous','nervous but hold'],['sell','probably sell']]]
+];
+var NW_P=[
+ ['\uD83E\uDEE0','$200 and no clue',{amt:'200',ef:'no',debt:'no',match:'na',time:'10+',react:'nervous'}],
+ ['\uD83D\uDCB8','first real paycheck',{amt:'1000',ef:'some',debt:'no',match:'yes',time:'10+',react:'calm'}],
+ ['\uD83D\uDE34','401(k) i never look at',{amt:'5000',ef:'yes',debt:'no',match:'yes',time:'10+',react:'nervous'}],
+ ['\uD83D\uDE2C','i panic-sold last dip',{amt:'2000',ef:'yes',debt:'no',match:'na',time:'3-10',react:'sell'}],
+ ['\uD83D\uDCB3','got card debt tho',{amt:'1500',ef:'some',debt:'yes',match:'no',time:'10+',react:'nervous'}]
+];
+function nwReady(n){return NW_Q.every(function(q){return n[q[0]];});}
+function nwAmt(n){var a=Number(String(n.amt).replace(/[^\d.]/g,''));return a>0?a:0;}
+function nwModel(n){
+  var rc={calm:4,nervous:3,sell:2}[n.react]||3,tc={'lt1':2,'1-3':2,'3-10':3,'10+':4}[n.time]||3,mx=Math.min(rc,tc);
+  var fit=MODELS.filter(function(m){return m.risk<=mx;}).sort(function(a,b){return a.effort-b.effort||(n.time==='10+'?b.growth-a.growth:a.risk-b.risk)||a.name.localeCompare(b.name);});
+  var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
+  var quiz=mt&&byId[mt]&&byId[mt].risk<=mx?byId[mt]:null;
+  var main=quiz||fit[0],alt=fit.filter(function(m){return m!==main;})[0];
+  return {m:main,alt:alt,quiz:!!quiz,mx:mx};
+}
+function nwSteps(n){
+  var s=[],pick=nwModel(n),a=nwAmt(n);
+  if(n.time==='lt1')s.push(['park','park it somewhere boring','money you need within a year usually sits in high-yield savings or T-bills. stocks can drop 30% in that window and not come back in time']);
+  if(n.ef==='no')s.push(['ef','emergency fund first','most people start with 3\u20136 months of expenses in high-yield savings. it\u2019s what keeps you from selling in a dip']);
+  else if(n.ef==='some')s.push(['ef','finish the emergency fund','top it up to 3\u20136 months of expenses before going all in. future you says thanks']);
+  if(n.debt==='yes')s.push(['debt','kill the card debt','paying off ~20%+ APR is basically a guaranteed 20% return. no model reliably beats that']);
+  if(n.match==='yes')s.push(['match','grab the full 401(k) match','an employer match is free money, often a 50\u2013100% instant bump on what you put in']);
+  if(n.time!=='lt1')s.push(['model','pick a model + automate it',handle(pick.m)+' fits your timeline and how you said you\u2019d react. set a monthly auto-buy so you don\u2019t have to think']);
+  if(n.react==='sell')s.push(['rules','write your dip rules now','decide today what you\u2019ll do at \u221220%, while you\u2019re calm. most losses come from selling at the bottom']);
+  return {s:s,pick:pick,a:a};
+}
+function nwShort(k,pick){return {park:'park it',ef:'emergency fund',debt:'kill card debt',match:'401(k) match',model:handle(pick.m),rules:'dip rules'}[k];}
+function nwChain(r){return r.s.map(function(x){return nwShort(x[0],r.pick);}).join(' \u2192 ');}
+function viewNow(){
+  var n=state.nw,ready=nwReady(n),a=nwAmt(n);
+  var per='<div class="nw-per">'+NW_P.map(function(p,i){return '<button class="nw-pc'+(n.persona===i?' on':'')+'" data-nwp="'+i+'"><span>'+p[0]+'</span>'+esc(p[1])+'</button>';}).join('')+'</div>';
+  var qs='<div class="nw-q"><label class="nw-l" for="nw-amt">how much are we talking?</label><div class="nw-amtw"><span>$</span><input id="nw-amt" inputmode="decimal" autocomplete="off" placeholder="500" value="'+esc(n.amt)+'"></div><div class="nw-chips">'+['100','500','1000','5000'].map(function(v){return '<button class="nw-o sm'+(n.amt===v?' on':'')+'" data-nw="amt:'+v+'">$'+Number(v).toLocaleString()+'</button>';}).join('')+'</div></div>'+
+   NW_Q.map(function(q){return '<div class="nw-q"><p class="nw-l">'+q[1]+'</p><div class="nw-chips">'+q[2].map(function(o){return '<button class="nw-o'+(n[q[0]]===o[0]?' on':'')+'" data-nw="'+q[0]+':'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div></div>';}).join('');
+  var out='';
+  if(!ready){var left=NW_Q.filter(function(q){return !n[q[0]];}).length;out='<div class="nw-wait"><div class="im in">'+(left===NW_Q.length?'tap a situation up top, or answer 5 quick ones \uD83D\uDC46':left+' more tap'+(left>1?'s':'')+' and i\u2019ll lay it out \uD83D\uDC40')+'</div></div>';}
+  else{
+    var r=nwSteps(n),m=r.pick.m,amtTxt=a?money(a):'your money';
+    var intro='ok real talk. with '+amtTxt+(n.debt==='yes'?' and some card debt':'')+(n.ef==='no'?' and no cushion yet':'')+', here\u2019s the order most people in your spot consider \uD83D\uDC47';
+    var bub='<div class="nw-thread"><div class="im in">'+esc(intro)+'</div>'+r.s.map(function(x,i){return '<div class="im in nw-st"><b>'+(i+1)+'. '+esc(x[1])+'</b>'+esc(x[2])+'</div>';}).join('')+'</div>';
+    var split=a&&n.time!=='lt1'?m.hold.map(function(h){return '<div class="nw-sp"><b>'+esc(h[0])+'</b><span>'+esc(h[1])+'</span><i>'+money(a*h[2]/100)+'</i></div>';}).join(''):'';
+    var modelCard='<a class="nw-model" href="#m-'+m.id+'">'+av(m,'sm',true)+'<div><b>'+esc(handle(m))+'</b><small>'+(r.pick.quiz?'your quiz match, and it fits':'fits your timeline + gut check')+' \u00b7 risk '+m.risk+'/5 \u00b7 effort '+m.effort+'/5</small></div><span>view \u2192</span></a>'+
+      (split?'<div class="nw-split"><p>if '+esc(amtTxt)+' went into its example mix'+((n.ef!=='yes'||n.debt==='yes')?', once the basics above are handled':'')+':</p>'+split+'</div>':'')+
+      (r.pick.alt?'<p class="nw-alt">also worth a look: <a href="#m-'+r.pick.alt.id+'">'+esc(handle(r.pick.alt))+'</a> \u00b7 not sure? take the <a href="#match">match quiz</a></p>':'');
+    if(n.time==='lt1')modelCard='<p class="nw-alt">when your timeline stretches past a year or two, come back and we\u2019ll match you a model. in the meantime, peek at <a href="#m-'+m.id+'">'+esc(handle(m))+'</a></p>';
+    var card='<div class="nw-card" id="nwcard"><div class="nw-card-h"><span>my move</span><i>'+LOGO+' modellab</i></div><p class="nw-card-c">'+esc(nwChain(r))+'</p><small>'+esc(amtTxt)+' \u00b7 '+({'lt1':'<1 yr','1-3':'1\u20133 yrs','3-10':'3\u201310 yrs','10+':'10+ yrs'})[n.time]+' \u00b7 find yours at modellab</small></div>'+
+      '<div class="nw-share"><button class="btn light" data-nwshare="1">'+(n.shared||'share my move \u2197')+'</button><button class="btn light" data-nwreset="1">start over</button></div>';
+    var sms;
+    if(buddyIn()||n.done)sms='<div class="nw-sms"><div class="im in">you\u2019re in \uD83D\uDD12 i\u2019ll check in on this plan once texts go live</div></div>';
+    else sms='<div class="nw-sms"><div class="im in">want me to text you this plan + check in on it? \uD83D\uDCF1</div><div class="im in">like a nudge when the cushion\u2019s full, or a \u201cbreathe\u201d when the market drops</div>'+
+      '<form class="nw-f" data-nwform="1" novalidate><input id="nw-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number"><button class="tp-yes" type="submit">text me my plan \u203A</button>'+
+      '<label class="tp-cons"><input type="checkbox" id="nw-ok"><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label><p class="tp-err" role="alert">'+esc(n.err||'')+'</p></form></div>';
+    out=bub+'<div class="nw-res">'+modelCard+card+'</div>'+sms;
+  }
+  return '<div class="wrap nw"><header class="nw-hd"><p class="eyebrow">new \u00b7 your personalized investing tool</p><h1 class="h1">now what?</h1><p class="sub">tell us what you\u2019ve got. get the order of moves most people in your spot consider, plus the model that fits.</p></header>'+
+   '<p class="nw-l nw-l0">tap your situation</p>'+per+'<div class="nw-grid"><div class="nw-ask">'+qs+'<a class="nw-own" href="#overlap">\uD83D\uDCCB already own stocks or funds? paste them in the Overlap Checker \u2192</a></div><div class="nw-out" aria-live="polite">'+out+'</div></div>'+
+   '<p class="note nw-disc">General, rule-based steps for education, not personal investment advice. The order follows common guidance (cushion, high-interest debt, employer match, then invest) and the model pick uses only the risk and effort ratings shown on each model. Your situation may differ; consider a licensed professional for advice.</p></div>';
+}
+function nwSubmit(){
+  var n=state.nw,ph=normPhone(document.getElementById('nw-ph').value),ok=document.getElementById('nw-ok').checked;
+  if(!ph){n.err='that number looks off. try a US mobile';rerender();return;}
+  if(!ok){n.err='check the box so we\u2019re allowed to text you';rerender();return;}
+  var r=nwSteps(n),goal=n.react==='sell'?'panic':((n.ef!=='yes'||n.debt==='yes')?'basics':'model');
+  n.err='';smsJoin(ph,goal,'low','modellab.now',function(){n.done=true;rerender();paintPop();},function(){n.err='couldn\u2019t save that right now. try again?';rerender();},{now_plan:r.s.map(function(x){return x[0];}).join('>'),now_model:r.pick.m.id,now_time:n.time,now_react:n.react});
+}
+function nwShare(){
+  var n=state.nw,r=nwSteps(n),url=location.origin+BASE+'now',txt='my move: '+nwChain(r)+'\nfind yours \u2192 '+url;
+  function okd(m){n.shared=m;rerender();setTimeout(function(){n.shared='';rerender();},2200);}
+  if(navigator.share){navigator.share({title:'my move',text:txt}).catch(function(){});return;}
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){okd('copied \u2705');},function(){okd('couldn\u2019t copy');});
 }
 /* ---------- text buddy side popup + launcher ---------- */
 var POP={open:false,step:0,err:'',done:false};
@@ -606,7 +686,7 @@ function glClose(){if(glPop){glPop.remove();glPop=null;}document.querySelectorAl
 function glOpen(b){glClose();var p=document.createElement('div');p.className='gl-pop';p.setAttribute('role','tooltip');p.innerHTML='<b>'+esc(b.textContent)+'</b> '+esc(b.getAttribute('data-gl'));document.body.appendChild(p);
   var r=b.getBoundingClientRect(),pw=p.offsetWidth,x=Math.max(12,Math.min(window.innerWidth-pw-12,r.left+r.width/2-pw/2)),above=r.top>p.offsetHeight+24;
   p.style.left=(x+window.scrollX)+'px';p.style.top=((above?r.top-p.offsetHeight-8:r.bottom+8)+window.scrollY)+'px';b.setAttribute('aria-expanded','true');glPop=p;}
-var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};
+var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};ROUTES.now={view:viewNow,nav:'now'};
 var view=$('#view'),foot=$('#foot');
 function render(keep){
   var hash=curH().slice(1),html,nav='',home=false;
@@ -637,6 +717,10 @@ document.addEventListener('click',function(e){
     if(u.origin===location.origin&&u.pathname.indexOf(BASE)===0&&!/\.[a-z0-9]+$/i.test(u.pathname)&&!u.hash){e.preventDefault();go(fromPath(decodeURIComponent(u.pathname).slice(BASE.length)));return;}}
   var pb=t.closest('[data-pop]');if(pb){var pv=pb.getAttribute('data-pop');if(pv==='open'){POP.open=true;}else if(pv==='close'){POP.open=false;if(!POP.done){try{localStorage.setItem('ml_pop_snooze',String(Date.now()+3*864e5));}catch(x){}}}else if(pv==='snooze'){POP.open=false;try{localStorage.setItem('ml_pop_snooze',String(Date.now()+7*864e5));}catch(x){}}else if(pv==='yes'){POP.step=1;}paintPop();if(pv==='yes'){var pi=document.getElementById('tp-ph');if(pi)pi.focus();}return;}
   var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
+  var nwb=t.closest('[data-nw]');if(nwb){var nv=nwb.getAttribute('data-nw'),nk=nv.split(':')[0];state.nw[nk]=nv.slice(nk.length+1);state.nw.persona=-1;rerender();return;}
+  var nwp=t.closest('[data-nwp]');if(nwp){var pi2=Number(nwp.getAttribute('data-nwp')),pd=NW_P[pi2][2];for(var pk in pd)state.nw[pk]=pd[pk];state.nw.persona=pi2;rerender();if(window.innerWidth<900){var no=document.querySelector('.nw-out');if(no)no.scrollIntoView({behavior:'smooth',block:'start'});}return;}
+  if(t.closest('[data-nwshare]')){nwShare();return;}
+  if(t.closest('[data-nwreset]')){state.nw={amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:state.nw.done,shared:''};rerender();return;}
   var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell','1');}catch(x){}paintBell();return;}
   if(state.bell&&!t.closest('.bell-pop')){state.bell=false;paintBell();}
   var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
@@ -658,10 +742,12 @@ function paintBell(){var w=document.getElementById('bellw');if(w)w.innerHTML=bel
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.hasAttribute&&t.hasAttribute('data-fit')){var k=t.getAttribute('data-fit');state.fit[k]=Number(t.value);t.style.setProperty('--p',((t.value-1)*25)+'%');$('#v-'+k).textContent=t.value+'/5';$('#rank').innerHTML=rankHtml();}
+  if(t.id==='nw-amt'){state.nw.amt=t.value.replace(/[^\d.]/g,'');state.nw.persona=-1;clearTimeout(viewNow._t);viewNow._t=setTimeout(function(){var s0=t.selectionStart;rerender();var ni=document.getElementById('nw-amt');if(ni){ni.focus();try{ni.setSelectionRange(s0,s0);}catch(x){}}},450);}
   if(t.id==='amt'){state.amount=Math.max(0,Number(t.value)||0);var id=curH().slice(3);if(byId[id]){$('#hold').innerHTML=holdRows(byId[id]);var cr=$('#calcres');if(cr)cr.innerHTML=valueInner(byId[id]);}}
 });
 document.addEventListener('submit',function(e){
   if(e.target.closest&&e.target.closest('form[data-bdform]')){e.preventDefault();bdSubmit();return;}
+  if(e.target.closest&&e.target.closest('form[data-nwform]')){e.preventDefault();nwSubmit();return;}
   if(e.target.closest&&e.target.closest('form[data-popform]')){e.preventDefault();popSubmit();return;}
   var f=e.target.closest&&e.target.closest('form[data-signup]');if(!f)return;
   e.preventDefault();
