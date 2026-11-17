@@ -41,7 +41,10 @@ async function askClaude(env, profile, history, text) {
   });
   if (!r.ok) throw new Error(`anthropic ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const d = await r.json();
-  return (d.content || []).map(c => c.text || "").join("").trim();
+  const out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
+  if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
+  askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
+  return out;
 }
 
 function clean(reply) {
@@ -112,7 +115,7 @@ export default {
         const history = JSON.parse((await env.BUDDY_KV.get(`dry:${body.phone || "x"}`)) || "[]");
         const reply = clean(await askClaude(env, body, history, String(body.text || "")));
         await env.BUDDY_KV.put(`dry:${body.phone || "x"}`, JSON.stringify([...history, { role: "user", content: String(body.text || "") }, { role: "assistant", content: reply }].slice(-12)), { expirationTtl: 3600 });
-        return json({ reply, credits: smsCredits(reply) });
+        return json({ reply, credits: smsCredits(reply), debug: askClaude.last });
       }
       ctx.waitUntil(handle(env, body).then(r => console.log(JSON.stringify(r))).catch(e => console.log("buddy error", e.message)));
       return json({ accepted: true });   // answer Klaviyo fast; the reply is sent in the background
