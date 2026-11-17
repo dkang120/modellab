@@ -108,3 +108,12 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 - Max one dip text every 7 days, only when a deeper level is hit, and levels reset once SPY is back within 3% of its high. State lives in `dip_state.json`.
 - Nov 17, 2026: SPY was -5.02%; -5% was marked handled on purpose, so the first text goes out at -10%.
 - Test without sending: run the workflow manually with `dip_test` = true (creates a draft, then delete it in Klaviyo).
+
+## AI text buddy (live 2026-11-17)
+- Code: `buddy/` (Cloudflare Worker `modellab`, https://modellab.kangd4u.workers.dev). Auto-deploys from GitHub on every push touching `buddy/`.
+- Voice: `buddy/src/prompt.js` = the Gen Z rulebook doc turned into instructions. Model: Claude Haiku 5.5, thinking off.
+- Klaviyo: inbound text (Sent Text Message TD8d8Y) -> flow VHZ872 webhook -> worker -> "Buddy Reply" event -> flow XVHM2i texts `{{ event.reply }}`.
+- Alerts: "Buddy Needs Human" -> flow Y5jhzu, "Buddy Budget Alert" -> flow XuUv9J (email to Daniel, template UV3ypD).
+- Caps (wrangler.toml): 80 AI credits/month, 6 replies per person/month, one "maxed out" note, 80% alert.
+- Secrets live in Cloudflare only: ANTHROPIC_API_KEY, KLAVIYO_BUDDY_KEY, BUDDY_SECRET.
+- Check usage: GET /status with header x-buddy-secret.
