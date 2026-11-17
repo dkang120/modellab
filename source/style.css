@@ -859,3 +859,30 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 .mfaq summary::after{content:'+';font-size:22px;line-height:1;color:var(--muted);flex:none}
 .mfaq details[open] summary::after{content:'–'}
 .mfaq details p{margin:0 0 16px;color:var(--soft);font-size:15px;line-height:23px}
+/* floating text buddy on phones: compact icon button, slides away while scrolling down */
+@media(max-width:640px){
+  #tpop{left:auto;pointer-events:none}
+  #tpop>*{pointer-events:auto}
+  #tpop.open{left:12px}
+  #tpop:not(.open) .tp-launch{padding:5px}
+  #tpop:not(.open) .tp-lt{display:none}
+  #tpop{transition:transform .25s ease,opacity .25s ease}
+  #tpop.tp-away:not(.open){transform:translateY(90px);opacity:0}
+}
+/* site search */
+.srch-b{position:absolute;right:62px;top:27px;width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.srch-b svg{width:22px;height:22px}
+.srch-b:hover{background:var(--t-gray)}
+@media(min-width:1000px){.navl.navr{right:124px}}
+#srch{position:fixed;inset:0;z-index:90;background:rgba(10,10,10,.35);display:none;padding:72px 16px 16px}
+#srch.on{display:block}
+.srch-in{max-width:620px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 30px 80px -30px rgba(0,0,0,.45);overflow:hidden}
+.srch-bar{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 20px;border-bottom:1px solid var(--line)}
+.srch-bar input{flex:1;border:0;outline:0;font:inherit;font-size:17px;padding:10px 0;background:transparent;color:var(--ink)}
+.srch-bar button{border:1px solid var(--line);background:#fff;border-radius:10px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:5px 8px;cursor:pointer}
+#srch-r{max-height:60vh;overflow-y:auto;padding:6px}
+#srch-r a{display:flex;flex-direction:column;gap:2px;padding:11px 14px;border-radius:14px;text-decoration:none;color:var(--ink)}
+#srch-r a:hover,#srch-r a:focus{background:var(--lilac);outline:0}
+#srch-r b{font-weight:500;font-size:15px}
+#srch-r small{color:var(--muted);font-size:13px;line-height:1.35}
+.srch-none{padding:16px;color:var(--muted);font-size:14px;margin:0}

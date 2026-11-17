@@ -52,6 +52,14 @@ css.textContent=[
 '.tl-hm th button{background:none;border:0;font:inherit;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--muted);padding:0}',
 '.tl-hm th button[aria-pressed=true]{color:var(--purple)}',
 '.tl-hm table{min-width:760px}',
+'@media(max-width:899px){.gs-two>.panel:last-child{order:-1}}',
+'.gs-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}',
+'.gs-form .tl-f:first-child{grid-column:1/-1}',
+'@media(max-width:520px){.gs-form{grid-template-columns:1fr}}',
+'.gs-save{display:flex;gap:10px;align-items:flex-end;margin-top:16px;flex-wrap:wrap}',
+'.gs-goals{display:flex;flex-wrap:wrap;gap:8px}.gs-goal{display:flex;align-items:center;gap:2px}.gs-x{border:0;background:none;font-size:20px;color:var(--muted);cursor:pointer;padding:0 6px}',
+'.dd-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media(max-width:700px){.dd-g{grid-template-columns:1fr 1fr}}',
+'.dd-g>div{background:var(--t-gray,#f4f3f7);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}.dd-g small{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}.dd-g b{font-size:24px;font-weight:600;letter-spacing:-.02em}.dd-g b.dn{color:#c2410c}.dd-g em{font-style:normal;font-size:13px;color:var(--muted)}',
 '.tl-hold{display:grid;grid-template-columns:1.4fr .8fr auto;gap:10px;align-items:center;margin-bottom:10px}',
 '.tl-hold select,.tl-hold input{font:inherit;font-size:15px;border:1.5px solid var(--line);border-radius:999px;padding:10px 16px;background:var(--white);color:var(--ink);outline:0;width:100%}',
 '.tl-x{background:none;border:0;color:var(--muted);font-size:18px;padding:6px 10px}',
@@ -170,18 +178,19 @@ function scenWin(sc){return {g0:HI[sc.from]+1,g1:HI[sc.to]};}
 /* ================= TOOLS HUB ================= */
 function viewTools(){
   var cards=[
-   ['mint','Step 1 · Match','Match Quiz','Six questions about how you would actually behave. Get the models that fit, backed by how far each one really fell.','#match','Take the quiz →'],
-   ['peach','Step 2 · Feel the risk','Pain Simulator','Invest at a bad moment in history and watch it happen. Sell, hold or buy more when it hurts.','#pain','Try it →'],
-   ['lilac','Step 2 · Feel the risk','Stress Test','Every model against six real market crashes, side by side.','#stress','Compare crashes →'],
-   ['yellow','Step 3 · Act','Implement It','Turn a model into exact dollar amounts, share counts and a rebalance plan.','#implement','Build my plan →'],
-   ['blue','Step 3 · Act','Overlap Checker','Paste what you own. See which model it already resembles and where you are concentrated.','#overlap','Check my holdings →'],
-   ['mint','Go further','Build Your Own','Pick holdings and weights. Test them against 30–100 years of history and compare with any model.','#build','Open the builder →'],
-   ['peach','Compete','Leaderboard','Track a virtual portfolio from today’s close against everyone else. No real money.','#leaderboard','See the board →']
+   ['mint','Step 1 · Match','Match Quiz','six questions about how you’d actually act. get the models that fit, backed by how far each one really fell','#match','Take the quiz →'],
+   ['peach','Step 2 · Feel the risk','Pain Simulator','invest at the worst moment in history and watch it play out. sell, hold or buy more when it hurts','#pain','Try it →'],
+   ['lilac','Step 2 · Feel the risk','Stress Test','every model against six real market crashes, side by side','#stress','Compare crashes →'],
+   ['yellow','Step 3 · Act','Implement It','turn a model into exact dollar amounts, share counts and a rebalance plan','#implement','Build my plan →'],
+   ['blue','Step 3 · Act','Overlap Checker','paste what you own. see which model it already looks like and where you’re too concentrated','#overlap','Check my holdings →'],
+   ['lilac','Go further','Goal Simulator','run your plan 1,000 ways. see the typical outcome, the rough one and your odds of hitting a goal','#goal','Simulate my plan →'],
+   ['mint','Go further','Build Your Own','pick your own holdings and weights. test them against 30–100 years of history','#build','Open the builder →'],
+   ['peach','Compete','Leaderboard','track a virtual portfolio from today’s close against everyone else. no real money','#leaderboard','See the board →']
   ];
   var pg=progGet(),nx=!pg.match?['#match','Start with the Match Quiz']:(!pg.pain?['#pain','Next: feel the risk with the Pain Simulator']:(!pg.implement?['#implement','Next: build your plan']:['#build','All three steps done. Try Build Your Own']));
   var dn=function(k){return pg[k]?'<i class="tl-ck" aria-label="done">✓</i> ':'';};
   var thread='<div class="imsg" aria-label="Conversation"><div class="im in">how would you actually handle a crash?</div><div class="im out">honestly no idea</div><div class="im in">ok. three steps. match, feel the risk, then act.</div><div class="im out">bet. where do i start?</div></div>';
-  return head('Tools.','Match a model to how you behave, feel the risk, then act on it.',thread+'<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
+  return head('Tools.','match a model to how you’d actually act, feel the risk, then make a plan',thread+'<div class="tl-steps"><span class="'+(pg.match?'dn':'')+'">'+dn('match')+'<b>1</b> Match</span><span class="'+(pg.pain?'dn':'')+'">'+dn('pain')+'<b>2</b> Feel the risk</span><span class="'+(pg.implement?'dn':'')+'">'+dn('implement')+'<b>3</b> Act</span></div><p class="center" style="margin-top:16px"><a class="btn pri sm" href="'+nx[0]+'">'+nx[1]+' →</a></p>')+
    '<div class="grid3 tl-hub" style="padding-bottom:100px">'+cards.map(function(c){return '<a class="mcard" style="background:var(--'+c[0]+')" href="'+c[4]+'"><span class="cat">'+c[1]+'</span><h3>'+c[2]+'</h3><p>'+c[3]+'</p><span class="go">'+(pg[c[4].slice(1)]?'Done ✓ · ':'')+c[5]+'</span></a>';}).join('')+'</div></div>';
 }
 
@@ -481,6 +490,74 @@ function viewBuild(){
    '<div class="panel sh"><h2 style="font-size:22px">How it would have gone</h2><p class="note" style="margin:6px 0 10px">'+(mine?mlab(HM[g0])+' to '+mlab(HM[g1])+', starting with '+money(BD.amt)+'.':'Add a holding to begin.')+'</p>'+res+'</div></div>'+note(histNote())+'</div></div>';
 }
 
+
+/* ================= GOAL SIMULATOR (Monte Carlo) ================= */
+var GS={m:'index',start:1000,monthly:100,years:10,goal:25000,mode:'hist',ret:null,vol:null,name:'',runs:1000,saved:null};
+function gsSaved(){if(GS.saved==null){try{GS.saved=JSON.parse(localStorage.getItem('ml_goals')||'[]');}catch(e){GS.saved=[];}}return GS.saved;}
+function gsPersist(){try{localStorage.setItem('ml_goals',JSON.stringify(GS.saved||[]));}catch(e){}}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(r){var u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+/* the model's own monthly returns (fixed weights, rebalanced yearly) over all the history its holdings have */
+function gsMonthly(m){var h=toH(m),g0=startOf(h);if(!isFinite(g0))return null;var p=sim(h,g0,HM.length-1,1,'annual');if(!p)return null;var r=[];for(var i=1;i<p.length;i++)r.push(p[i]/p[i-1]-1);return {r:r,from:HM[g0]};}
+function gsHistParams(mr){var n=mr.length,lg=0,ss=0,i;for(i=0;i<n;i++)lg+=Math.log(1+mr[i]);var mu=lg/n;for(i=0;i<n;i++){var d=Math.log(1+mr[i])-mu;ss+=d*d;}return {ret:Math.exp(mu*12)-1,vol:Math.sqrt(ss/(n-1))*Math.sqrt(12)};}
+function gsRun(){
+  var m=ML.byId[GS.m],mh=gsMonthly(m);if(!mh)return null;
+  var hp=gsHistParams(mh.r),N=Math.round(GS.years*12),R=GS.runs,rnd=rng(GS.years*7919+GS.start+GS.monthly*31+(GS.m.length*101)+(GS.mode==='hist'?1:2)+Math.round((GS.ret||0)*1e4)+Math.round((GS.vol||0)*1e3));
+  var ret=GS.mode==='hist'?hp.ret:(GS.ret!=null?GS.ret:hp.ret),vol=GS.mode==='hist'?hp.vol:(GS.vol!=null?GS.vol:hp.vol);
+  var mu=Math.log(1+ret)/12,sg=vol/Math.sqrt(12);
+  var paths=[],ends=[],k,j;
+  for(j=0;j<R;j++){var v=GS.start,row=new Float64Array(N+1);row[0]=v;var blk=0,pos=0;
+    for(k=1;k<=N;k++){
+      var r;
+      if(GS.mode==='hist'){if(blk===0){pos=Math.floor(rnd()*(mh.r.length-12));blk=12;}r=mh.r[pos++];blk--;}
+      else r=Math.exp(mu+sg*gauss(rnd))-1;
+      v=(v+GS.monthly)*(1+r);row[k]=v;}
+    paths.push(row);ends.push(v);}
+  function q(arr,p){var a=arr.slice().sort(function(x,y){return x-y;});return a[Math.min(a.length-1,Math.max(0,Math.floor(p*(a.length-1))))];}
+  var p10=[],p50=[],p90=[],paid=[],col=new Float64Array(R);
+  for(k=0;k<=N;k++){for(j=0;j<R;j++)col[j]=paths[j][k];var a=Array.prototype.slice.call(col).sort(function(x,y){return x-y;});p10.push(a[Math.floor(.1*(R-1))]);p50.push(a[Math.floor(.5*(R-1))]);p90.push(a[Math.floor(.9*(R-1))]);paid.push(GS.start+GS.monthly*k);}
+  var hit=GS.goal>0?ends.filter(function(x){return x>=GS.goal;}).length/R:null;
+  var lose=ends.filter(function(x,i){return x<GS.start+GS.monthly*N;}).length/R;
+  return {m:m,mh:mh,hp:hp,ret:ret,vol:vol,N:N,p10:p10,p50:p50,p90:p90,paid:paid,end:{p10:q(ends,.1),p50:q(ends,.5),p90:q(ends,.9)},hit:hit,lose:lose,contrib:GS.start+GS.monthly*N};
+}
+function viewGoal(){
+  if(hState!=='ready')return loadingView('Goal Simulator.','See the range of ways a plan could play out.');
+  if(!ML.unlocked())return gateView('Goal Simulator','Run a plan 1,000 ways and see the range of outcomes.','The good, the typical and the rough.','goal');
+  var r=gsRun(),sv=gsSaved();
+  var yNow=new Date().getFullYear(),labs=[];if(r)for(var k=0;k<=r.N;k++){var yy=yNow+Math.floor(k/12),mm=k%12+1;labs.push(yy+'-'+(mm<10?'0':'')+mm);}
+  var res='';
+  if(r){
+    var all=r.p10.concat(r.p90,r.paid);if(GS.goal>0)all.push(GS.goal);
+    var hi=Math.max.apply(null,all)*1.08;
+    res='<div id="gs-chart">'+chart({n:r.p50.length,labels:labs,series:[{vals:r.p90,color:'#c9b3fb',w:2},{vals:r.p10,color:'#c9b3fb',w:2},{vals:r.paid,color:'#a3a3a8',w:2,dash:'5 5'},{vals:r.p50,color:'#6a35e0',w:3}],ymin:0,ymax:hi,base:GS.goal>0?GS.goal:null,aria:'Range of outcomes for '+r.m.name})+
+     legend([['typical (median)','#6a35e0'],['good / rough (90th / 10th percentile)','#c9b3fb'],['what you put in','#a3a3a8']])+(GS.goal>0?'<p class="note" style="margin-top:4px">Dotted gray line across: your goal of '+money(GS.goal)+'.</p>':'')+'</div>'+
+     '<div class="tl-stats" style="margin-top:16px">'+
+      (r.hit!=null?statBox('CHANCE OF GOAL',(r.hit>=.995?'99%+':(r.hit<=.005?'<1%':Math.round(r.hit*100)+'%')),'reach '+mshort(GS.goal)+' in '+GS.years+' yrs',r.hit>=.7?'up':(r.hit<.4?'dn':'na')):'')+
+      statBox('TYPICAL',mshort(r.end.p50),'half the runs end above this')+
+      statBox('ROUGH CASE',mshort(r.end.p10),'1 in 10 runs end below this','dn')+
+      statBox('GOOD CASE',mshort(r.end.p90),'1 in 10 runs end above this','up')+
+      statBox('YOU PUT IN',mshort(r.contrib),Math.round(r.lose*100)+'% of runs end below this')+'</div>'+
+     note('Assumes '+pct1(r.ret)+' a year with '+(r.vol*100).toFixed(0)+'% volatility'+(GS.mode==='hist'?', from '+esc(r.m.name)+'’s example portfolio since '+mlab(r.mh.from)+' (12-month chunks of real history, reshuffled).':' (your custom numbers).')+' '+GS.runs.toLocaleString()+' runs, before fees, taxes and inflation. A range of what could happen, not a forecast.');
+  }
+  var saved=sv.length?'<div class="panel sh"><h2 style="font-size:20px">Your goals</h2><p class="note" style="margin:4px 0 12px">Saved on this device only.</p><div class="gs-goals">'+sv.map(function(g,i){return '<div class="gs-goal"><button class="chip" data-gs-load="'+i+'"><b>'+esc(g.name||'goal')+'</b> · '+mshort(g.goal)+' in '+g.years+'y · '+esc((ML.byId[g.m]||{}).name||g.m)+'</button><button class="gs-x" data-gs-del="'+i+'" aria-label="Delete goal">×</button></div>';}).join('')+'</div></div>':'';
+  var cust=GS.mode==='custom';
+  return head('Goal Simulator.','run your plan 1,000 ways. see the typical outcome, the rough one and your odds of hitting your goal','<div class="tl-steps"><span><b>Go further</b> Plan</span></div>')+
+   '<div class="stack"><div class="two gs-two" style="align-items:start"><div class="panel sh"><h2 style="font-size:22px">Your plan</h2>'+
+    '<div class="gs-form">'+
+     '<label class="tl-f">Model<select id="gs-m">'+modelOpts(GS.m)+'</select></label>'+
+     '<label class="tl-f">Starting amount ($)<input id="gs-start" type="number" min="0" step="100" value="'+GS.start+'"></label>'+
+     '<label class="tl-f">Added every month ($)<input id="gs-monthly" type="number" min="0" step="10" value="'+GS.monthly+'"></label>'+
+     '<label class="tl-f">Years<input id="gs-years" type="number" min="1" max="40" value="'+GS.years+'"></label>'+
+     '<label class="tl-f">Goal ($, optional)<input id="gs-goal" type="number" min="0" step="500" value="'+(GS.goal||'')+'"></label>'+
+     '<label class="tl-f">Assumptions<select id="gs-mode"><option value="hist"'+(cust?'':' selected')+'>From the model’s history</option><option value="custom"'+(cust?' selected':'')+'>My own numbers</option></select></label>'+
+     (cust?'<label class="tl-f">Return per year (%)<input id="gs-ret" type="number" step="0.5" min="-10" max="20" value="'+((GS.ret!=null?GS.ret:(r?r.hp.ret:0.07))*100).toFixed(1)+'"></label><label class="tl-f">Volatility per year (%)<input id="gs-vol" type="number" step="1" min="0" max="60" value="'+((GS.vol!=null?GS.vol:(r?r.hp.vol:0.15))*100).toFixed(0)+'"></label>':'')+
+    '</div>'+
+    '<div class="gs-save"><label class="tl-f" style="flex:1">Name this goal<input id="gs-name" type="text" maxlength="30" placeholder="house, car, first $10k…" value="'+esc(GS.name)+'"></label><button class="btn pri sm" data-gs-save="1">Save goal</button></div>'+
+    note('Nothing you type leaves your browser.')+'</div>'+
+   '<div class="panel sh"><h2 style="font-size:22px">How it could play out</h2><p class="note" style="margin:6px 0 10px">'+(r?mshort(GS.start)+' to start, '+mshort(GS.monthly)+'/month, '+GS.years+' years in '+esc(r.m.name)+'.':'This model needs longer history to simulate.')+'</p>'+res+'</div></div>'+saved+
+   '<div class="panel" style="background:var(--lilac)"><h2 style="font-size:20px">How to read this</h2><p class="b">Markets don’t move in a straight line, so one projected number hides most of the story. This runs the plan 1,000 times with different sequences of good and bad years. The purple line is the middle outcome; the light lines are the rough and good cases. Sticking with monthly adds through the rough paths is usually what decides how it ends.</p></div></div>';
+}
+
 /* ================= LEADERBOARD ================= */
 var LBS={rows:null,err:null,loading:false,filter:'all',joinModel:'index',handle:'',custom:null,msg:''};
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
@@ -581,6 +658,23 @@ ML.crashComments=function(m){
    '<a class="lk cm-more" href="#pain/'+m.id+'">live through one in the Pain Simulator →</a>'+note('Real history from long-run proxy series, rebalanced yearly, price only. Not the funds’ own returns.')+'</div>';
 };
 
+
+/* ================= model page: the numbers, worked out (real history) ================= */
+ML.deepDive=function(m){
+  if(hState!=='ready')return '';
+  var g0=HI['1992-02'],g1=HM.length-1,h=toH(m),s0=startOf(h);if(!isFinite(s0)||s0>g0)return '';
+  var p=sim(h,g0,g1,10000,'annual'),mk=sim([['VTI',100]],g0,g1,10000,'annual'),dca=sim(h,g0,g1,0,'annual',100);if(!p||!mk||!dca)return '';
+  var a=pstats(p),b=pstats(mk),n=p.length-1,yrs=(n/12).toFixed(0),put=100*n,end=p[n],dEnd=dca[n];
+  var vs=a.cagr>=b.cagr?'ahead of':'behind';
+  return '<div class="panel dd"><h2>the numbers, worked out</h2><p class="b" style="margin-bottom:14px">real history, '+mlab(HM[g0])+' to '+mlab(HM[g1])+' ('+yrs+' years), using the example portfolio above</p>'+
+   '<div class="dd-g"><div><small>$10k in '+HM[g0].slice(0,4)+'</small><b>'+mshort(end)+'</b><em>'+pct1(a.cagr)+' a year</em></div>'+
+   '<div><small>$100 every month</small><b>'+mshort(dEnd)+'</b><em>from '+mshort(put)+' put in</em></div>'+
+   '<div><small>worst 12 months</small><b class="dn">'+pct1(a.worst12)+'</b><em>best: '+pct1(a.best12)+'</em></div>'+
+   '<div><small>time below its old high</small><b>'+Math.round(a.under/n*100)+'%</b><em>of all months</em></div></div>'+
+   '<p class="b" style="margin-top:14px">over the same stretch, the whole US stock market did '+pct1(b.cagr)+' a year with a worst fall of '+pct1(b.mdd)+', so '+esc(m.name)+' finished '+vs+' it, with a worst fall of '+pct1(a.mdd)+'. that tradeoff, return vs how much it hurts, is the whole point of picking a style</p>'+
+   note('Built from long-run proxy series, rebalanced yearly, before fees and taxes. Not the funds’ own returns, and the past won’t repeat exactly.')+'</div>';
+};
+
 /* ================= model page hook ================= */
 ML.modelTools=function(m){
   var emb='<iframe src="'+new URL('embed/'+m.id+'/',document.baseURI).href+'" title="'+esc(m.name)+' example portfolio" width="360" height="330" style="border:0;border-radius:16px" loading="lazy"></iframe>';
@@ -596,6 +690,7 @@ ML.routes.stress={nav:'tools',view:viewStress,before:ensureHist};
 ML.routes.implement={nav:'tools',view:viewImplement};
 ML.routes.overlap={nav:'tools',view:viewOverlap,before:ensureHist};
 ML.routes.build={nav:'tools',view:viewBuild,before:ensureHist};
+ML.routes.goal={nav:'tools',view:viewGoal,before:ensureHist};
 ML.routes.leaderboard={nav:'leaderboard',view:viewLeaderboard};
 ML.routes.__leave=function(){painStop();};
 if(ML.routeFor(ML.curH()))ML.rerender();
@@ -702,6 +797,16 @@ document.addEventListener('change',function(e){
   else if(t.hasAttribute&&t.hasAttribute('data-t-brow')){BD.rows[Number(t.getAttribute('data-t-brow'))][0]=t.value;ML.rerender();}
   else if(t.hasAttribute&&t.hasAttribute('data-t-bw')){BD.rows[Number(t.getAttribute('data-t-bw'))][1]=Number(t.value)||0;ML.rerender();}
 });
+function gsNum(id,lo,hi,d){var el=document.getElementById(id);var v=Number(el&&el.value);return isFinite(v)&&el.value!==''?Math.max(lo,Math.min(hi,v)):d;}
+var gsT;document.addEventListener('input',function(e){var id=e.target.id||'';if(id.indexOf('gs-')!==0||id==='gs-name')return;clearTimeout(gsT);gsT=setTimeout(function(){
+  GS.start=gsNum('gs-start',0,1e7,0);GS.monthly=gsNum('gs-monthly',0,1e6,0);GS.years=Math.round(gsNum('gs-years',1,40,10));GS.goal=gsNum('gs-goal',0,1e9,0);
+  if(document.getElementById('gs-ret'))GS.ret=gsNum('gs-ret',-10,20,7)/100;if(document.getElementById('gs-vol'))GS.vol=gsNum('gs-vol',0,60,15)/100;
+  var a=document.activeElement&&document.activeElement.id;ML.rerender();var f=a&&document.getElementById(a);if(f){f.focus();try{var L=f.value.length;f.setSelectionRange(L,L);}catch(x){}}},350);});
+document.addEventListener('change',function(e){var id=e.target.id;if(id==='gs-m'){GS.m=e.target.value;ML.rerender();}else if(id==='gs-mode'){GS.mode=e.target.value;GS.ret=null;GS.vol=null;ML.rerender();}else if(id==='gs-name'){GS.name=e.target.value;}});
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-gs-save],[data-gs-load],[data-gs-del]');if(!t)return;var sv=gsSaved();
+  if(t.hasAttribute('data-gs-save')){var nm=(document.getElementById('gs-name')||{}).value||'';GS.name=nm;sv.unshift({name:nm.slice(0,30)||'my goal',m:GS.m,start:GS.start,monthly:GS.monthly,years:GS.years,goal:GS.goal,mode:GS.mode,ret:GS.ret,vol:GS.vol});GS.saved=sv.slice(0,8);gsPersist();ML.rerender();}
+  else if(t.hasAttribute('data-gs-load')){var g=sv[Number(t.getAttribute('data-gs-load'))];if(g){['m','start','monthly','years','goal','mode','ret','vol','name'].forEach(function(k){if(g[k]!==undefined)GS[k]=g[k];});ML.rerender();}}
+  else{sv.splice(Number(t.getAttribute('data-gs-del')),1);gsPersist();ML.rerender();}});
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='pn-amt'){P.amt=Math.max(100,Number(t.value)||10000);}

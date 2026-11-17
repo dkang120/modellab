@@ -10,8 +10,8 @@ const a = src.indexOf('var MODELS=[') + 'var MODELS='.length, b = src.indexOf('\
 const MODELS = new Function('return ' + src.slice(a, b))();
 const { seoFor, faqFor } = require(path.resolve('source/seo.js'));
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const TOOLS = ['match', 'pain', 'stress', 'implement', 'overlap', 'build'];
-const routes = [{ path: '', h: '#home' }].concat([['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', '']]
+const TOOLS = ['match', 'pain', 'stress', 'implement', 'overlap', 'build', 'goal'];
+const routes = [{ path: '', h: '#home' }].concat([['library', ''], ['compare', ''], ['tools', ''], ['leaderboard', ''], ['about', ''], ['now', ''], ['text', ''], ['sms-terms', ''], ['privacy', ''], ['data', '']]
   .map(([n]) => ({ path: n + '/', h: '#' + n })))
   .concat(TOOLS.map(n => ({ path: 'tools/' + n + '/', h: '#' + n })))
   .concat(MODELS.map(m => ({ path: 'models/' + m.id + '/', h: '#m-' + m.id })))
@@ -38,7 +38,7 @@ function body(r, rel) {
   }
   return h + `<p>Educational only, not investment advice. Example portfolios are hypothetical.</p></div>`;
 }
-const TOOLD = { match: 'quiz', pain: 'simulator', stress: 'chart', implement: 'calculator', overlap: 'checker', build: 'backtester' };
+const TOOLD = { match: 'quiz', pain: 'simulator', stress: 'chart', implement: 'calculator', overlap: 'checker', build: 'backtester', goal: 'simulator' };
 function schemaFor(r, url) {
   const ld = [];
   const id = r.h.slice(1).split('/')[0];

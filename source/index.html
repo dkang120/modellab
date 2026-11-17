@@ -15,7 +15,7 @@
 <script src="seo.js"></script>
 </head>
 <body>
-<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a></nav><nav class="navl navr" aria-label="Featured"><a href="#now" data-nav="now">Now what?</a><a href="#text" data-nav="text" class="nav-hl">text buddy <i>new</i></a></nav><div class="bellw" id="bellw"></div></header>
+<header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#compare" data-nav="compare">Compare</a><a href="#tools" data-nav="tools">Tools</a><a href="#leaderboard" data-nav="leaderboard">Leaderboard</a><a href="#about" data-nav="about">About</a></nav><nav class="navl navr" aria-label="Featured"><a href="#now" data-nav="now">Now what?</a><a href="#text" data-nav="text" class="nav-hl">text buddy <i>new</i></a></nav><div class="bellw" id="bellw"></div><button class="srch-b" data-search="open" aria-label="Search ModelLab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></header>
 <main id="view"></main>
 <div id="foot"></div>
 <script>
@@ -280,7 +280,7 @@ function bellHtml(){
 function footer(home){
   var L=[['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
   return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
-   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
+   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a> · <a href="#data">Your data</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
 function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy <i>new</i>'],['now','Now what?'],['library','Library'],['compare','Compare'],['tools','Tools'],['leaderboard','Leaderboard'],['about','About']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'"'+(a[0]==='text'?' class="nav-hl"':'')+'>'+a[1]+'</a>';}).join('')+'</nav></div>';}
@@ -300,7 +300,7 @@ function heroHtml(){
    '<section class="mm-screen" aria-label="Every investing model, built as a portfolio"><div class="mm-core"><div class="mm-drifts" aria-hidden="true">'+dr+'</div><div class="mm-fade"></div>'+
    '<div class="mm-deck" id="mmdeck" aria-hidden="true">'+heroDeck(HERO.i)+'</div><div class="mm-exch" id="mmex" aria-hidden="true">'+heroEx(HERO.i)+'</div>'+
    '</div><div class="mm-footer"><div class="mm-headline"><h1 class="sr">Every investing model, built as a portfolio.</h1><p class="mm-line is-soft" aria-hidden="true">investing models</p><div class="mm-line-row" aria-hidden="true"><p class="mm-line">as portfolios.</p>'+heart+'</div></div>'+
-   '<div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">or <a href="#text" class="mm-buddy">get your personalized investing tool, by text 📱</a></p></div></div></section></div></div></main>';
+   '<div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">or <a href="#text" class="mm-buddy">get your personalized investing tool, in your texts 🔒</a></p></div></div></section></div></div></main>';
 }
 function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',window.innerHeight);}}
 function heroPaint(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e)return;d.innerHTML=heroDeck(HERO.i);e.className='mm-exch';e.innerHTML=heroEx(HERO.i);}
@@ -314,8 +314,8 @@ function hl(soft,main){return '<h2 class="h2"><em>'+soft+'</em>'+main+'</h2>';}
 function buddySection(){
   var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}var mm=(mt&&byId[mt])||byId['index'];
   var th=[['in','market\u2019s down 10% from the top. pretty normal tbh. you good?'],['out','ngl kinda nervous'],['in','real talk, '+mm.name.toLowerCase()+' has fallen further before and came back. your plan > the headlines'],['out','ok holding \uD83D\uDD12'],['in','that\u2019s the energy. new drop friday \uD83E\uDDEA']];
-  return '<section class="hb"><div class="hb-copy"><p class="eyebrow">the highlight</p><h2 class="h2"><em>your personalized</em>investing tool.</h2><p class="sub">a text buddy that knows your model, checks in when markets get wild, and keeps you investing. free while we\u2019re early.</p>'+
-   '<ul class="hb-pts"><li><b>personal</b> texts about <i>your</i> model, not generic tips</li><li><b>calm</b> check-ins when the market drops</li><li><b>weekly</b> Lab Drop: one new model, explained in a text</li></ul>'+
+  return '<section class="hb"><div class="hb-copy"><p class="eyebrow">the highlight</p><h2 class="h2"><em>your personalized</em>investing tool</h2><p class="sub">a buddy in your texts who knows your model, checks on you when the market gets wild, and keeps you locked in. free while we\u2019re early</p>'+
+   '<ul class="hb-pts"><li><b>about <i>your</i> model</b>, not the same tips everyone gets</li><li><b>calm check-ins</b> when the market drops, never panic</li><li><b>a lab drop every 2 weeks</b>: one new model, explained in one text</li></ul>'+
    (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime</p>')+'</div>'+
    '<div class="hb-phone" aria-hidden="true"><div class="hb-top"><span class="av sm ring"><span>'+LOGO+'</span></span><b>modellab buddy</b></div>'+th.map(function(x){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'">'+esc(x[1])+'</div>';}).join('')+'</div></section>';
 }
@@ -326,7 +326,7 @@ function viewHome(){
   var d1=(ms&&unlocked())?'<span class="pill '+sign(ms.d1)+'">1D '+fmt(ms.d1)+'</span>':'';
   var lib=['index','value','dividend','momentum','all-weather'].map(function(id){var m=byId[id];
     return '<a class="lrow" style="background:var(--'+m.color+')" href="#m-'+m.id+'"><div><strong>'+esc(m.name)+'</strong><span class="s">'+esc(m.cat)+'</span></div>'+dots(m.risk,'p')+'</a>';}).join('');
-  var steps=[['Pick a philosophy','Value, growth, dividend, all-weather and more, each explained in plain language.'],['See the portfolio','Every model has an example allocation, a donut chart, and a dollar calculator.'],['Compare side by side','Line up to four models on risk, effort, and growth, then see which fits you best.']];
+  var steps=[['Pick a philosophy','value, growth, dividend, all-weather and more, each explained like a friend would'],['See the portfolio','every model comes with an example portfolio, a chart and a dollar calculator'],['Compare side by side','line up four models on risk, effort and growth, then see which one fits you']];
   var stepHtml=steps.map(function(s,i){return '<button class="step'+(state.step===i?' on':'')+'" data-step="'+i+'"><h3>'+s[0]+'</h3><p>'+s[1]+'</p></button>';}).join('');
   var tick=['VTI','QQQ','TLT','GLD'].map(function(t){var st=stats(t);return '<div class="mini"><b>'+t+'</b><span>'+(!unlocked()?'<a class="lk" href="#compare" style="text-decoration:none">Sign up to view</a>':(st?'$'+st.last.toFixed(2)+' &nbsp;<span class="c">'+chg(st.d1)+'</span>':'n/a'))+'</span></div>';}).join('');
   var cb=['index','value','momentum'].map(function(id){var m=byId[id];return '<div class="cbar">'+esc(m.name)+' · risk '+m.risk+'/5<div class="bar"><i style="width:'+(m.risk*20)+'%"></i></div></div>';}).join('');
@@ -339,20 +339,20 @@ function viewHome(){
     ['Can I try my own amounts?','Yes. On any model page, type a dollar amount into the calculator to see how it would split across that model’s holdings.']]
     .map(function(q,i){return '<details'+(i===0?' open':'')+'><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
   return heroHtml()+'<div class="wrap"><section class="home-stories"><p class="eyebrow">the models · tap to view</p>'+storiesRow()+'</section>'+
-  '<a class="nw-promo" href="#now"><i>new</i><span>got money sitting there? <b>now what?</b></span><em>tap your situation \u2192</em></a>'+buddySection()+'<section class="intro"><p class="sub">Explore investing philosophies with example allocations, price snapshots, and side-by-side comparisons.</p>'+
+  '<a class="nw-promo" href="#now"><i>new</i><span>got money sitting there? <b>now what?</b></span><em>tap your situation \u2192</em></a>'+buddySection()+'<section class="intro"><p class="sub">see what every investing style actually owns, how bumpy it gets, and if it fits you</p>'+
    '<div class="demo"><div class="demo-h"><div><h3>Value</h3><p>Example portfolio'+(DATA?' · '+asOfTxt()+' close':'')+'</p></div>'+d1+'</div>'+heroRows+'<div class="demo-f"><span>If I invested</span><b>$10,000</b></div></div></section>'+
   '<div class="ideas"><span class="eyebrow">Built from the ideas of</span><div class="names"><span>Graham</span><span>Buffett</span><span>Lynch</span><span>Bogle</span><span>Dalio</span><span>Markowitz</span><span>Fama</span></div></div>'+
-  '<section class="s">'+hl('ModelLab makes','investing styles simple.')+'<div class="simple"><div class="steps">'+stepHtml+'</div><div class="libcard"><b>Library</b>'+lib+'</div></div></section>'+
-  '<section class="s" style="padding-top:20px">'+hl('But wait,','there’s more')+'<p class="sub center">Price snapshots, a dollar calculator, and a compare view, built into every model.</p>'+
-    '<div class="bento"><div class="bcard"><h3>Prices that stay current</h3><p>Closing prices and daily change for every ETF, from the latest market close.</p>'+tick+'</div>'+
-    '<div class="bcard"><h3>Compare up to four</h3><p>Risk, effort, and growth profiles drawn side by side so the tradeoffs are obvious.</p>'+cb+'</div>'+
-    '<div class="bcard"><h3>A dollar calculator</h3><p>Type any amount and watch it split across the holdings of each model.</p><div class="mini"><span style="color:var(--muted);font-weight:400;font-size:14px">If I invested</span><b style="font-size:20px">$10,000</b></div>'+calc+'</div></div></section>'+
+  '<section class="s">'+hl('investing styles,','minus the jargon')+'<div class="simple"><div class="steps">'+stepHtml+'</div><div class="libcard"><b>Library</b>'+lib+'</div></div></section>'+
+  '<section class="s" style="padding-top:20px">'+hl('the tools','you’ll actually use')+'<p class="sub center">prices, a dollar calculator and compare, built into every model</p>'+
+    '<div class="bento"><div class="bcard"><h3>prices that stay fresh</h3><p>closing prices and daily moves, updated every weekday after the market closes</p>'+tick+'</div>'+
+    '<div class="bcard"><h3>line up four at once</h3><p>risk, effort and growth side by side, so the tradeoffs are obvious</p>'+cb+'</div>'+
+    '<div class="bcard"><h3>a dollar calculator</h3><p>type any amount and see exactly where every dollar goes</p><div class="mini"><span style="color:var(--muted);font-weight:400;font-size:14px">If I invested</span><b style="font-size:20px">$10,000</b></div>'+calc+'</div></div></section>'+
   '<section class="s" style="padding-top:20px"><h2 class="h2">Find your style.</h2><div class="mgrid" style="margin-top:44px;padding-bottom:0">'+feat+'</div><div class="center" style="margin-top:36px"><a class="btn light" href="#library">See all models →</a></div></section>'+
-  '<section class="s" style="padding-top:20px">'+hl('Don’t just read about it.','Feel it.')+'<p class="sub center">Match a model to how you behave, live through a real crash, then get a plan you can act on.</p><div class="grid3" style="margin-top:44px">'+
-    [['Step 1 · Match','Match Quiz','Six questions about how you would actually behave, backed by how far each model really fell.','#match','Take the quiz →'],['Step 2 · Feel the risk','Pain Simulator','Invest right before a crash and decide in real time: sell, hold or buy more.','#pain','Try it →'],['Step 3 · Act','Implement It','Exact dollar amounts, share counts and a rebalance plan for any model.','#implement','Build my plan →']].map(function(c){return '<a class="mcard" href="'+c[3]+'"><span class="cat">'+c[0]+'</span><h3>'+c[1]+'</h3><p>'+c[2]+'</p><span class="go">'+c[4]+'</span></a>';}).join('')+
+  '<section class="s" style="padding-top:20px">'+hl('don’t just read about it','feel it')+'<p class="sub center">match a model to how you’d actually act, live through a real crash, then get a plan you can use</p><div class="grid3" style="margin-top:44px">'+
+    [['Step 1 · Match','Match Quiz','six questions about how you’d actually act, backed by how far each model really fell','#match','Take the quiz →'],['Step 2 · Feel the risk','Pain Simulator','invest right before a real crash and decide live: sell, hold or buy more','#pain','Try it →'],['Step 3 · Act','Implement It','exact dollar amounts, share counts and a rebalance plan for any model','#implement','Build my plan →']].map(function(c){return '<a class="mcard" href="'+c[3]+'"><span class="cat">'+c[0]+'</span><h3>'+c[1]+'</h3><p>'+c[2]+'</p><span class="go">'+c[4]+'</span></a>';}).join('')+
     '</div><div class="center" style="margin-top:36px"><a class="btn light" href="#tools">See all tools →</a></div></section>'+
-  '<section class="s"><h2 class="h2">Frequently asked questions</h2><p class="sub center">Everything you need to know about ModelLab</p><div class="faq">'+faq+'</div></section></div>'+
-  '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('Find the model','that fits how you invest.').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">Educational only · not investment advice</p></div></div></section>';
+  '<section class="s"><h2 class="h2">questions people ask</h2><p class="sub center">honest answers, no fine print games</p><div class="faq">'+faq+'</div></section></div>'+
+  '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('find the model','that fits how you invest').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#library">Explore the library →</a><p class="mm-trust">Educational only · not investment advice</p></div></div></section>';
 }
 
 var TIERS={risk:['risk',['chill','steady','mid','spicy','full send']],effort:['effort',['set & forget','low-key','some homework','side quest','main character']],growth:['growth',['protect the bag','slow & steady','balanced','growth era','big swings']]};
@@ -364,7 +364,7 @@ function viewLibrary(){
   var ld=LABDROP[LABDROP.length-1],lm=byId[ld.id];
   var rows=[5,4,3,2,1].map(function(lv){var ms=list.filter(function(m){return m[key]===lv;});
     return '<div class="tier t'+lv+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">nobody here yet</span>')+'</div></div>';}).join('');
-  return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">Every investing model, sorted into a tier list. Tap one to see the portfolio.</p>'+
+  return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">every investing model, ranked in a tier list. tap one to see what it owns</p>'+
    '<a class="lib-new" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
    '<div class="tl-ctrl"><div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
    (buddyIn()?'':'<a class="lib-sms" href="#text">\uD83D\uDCF1 get every new drop by text \u2192</a>')+'<div class="tierlist">'+rows+'</div><p class="note tier-note">Rows are our 1–5 '+T[0]+' ratings, not a ranking of which model is better. Ratings are editorial.</p></div>';
@@ -411,6 +411,7 @@ function viewModel(id){
    '<div class="two"><div class="panel wb"><h3>Works best when</h3><p>'+esc(m.best)+'</p><h3 style="margin-top:6px">Struggles when</h3><p>'+esc(m.worst)+'</p></div>'+
    '<div class="panel wb" style="background:var(--lilac)"><h3>Who it suits</h3><p>'+esc(m.suits)+'</p><div class="btns"><button class="btn pri sm" data-cmp="'+m.id+'" aria-pressed="false">'+(inCmp?'In comparison ✓':'Add to compare')+'</button><a class="btn light sm" href="#compare">Open compare</a></div></div></div>'+
    (window.ML&&ML.modelTools?ML.modelTools(m):'')+
+   (window.ML&&ML.deepDive?ML.deepDive(m):'')+
    (window.faqFor?'<div class="panel mfaq"><h2>FAQ</h2>'+faqFor(m).map(function(q){return '<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>';}).join('')+'</div>':'')+
    '<div class="pager"><a class="btn light" href="#m-'+prev.id+'">← '+esc(prev.name)+'</a><a class="btn light" href="#m-'+next.id+'">'+esc(next.name)+' →</a></div></div></div>';
 }
@@ -468,10 +469,10 @@ function viewBuddy(){
   if(b.step>=1)msgs.push(['out','yo let’s do this']);
   if(b.step>=1)msgs.push(['in','what are you locking in on?']);
   if(b.step>=2)msgs.push(['out',BD_GOALS.filter(function(g){return g[0]===b.goal;})[0][1]]);
-  if(b.step>=2)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'say less. bite-size only, promise':'bet. the match quiz helps, then i keep you on it'))]);
+  if(b.step>=2)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'got you. bite-size only, promise':'ok cool. the match quiz helps, then i keep you on it'))]);
   if(b.step>=2)msgs.push(['in','how often can i text you?']);
   if(b.step>=3)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
-  if(b.step>=3)msgs.push(['in',mm?'perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind':'perfect. drop your number and you’re in 📱']);
+  if(b.step>=3)msgs.push(['in',mm?'perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind':'perfect. drop your number and you’re in 🔒']);
   if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','texts start as soon as our number goes live, then every lab drop after. reply STOP anytime.']);}
   if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
@@ -600,6 +601,7 @@ function paintPop(){
   if(onText||(buddyIn()&&!POP.open)){w.innerHTML='';return;}
   w.innerHTML=POP.open?popHtml():launcherHtml();w.className=POP.open?'open':'';
 }
+(function(){var y0=0,t;addEventListener('scroll',function(){var w=document.getElementById('tpop');if(!w)return;var y=scrollY;if(y>y0+6&&y>120)w.classList.add('tp-away');else if(y<y0-6)w.classList.remove('tp-away');y0=y;clearTimeout(t);t=setTimeout(function(){w.classList.remove('tp-away');},900);},{passive:true});})();
 function popAuto(){if(POP.open||buddyIn()||popSnoozed())return;setTimeout(function(){if(curH()==='#home'&&!POP.open&&!buddyIn()&&!popSnoozed()){POP.open=true;paintPop();}},4500);}
 function popSubmit(){
   var ph=normPhone(document.getElementById('tp-ph').value),ok=document.getElementById('tp-ok').checked;
@@ -638,7 +640,7 @@ function viewPrivacy(){
 }
 function viewAbout(){
   var links=[['#text','text buddy \uD83D\uDCF1','your personalized investing tool, in your texts'],['#library','the library','every model, as a portfolio'],['#tools','tools','match quiz, pain simulator, stress test'],['#compare','compare','line up to four models'],['#leaderboard','leaderboard','virtual portfolios, no real money'],[unlocked()?'#m-'+LABDROP[LABDROP.length-1].id:'#follow-cta','lab drop','a new model every week'+(unlocked()?' · latest: '+byId[LABDROP[LABDROP.length-1].id].name:' · follow to get it')],['https://hidanielkang.com','made by daniel kang','hidanielkang.com']];
-  return '<div class="wrap"><div class="bio"><span class="av xl ring"><span>'+LOGO+'</span></span><h1 class="bio-h">@modellab</h1><p class="bio-t">investing models, made understandable. free to browse.</p>'+
+  return '<div class="wrap"><div class="bio"><span class="av xl ring"><span>'+LOGO+'</span></span><h1 class="bio-h">@modellab</h1><p class="bio-t">investing models, minus the jargon. free to browse</p>'+
    '<div class="bio-l">'+links.map(function(l){var ext=l[0].indexOf('http')===0;return '<a class="bio-a" href="'+l[0]+'"'+(ext?' target="_blank" rel="noopener"':'')+'><b>'+l[1]+'</b><small>'+l[2]+'</small></a>';}).join('')+'</div>'+(unlocked()?'':'<div id="follow-cta"></div>'+gatePanel('follow @modellab','Get the Lab Drop every week and unlock live prices.','about'))+'</div><div class="about">'+
    '<div class="panel" style="background:var(--lilac)"><h2>Why it exists</h2><p class="b">Terms like value, momentum and all-weather get thrown around, but it is hard to see what each one looks like as a real portfolio. ModelLab shows the belief behind each style, the rules, and an example allocation, so you can understand the tradeoffs before you decide anything.</p></div>'+
    '<div class="panel"><h2>What you can do here</h2><ul><li>Read how each investing model thinks, in plain language.</li><li>See an example portfolio, its weights, and a dollar calculator.</li><li>Check price snapshots from the latest close.</li><li>Compare models side by side and find the ones closest to how you think about risk.</li><li>Take the Match Quiz, live through a real crash in the Pain Simulator, stress test every model, and turn one into a dollar-by-dollar plan.</li><li>Test your own mix against up to 100 years of history and compete on the leaderboard with a virtual portfolio.</li></ul></div>'+
@@ -654,9 +656,48 @@ function viewAbout(){
    '<div class="panel" style="background:var(--peach)"><h2>The fine print</h2><p class="b">ModelLab is an educational project by Daniel Kang. Every allocation is a hypothetical example using public funds. Nothing here is investment advice, a recommendation, or a record of performance. Price changes are price only and exclude dividends, fees and rebalancing. Historical tool results use long-run proxy series (see each tool\u2019s notes) and are not the funds\u2019 own returns. Risk, effort and growth ratings are editorial judgments, not measured data.</p></div></div></div>';
 }
 
+
+
+/* ---------- your data ---------- */
+var DLAB={ml_sub:'you followed @modellab (unlocks prices)',ml_email:'the email you followed with',ml_buddy:'you signed up for text buddy',ml_match:'your match quiz result',ml_goals:'goals you saved in the goal simulator',ml_prog:'which tool steps you finished',ml_bell:'notifications you’ve read',ml_seen:'models you’ve viewed',ml_pop_snooze:'when you closed the text buddy popup',ml_cmp:'models in your compare list'};
+function myData(){var o={};try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ml_')===0)o[k]=localStorage.getItem(k);}}catch(e){}return o;}
+function viewData(){
+  var d=myData(),ks=Object.keys(d).sort();
+  var rows=ks.length?'<ul class="dt-list">'+ks.map(function(k){var v=String(d[k]);return '<li><b>'+esc(DLAB[k]||k)+'</b><code>'+esc(v.length>80?v.slice(0,80)+'…':v)+'</code></li>';}).join('')+'</ul>':'<p class="b">nothing saved on this device yet</p>';
+  return '<div class="wrap"><div class="phead"><h1 class="display">Your data.</h1><p class="sub">what ModelLab knows about you, and how to take it back</p></div><div class="stack">'+
+   '<div class="panel sh"><h2>On this device</h2><p class="b" style="margin-bottom:12px">saved in your browser only. we can’t see it, and it never leaves your device</p>'+rows+
+    '<div class="btns" style="margin-top:16px"><button class="btn light sm" data-dt="copy"'+(ks.length?'':' disabled')+'>copy it all</button><button class="btn light sm" data-dt="clear"'+(ks.length?'':' disabled')+'>clear it all</button></div><p class="note" id="dt-msg" aria-live="polite"></p></div>'+
+   '<div class="panel sh"><h2>Email and phone</h2><ul><li>if you followed with your email or signed up for texts, your email or number is stored with Klaviyo, the service that sends our emails and texts, along with the answers you picked (like your goal or quiz result)</li>'+
+    '<li><b>stop texts:</b> reply STOP to any text</li><li><b>stop emails:</b> click unsubscribe at the bottom of any email</li>'+
+    '<li><b>see or delete everything:</b> email <a href="mailto:modellab@hidanielkang.com">modellab@hidanielkang.com</a> (modellab@hidanielkang.com) and we’ll send you a copy or delete it, usually within a few days</li></ul>'+
+    '<p class="note" style="margin-top:10px">we never sell your info. full details in the <a href="#privacy">privacy policy</a></p></div></div></div>';
+}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-dt]');if(!t)return;var a=t.getAttribute('data-dt'),m=document.getElementById('dt-msg');
+  if(a==='copy'){var txt=JSON.stringify(myData(),null,2);try{navigator.clipboard.writeText(txt).then(function(){if(m)m.textContent='copied';},function(){if(m)m.textContent='couldn’t copy here';});}catch(x){if(m)m.textContent='couldn’t copy here';}}
+  else if(a==='clear'){t.setAttribute('data-dt','clear2');t.textContent='tap again to confirm';}
+  else if(a==='clear2'){try{Object.keys(myData()).forEach(function(k){localStorage.removeItem(k);});}catch(x){}rerender();var mm=document.getElementById('dt-msg');if(mm)mm.textContent='cleared from this device';}});
+
+/* ---------- site search ---------- */
+function srchItems(){
+  var it=MODELS.map(function(m){return {t:m.name,s:m.cat+' · '+m.tag,h:'#m-'+m.id,k:(m.name+' '+m.cat+' '+m.tag+' '+m.belief+' '+m.hold.map(function(x){return x[0]+' '+x[1];}).join(' ')).toLowerCase()};});
+  var pages=[['library','the library','every model in a tier list'],['compare','compare','line up four models'],['now','now what?','what to do with the money you have'],['text','text buddy','your personalized investing tool, in your texts'],['tools','tools','quiz, pain simulator, stress test and more'],['match','match quiz','find the model that fits how you act'],['pain','pain simulator','live through a real crash'],['stress','stress test','every model vs six crashes'],['goal','goal simulator','run your plan 1,000 ways'],['implement','implement it','dollar amounts and a rebalance plan'],['overlap','overlap checker','see what you already own'],['build','build your own','test your own mix'],['leaderboard','leaderboard','virtual portfolios, no real money'],['about','about','how ModelLab works'],['data','your data','see, export or delete what we store'],['privacy','privacy policy',''],['sms-terms','sms terms','']];
+  return it.concat(pages.map(function(p){return {t:p[1],s:p[2],h:'#'+p[0],k:(p[1]+' '+p[2]+' '+p[0]).toLowerCase()};}));
+}
+function srchPaint(q){var box=document.getElementById('srch-r');if(!box)return;q=(q||'').trim().toLowerCase();var it=srchItems();
+  var res=q?it.filter(function(x){return q.split(/\s+/).every(function(w){return x.k.indexOf(w)>-1;});}).sort(function(a,b){return (b.t.toLowerCase().indexOf(q)===0)-(a.t.toLowerCase().indexOf(q)===0);}):it.slice(MODELS.length,MODELS.length+6).concat(it.slice(0,4));
+  box.innerHTML=res.length?res.slice(0,12).map(function(x){return '<a href="'+x.h+'" data-search="go"><b>'+esc(x.t)+'</b>'+(x.s?'<small>'+esc(x.s)+'</small>':'')+'</a>';}).join(''):'<p class="srch-none">nothing matches that. try a style like “value” or a ticker like “VTI”</p>';}
+function srchOpen(){var o=document.getElementById('srch');if(!o){o=document.createElement('div');o.id='srch';o.setAttribute('role','dialog');o.setAttribute('aria-label','Search');
+  o.innerHTML='<div class="srch-in"><div class="srch-bar"><input id="srch-q" type="search" placeholder="search models, tools, tickers…" autocomplete="off" aria-label="Search"><button data-search="close" aria-label="Close search">esc</button></div><div id="srch-r"></div></div>';document.body.appendChild(o);}
+  o.classList.add('on');srchPaint('');var q=document.getElementById('srch-q');q.value='';setTimeout(function(){q.focus();},20);}
+function srchClose(){var o=document.getElementById('srch');if(o)o.classList.remove('on');}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-search]');if(t){var a=t.getAttribute('data-search');if(a==='open'){e.preventDefault();srchOpen();}else if(a==='close'){srchClose();}else if(a==='go'){srchClose();}return;}if(e.target.id==='srch')srchClose();});
+document.addEventListener('input',function(e){if(e.target.id==='srch-q')srchPaint(e.target.value);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')srchClose();else if(e.key==='/'&&!/input|textarea|select/i.test((e.target.tagName||''))){e.preventDefault();srchOpen();}
+  else if(e.key==='Enter'&&e.target.id==='srch-q'){var f=document.querySelector('#srch-r a');if(f){f.click();}}});
+
 /* ---------- router and events ---------- */
 /* ---------- real URLs: /models/value/, /tools/pain/ (legacy #hash links still work) ---------- */
-var BASE=new URL('.',document.baseURI).pathname,TOOLN=['match','pain','stress','implement','overlap','build'];
+var BASE=new URL('.',document.baseURI).pathname,TOOLN=['match','pain','stress','implement','overlap','build','goal'];
 function fromPath(p){p=(p||'').replace(/^\/+|\/+$/g,'');if(!p)return '#home';if(p.indexOf('models/')===0)return '#m-'+p.slice(7);if(p.indexOf('tools/')===0&&p.length>6)return '#'+p.slice(6);return '#'+p;}
 function toPath(h){h=(h||'').replace(/^#/,'');if(!h||h==='home')return '';if(h.indexOf('m-')===0)return 'models/'+h.slice(2)+'/';var n=h.split('/')[0];return (TOOLN.indexOf(n)>-1?'tools/':'')+h.replace(/\/+$/,'')+'/';}
 function curH(){var p=decodeURIComponent(location.pathname).slice(BASE.length);if(!p.replace(/\//g,'')&&location.hash.length>1)return location.hash;return fromPath(p);}
@@ -700,7 +741,7 @@ function glClose(){if(glPop){glPop.remove();glPop=null;}document.querySelectorAl
 function glOpen(b){glClose();var p=document.createElement('div');p.className='gl-pop';p.setAttribute('role','tooltip');p.innerHTML='<b>'+esc(b.textContent)+'</b> '+esc(b.getAttribute('data-gl'));document.body.appendChild(p);
   var r=b.getBoundingClientRect(),pw=p.offsetWidth,x=Math.max(12,Math.min(window.innerWidth-pw-12,r.left+r.width/2-pw/2)),above=r.top>p.offsetHeight+24;
   p.style.left=(x+window.scrollX)+'px';p.style.top=((above?r.top-p.offsetHeight-8:r.bottom+8)+window.scrollY)+'px';b.setAttribute('aria-expanded','true');glPop=p;}
-var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};ROUTES.now={view:viewNow,nav:'now'};
+var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};ROUTES.now={view:viewNow,nav:'now'};ROUTES.data={view:viewData};
 var view=$('#view'),foot=$('#foot');
 function render(keep){
   var hash=curH().slice(1),html,nav='',home=false;
