@@ -19,11 +19,11 @@ def daily_yahoo(t):
     j = json.loads(_get(f"https://query1.finance.yahoo.com/v8/finance/chart/{t}?range=11y&interval=1d&includePrePost=false"))
     r = j["chart"]["result"][0]
     ts, closes = r["timestamp"], r["indicators"]["quote"][0]["close"]
-    out = [(dt.datetime.utcfromtimestamp(a).date().isoformat(), float(c)) for a, c in zip(ts, closes) if c is not None]
+    out = [(dt.datetime.fromtimestamp(a, dt.timezone.utc).date().isoformat(), float(c)) for a, c in zip(ts, closes) if c is not None]
     # Drop today's unfinished bar if the market is still open
     meta = r.get("meta", {})
-    if meta.get("currentTradingPeriod", {}).get("regular", {}).get("end", 0) > dt.datetime.utcnow().timestamp() and len(out) > 1:
-        if out[-1][0] == dt.datetime.utcnow().date().isoformat():
+    if meta.get("currentTradingPeriod", {}).get("regular", {}).get("end", 0) > dt.datetime.now(dt.timezone.utc).timestamp() and len(out) > 1:
+        if out[-1][0] == dt.datetime.now(dt.timezone.utc).date().isoformat():
             out = out[:-1]
     return out
 
@@ -87,7 +87,7 @@ def main():
     months = [f"{y}-{m:02d}" for y, m in MONTHS(ld)]
     data = {
         "asOf": f"{last_date}T21:00:00Z",
-        "pulledAt": dt.datetime.utcnow().isoformat() + "Z",
+        "pulledAt": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "session": "closed",
         "source": ("Yahoo Finance" if SRC["yahoo"] >= SRC["stooq"] else "Stooq") + " daily closes, refreshed every weekday after the US close",
         "priceBasis": "price return, excludes dividends",
