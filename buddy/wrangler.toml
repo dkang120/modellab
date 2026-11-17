@@ -15,7 +15,7 @@ MODEL = "claude-haiku-5-5"
 # The AI may use at most this many credits a month; scheduled texts keep the rest.
 MONTHLY_CREDIT_CAP = "80"
 PER_PERSON_MONTHLY = "6"
-ALERT_EMAIL = "kangd@masters.edu"
+ALERT_EMAIL = "kangd4u@gmail.com"
 
 # Secrets (set in the Cloudflare dashboard, never in this file):
 #   ANTHROPIC_API_KEY  - Claude API key
