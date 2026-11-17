@@ -16,7 +16,7 @@ LEVELS = [20, 10, 5]
 TEXTS = {
     5: "market's down 5% from the top. pretty normal tbh, happens most years. you good?",
     10: 'down 10% now. this is where people start googling "should i sell" \U0001F605 your plan > the headlines',
-    20: "down 20%. ngl that's rough. stocks have fallen this far before and came back. see how holding played out: dkang120.github.io/modellab/tools/pain/",
+    20: "down 20%. ngl that's rough. stocks have fallen this far before and came back. see how holding played out: modellab.hidanielkang.com/tools/pain/",
 }
 RESET_ABOVE = -3.0
 MIN_DAYS = 7
