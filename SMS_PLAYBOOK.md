@@ -87,8 +87,9 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 - Flow: **Welcome** (RppiPm), **live**. 1a welcome, then 2 minutes later a 1b text picked by `buddy_goal`. The first text carries the "ModelLab:" prefix.
 - Flow: **Now What? plan check-in** (WKYd6p), draft. Only for `buddy_source = modellab.now`. 14 days after signup, one text based on the first step in `now_plan` (emergency fund, card debt, park it, 401(k) match, or model auto-buy).
 - Flow: **Re-engage at 45 days** (WiNVcU), draft. 45 days after signup, only if they never clicked or replied: section 5 text.
+- Flow: **Lab Drop series** (QSmw8B), draft. Starts 7 days after signup, then one model every 2 weeks (13 drops, ~2 texts a month to stay inside the consent wording). No emoji, so each text stays 1 credit.
 - Segment: **Text Buddy: goal = investing monthly** (Re3hUw).
-- Campaign drafts: Lab Drop #1 dogs of the dow (duplicate weekly); dip check-ins at -5%, -10%, -20% (send only when it happens, max 1 a week); monthly habit check to segment Re3hUw (duplicate monthly).
+- Campaign drafts: Lab Drop #1 dogs of the dow (one-off, optional now that the series flow exists); dip check-ins at -5%, -10%, -20% (send only when it happens, max 1 a week); monthly habit check to segment Re3hUw (duplicate monthly).
 - Keyword replies (HELP text, LESS, Y/N, SELL): set up by hand in Klaviyo, Settings > SMS > Keywords. No API for it.
 - Account settings: org prefix "ModelLab", opt-out text "Text STOP to opt-out".
 
@@ -97,3 +98,6 @@ About 2–4 texts per person per month. Klaviyo's free plan includes 150 SMS cre
 2. Segment on `buddy_source = modellab.text`; confirm consent status before the first send.
 3. Build flows 1, 3, 4, 5 and the keyword replies as flows; send the Lab Drop as a weekly campaign.
 4. Re-check the slang and emoji lists against the rulebook every quarter.
+
+## Email (redesigned Nov 17, 2026)
+- **ModelLab Welcome** (WxP5LZ) and **Weekly Series, 13 weeks** (UMtJqn): live, automatic, new Gen Z design (gradient, chat bubbles, @model profiles) with a text buddy block in every email. Subjects: `new drop 🧪 @model: hook`.
