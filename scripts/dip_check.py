@@ -58,7 +58,10 @@ def send(level, key, today):
             "content": {"body": TEXTS[level]},
             "render_options": {"shorten_links": True, "add_org_prefix": True,
                                "add_info_link": False, "add_opt_out_language": False}}}]}}}}, key)
-    cid = camp["data"]["id"]
+    d = camp["data"]
+    # Klaviyo may answer with the campaign or with its message; send jobs need the campaign id.
+    cid = d["id"] if d.get("type") == "campaign" else d["relationships"]["campaign"]["data"]["id"]
+    print(f"dip check: created {d.get('type')} {d['id']}, campaign {cid}")
     if os.environ.get("DIP_TEST") == "true":
         print(f"dip check: TEST created draft campaign {cid}, not sent")
         return cid
