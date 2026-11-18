@@ -79,7 +79,7 @@ export function approvalGuard(out) {
   if (!APPROVAL.test(r)) return r;
   const parts = r.split(/(?<=[.!?])\s+|,\s+(?=(?:but|and|so|though)\b)/);
   const kept = parts.filter(p => !APPROVAL.test(p)).join(" ").replace(/\s{2,}/g, " ").trim();
-  return kept.length >= 20 ? kept : r;   // if the whole text is the approval, leave it (judge/test will flag it)
+  return kept.length >= 12 ? kept : r;   // if the whole text is the approval, leave it (judge/test will flag it)
 }
 // Links only when they asked for something a page answers.
 const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|where (can|do|is)|quiz|sim\b|simulator|tool|how bad|chart|history|look (at|it up)|send (me|it)|read more|learn more)/i;
