@@ -1,0 +1,100 @@
+name: Simulated user test
+
+# Run from your phone: repo → Actions → "Simulated user test" → Run workflow.
+# AI personas text the buddy (same prompt/model as production). No texts are sent; no Klaviyo credits used.
+# Spend is capped across ALL runs by the budget input (tracked in a ledger kept in the Actions cache).
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Run name (reuse a name to resume it)'
+        default: 'pilot'
+      total:
+        description: 'Number of conversations'
+        default: '30'
+      budget:
+        description: 'Max total spend in USD across all runs'
+        default: '3'
+      turns:
+        description: 'Max texts per side in each conversation'
+        default: '6'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: simtest
+  cancel-in-progress: false
+
+jobs:
+  simtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check API key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Missing secret ANTHROPIC_API_KEY. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Restore ledger and saved runs
+        uses: actions/cache/restore@v4
+        with:
+          path: simtest-out
+          key: simtest-${{ github.run_id }}
+          restore-keys: simtest-
+
+      - name: Run simulated conversations
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RUN_NAME: ${{ inputs.name }}
+          TOTAL: ${{ inputs.total }}
+          BUDGET: ${{ inputs.budget }}
+          TURNS: ${{ inputs.turns }}
+        run: node simtest/run.mjs --name "$RUN_NAME" --total "$TOTAL" --budget "$BUDGET" --turns "$TURNS" --out simtest-out
+
+      - name: Save ledger and runs
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: simtest-out
+          key: simtest-${{ github.run_id }}
+
+      - name: Show report
+        if: always()
+        env:
+          RUN_NAME: ${{ inputs.name }}
+        run: |
+          if [ -f "simtest-out/$RUN_NAME/report.md" ]; then cat "simtest-out/$RUN_NAME/report.md" >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Commit report to the repo
+        if: always()
+        env:
+          RUN_NAME: ${{ inputs.name }}
+        run: |
+          [ -f "simtest-out/$RUN_NAME/report.md" ] || exit 0
+          mkdir -p "simtest/results/$RUN_NAME"
+          cp "simtest-out/$RUN_NAME/report.md" "simtest-out/$RUN_NAME/dataset.jsonl" "simtest/results/$RUN_NAME/"
+          cp simtest-out/ledger.json simtest/results/ledger.json
+          git config user.name "modellab-simtest"
+          git config user.email "simtest@users.noreply.github.com"
+          git add simtest/results
+          git diff --cached --quiet && exit 0
+          git commit -m "simtest: $RUN_NAME report [skip ci]"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simtest-${{ inputs.name }}
+          path: simtest-out/${{ inputs.name }}
