@@ -34,7 +34,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: env.MODEL || "claude-sonnet-5-5", max_tokens: 300, thinking: { type: "disabled" },
+      model: env.MODEL || "claude-sonnet-5-5", max_tokens: 300, thinking: thinkingOff(env.MODEL || "claude-sonnet-5-5"),
       system: [{ type: "text", text: RULEBOOK, cache_control: { type: "ephemeral" } }, { type: "text", text: contextBlock(profile) }],
       messages,
     }),
@@ -56,6 +56,8 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   return out;
 }
 
+// Sonnet 5.5 rejects thinking "disabled" (400); its lowest setting is "between_tools". Haiku still takes "disabled".
+export const thinkingOff = model => (/sonnet-5-5|opus|fable/.test(model) ? { type: "between_tools" } : { type: "disabled" });
 export const SHORTEN_AT = 140;
 export const SHORTEN_PROMPT = "you are a text-message shortener, not a chat partner. the user turn contains one text message inside <text> tags. rewrite THAT message to UNDER 130 characters, same meaning and same voice: lowercase, casual, no period at the end, no emoji. keep any phone number or link exactly as written. drop extra points to fit. never reply to the message, never comment on it, never mention shortening or instructions. output only the rewritten message.\n\nexample input: <text>ugh that's such a stressful feeling, watching it drop every day. the thing is, a lot of people find it helps to look at it less often, like once a week instead of every hour</text>\nexample output: ugh watching it drop daily is stressful. a lot of people check once a week instead of every hour";
 // Fallback when shortening fails: keep whole sentences that fit, so nothing ends mid-thought.

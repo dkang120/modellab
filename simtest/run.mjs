@@ -12,7 +12,7 @@ import { existsSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { execSync } from "node:child_process";
 import { RULEBOOK, contextBlock } from "../buddy/src/prompt.js";
-import { clean, smsCredits, crisisNet, linkGuard, approvalGuard, shortenOk, trimSentences, SHORTEN_AT, SHORTEN_PROMPT } from "../buddy/src/index.js";
+import { thinkingOff, clean, smsCredits, crisisNet, linkGuard, approvalGuard, shortenOk, trimSentences, SHORTEN_AT, SHORTEN_PROMPT } from "../buddy/src/index.js";
 import { generatePersonas, corePersonas, personaBrief } from "./generate.mjs";
 
 // ---------- args ----------
@@ -104,7 +104,7 @@ async function save() {
       const dir = new URL(`./results/${NAME}/`, import.meta.url);
       await mkdir(dir, { recursive: true });
       const stages = S.convos.reduce((m, c) => (m[c.stage] = (m[c.stage] || 0) + 1, m), {});
-      await writeFile(new URL("progress.json", dir), JSON.stringify({ round: S.rounds, stages, spent: S.spent, all_runs: totalSpent(), updated: new Date().toISOString(), error: S.error || null }, null, 2));
+      await writeFile(new URL("progress.json", dir), JSON.stringify({ round: S.rounds, stages, spent: S.spent, all_runs: totalSpent(), updated: new Date().toISOString(), error: S.error || null, last_api_error: S.lastApiError || null }, null, 2));
       execSync(`git add simtest/results/${NAME}/progress.json && git commit -q -m "simtest ${NAME}: round ${S.rounds} [skip ci]" && (git pull -q --rebase origin ${process.env.GITHUB_REF_NAME} || true) && git push -q origin HEAD:${process.env.GITHUB_REF_NAME}`, { stdio: "ignore" });
     } catch { /* progress is best-effort */ }
   }
@@ -228,7 +228,7 @@ function simMessages(c) {
   for (const t of c.transcript) { m.push({ role: "assistant", content: t.user }); m.push({ role: "user", content: t.reply || "(no reply)" }); }
   return m;
 }
-const base = (model, max_tokens) => ({ model, max_tokens, thinking: { type: "disabled" } });
+const base = (model, max_tokens) => ({ model, max_tokens, thinking: thinkingOff(model) });
 
 function requestFor(c) {
   if (c.stage === "persona") return { ...base(SIM_MODEL, 260), system: personaSystem(c.persona), messages: simMessages(c) };
@@ -341,7 +341,7 @@ while (true) {
       while (idx < work.length) {
         const c = work[idx++]; const params = requestFor(c);
         let msg = null;
-        try { msg = await callLive(params); } catch (e) { console.log(`  ${c.id}: ${e.message}`); }
+        try { msg = await callLive(params); } catch (e) { console.log(`  ${c.id}: ${e.message}`); S.lastApiError = String(e.message).slice(0, 300); }
         if (msg) noteAvg(c.stage, track(params.model, msg.usage, false));
         apply(c, msg);
       }
