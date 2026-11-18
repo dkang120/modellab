@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "stages": {
+    "persona": 5,
+    "stopped": 16,
+    "shorten": 1
+  },
+  "spent": 0.062694,
+  "all_runs": 3.802850349999998,
+  "updated": "2026-11-18T16:48:07.958Z",
+  "error": null,
+  "last_api_error": null
+}
