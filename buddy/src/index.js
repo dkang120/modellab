@@ -49,7 +49,9 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
   if (out && clean(out).length > SHORTEN_AT) out = trimSentences(out);
   if (flagged) out = "[HUMAN]" + out;
-  out = crisisNet(text, approvalGuard(linkGuard(text, out)));
+  const prior = [...history].reverse().find(m => m.role === "user")?.content || "";
+  const already = history.some(m => m.role === "assistant" && /MY-RESET|988/.test(m.content || ""));
+  out = crisisNet(text, approvalGuard(linkGuard(text, out)), prior, already);
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
@@ -95,15 +97,19 @@ export function linkGuard(theirText, out) {
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
 // Safety net if the model misses a crisis: code-level check on the person's text.
-const HOPELESS = /(what'?s (even )?the point( of (anything|living|trying))?( anymore)?\s*[?.!]*$|done with everything|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist)|no reason to (live|keep going)|kill (my ?self)|suicid|end (it all|my life)|better off (dead|without me)|hurt (my ?self))/i;
-const GAMBLING_LOSS = /(lost|losing|blew|down)\b.{0,40}\b(bet|bets|betting|parlay|sportsbook|casino|options|gambl)/i;
-export function crisisNet(theirText, out) {
-  const t = String(theirText || "");
-  const hopeless = HOPELESS.test(t), gamble = GAMBLING_LOSS.test(t) && /(rent|bills|can'?t (pay|cover)|owe|all my|win it back)/i.test(t);
+const HOPELESS = /(what'?s (even )?the point( anymore| of (even )?(anything|living|trying|it all|getting up|any of (this|it)))|what'?s (even )?the point\s*[?.!]*$|done with everything|(life|everything|it all) (feels|is) (pointless|hopeless)|tired of (feeling like this|everything|living)|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist|wake up)|no reason to (live|keep going)|kill (my ?self)|suicid|end (it all|my life)|better off (dead|without me)|hurt (my ?self)|give up on everything)/i;
+const LOSS = /(lost|losing|blew|blown|down (like )?\$?\d|in the hole|wiped out|make (it |that |this )?back|win (it |that )?back|get back to even|chas(e|ing) (it|the loss))/i;
+const GAMBLE_WORDS = /(bet|bets|betting|parlay|sportsbook|casino|options|calls\b|puts\b|0dte|gambl|slots|draftkings|fanduel)/i;
+const NEED = /(rent|bills|can'?t (pay|cover|afford)|owe|all my|everything i had|back to even|win it back|make (it )?back|evict)/i;
+// Safety net if the model misses a crisis. theirText = this text; prior = their previous text; already = already flagged in this chat.
+export function crisisNet(theirText, out, prior = "", already = false) {
+  const t = String(theirText || ""), both = `${prior || ""} ${t}`;
+  const hopeless = HOPELESS.test(t);
+  const gamble = !already && GAMBLE_WORDS.test(both) && LOSS.test(both) && NEED.test(both);
   if (!hopeless && !gamble) return out;
   let r = String(out || "").replace("[HUMAN]", "").trim();
   if (hopeless && !/988/.test(r)) r = "i'm really glad you told me. you can call or text 988 anytime, and daniel will check in on you";
-  else if (gamble && !/988|MY-RESET/i.test(r)) r = "that's a lot to carry. 1-800-MY-RESET is free and 24/7 for gambling stuff, and daniel will check in on you";
+  else if (gamble && !/988|MY-RESET/i.test(r)) r = (r ? r.replace(/[.!?\s]*$/, "") + ". " : "") + "1-800-MY-RESET is free and 24/7 for gambling stuff, and daniel will check in";
   return "[HUMAN]" + r;
 }
 

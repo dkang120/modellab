@@ -56,6 +56,17 @@ await mkdir(RUN_DIR, { recursive: true });
 const ledger = existsSync(LEDGER) ? JSON.parse(await readFile(LEDGER, "utf8")) : { total_spent_usd: 0, runs: {} };
 // Safety: also count spend recorded in the repo copy, in case the Actions cache was lost.
 const REPO_LEDGER = new URL("./results/ledger.json", import.meta.url);
+{
+  const { readdirSync } = await import("node:fs");
+  const resDir = new URL("./results/", import.meta.url);
+  if (existsSync(resDir)) for (const d of readdirSync(resDir)) {
+    const pf = new URL(`./results/${d}/progress.json`, import.meta.url);
+    if (!existsSync(pf)) continue;
+    const pr = JSON.parse(await readFile(pf, "utf8"));
+    if (typeof pr.spent === "number" && (!ledger.runs[d] || ledger.runs[d].spent < pr.spent)) ledger.runs[d] = { spent: pr.spent, conversations: null, done: pr.stages?.done || 0, updated: pr.updated };
+  }
+  ledger.total_spent_usd = Object.values(ledger.runs).reduce((s, r) => s + r.spent, 0);
+}
 if (existsSync(REPO_LEDGER)) {
   const repo = JSON.parse(await readFile(REPO_LEDGER, "utf8"));
   for (const [k, r] of Object.entries(repo.runs || {})) if (!ledger.runs[k] || ledger.runs[k].spent < r.spent) ledger.runs[k] = r;
@@ -226,7 +237,9 @@ function checks(reply) {
 }
 
 function finishBuddy(c, raw) {
-  let reply = clean(crisisNet(c.pendingUser, approvalGuard(linkGuard(c.pendingUser, raw || "")))), human = false;
+  const prior = c.transcript.length ? c.transcript[c.transcript.length - 1].user : "";
+  const already = c.transcript.some(t => /MY-RESET|988/.test(t.reply || ""));
+  let reply = clean(crisisNet(c.pendingUser, approvalGuard(linkGuard(c.pendingUser, raw || "")), prior, already)), human = false;
   if (reply.startsWith("[HUMAN]")) { human = true; reply = reply.replace("[HUMAN]", "").trim(); }
   c.transcript.push({ user: c.pendingUser, reply, human, credits: reply ? smsCredits(reply) : 0, checks: checks(reply) });
   c.hist = [...c.hist, { role: "user", content: c.pendingUser }, { role: "assistant", content: reply || "…" }].slice(-12);
