@@ -1,1 +1,1 @@
-{ "name": "r1", "total": 500, "budget": 3, "turns": 6, "seed": 101, "mode": "batch" }
+{ "name": "r1", "total": 500, "budget": 3, "turns": 6, "seed": 101, "mode": "batch", "nonce": 2 }
