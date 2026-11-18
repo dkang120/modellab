@@ -27,8 +27,9 @@ on:
 permissions:
   contents: write
 
+# Each run gets its own lane; the shared $ ledger (cache + repo copy) keeps total spend capped.
 concurrency:
-  group: simtest
+  group: simtest-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -67,9 +68,9 @@ jobs:
           IN_TURNS: ${{ inputs.turns }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            node -e 'const q=require("./simtest/queue.json");const o=require("fs");o.appendFileSync(process.env.GITHUB_OUTPUT,`name=${q.name}\ntotal=${q.total}\nbudget=${q.budget}\nturns=${q.turns||6}\nseed=${q.seed||2026}\nmode=${q.mode||"auto"}\n`)'
+            node -e 'const q=require("./simtest/queue.json");const o=require("fs");o.appendFileSync(process.env.GITHUB_OUTPUT,`name=${q.name}\ntotal=${q.total}\nbudget=${q.budget}\nturns=${q.turns||6}\nseed=${q.seed||2026}\nmode=${q.mode||"auto"}\nconc=${q.concurrency||4}\n`)'
           else
-            printf 'name=%s\ntotal=%s\nbudget=%s\nturns=%s\nseed=2026\nmode=auto\n' "$IN_NAME" "$IN_TOTAL" "$IN_BUDGET" "$IN_TURNS" >> "$GITHUB_OUTPUT"
+            printf 'name=%s\ntotal=%s\nbudget=%s\nturns=%s\nseed=2026\nmode=auto\nconc=4\n' "$IN_NAME" "$IN_TOTAL" "$IN_BUDGET" "$IN_TURNS" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Git identity
@@ -86,7 +87,8 @@ jobs:
           TURNS: ${{ steps.cfg.outputs.turns }}
           SEED: ${{ steps.cfg.outputs.seed }}
           MODE: ${{ steps.cfg.outputs.mode }}
-        run: node simtest/run.mjs --name "$RUN_NAME" --total "$TOTAL" --budget "$BUDGET" --turns "$TURNS" --seed "$SEED" --mode "$MODE" --out simtest-out --progress
+          CONC: ${{ steps.cfg.outputs.conc }}
+        run: node simtest/run.mjs --name "$RUN_NAME" --total "$TOTAL" --budget "$BUDGET" --turns "$TURNS" --seed "$SEED" --mode "$MODE" --concurrency "$CONC" --out simtest-out --progress
 
       - name: Save ledger and runs
         if: always()
