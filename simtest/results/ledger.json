@@ -1,5 +1,5 @@
 {
-  "total_spent_usd": 3.4391583499999983,
+  "total_spent_usd": 3.740156349999998,
   "runs": {
     "pilot": {
       "spent": 0.05042114,
@@ -66,6 +66,12 @@
       "conversations": 40,
       "done": 36,
       "updated": "2026-11-18T16:33:54.844Z"
+    },
+    "sonnet-c": {
+      "spent": 0.30099799999999993,
+      "conversations": 30,
+      "done": 18,
+      "updated": "2026-11-18T16:36:31.744Z"
     }
   }
 }
