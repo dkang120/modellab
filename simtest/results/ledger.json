@@ -1,5 +1,5 @@
 {
-  "total_spent_usd": 3.822665049999998,
+  "total_spent_usd": 3.875003549999998,
   "runs": {
     "pilot": {
       "spent": 0.05042114,
@@ -78,6 +78,12 @@
       "conversations": 22,
       "done": 2,
       "updated": "2026-11-18T16:48:52.340Z"
+    },
+    "rulebook-a": {
+      "spent": 0.05233849999999998,
+      "conversations": 3,
+      "done": 2,
+      "updated": "2026-11-18T17:01:08.901Z"
     }
   }
 }
