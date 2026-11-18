@@ -77,8 +77,11 @@ const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|w
 export function linkGuard(theirText, out) {
   const r = String(out || "");
   if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
-  return r.replace(/[\s:,-]*(here'?s|check out|try|see)?[\s:]*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
-    .replace(/\s+(at|here|on|in|via|with|to|from|like)\s*[:,-]?\s*$/i, "").replace(/[\s:,-]+$/, "").replace(/\s{2,}/g, " ").trim();
+  // Drop the short clause that introduces the link ("basics at <link>", "check this out: <link>"), not just the URL.
+  const cut = r.replace(/(^|[.!?]\s+|,\s+)[^.!?,]{0,45}?(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, (m, lead) => (/[.!?]/.test(lead) ? lead.trim() : ""))
+    .replace(/\s*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
+    .replace(/[\s:,-]+$/, "").replace(/\s{2,}/g, " ").trim();
+  return cut.length >= 15 ? cut : r;   // nothing meaningful left: keep the original rather than send an empty text
 }
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
