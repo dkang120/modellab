@@ -1,1 +1,1 @@
-{ "name": "r1-live", "total": 150, "budget": 2.3, "turns": 6, "seed": 111, "mode": "live", "concurrency": 8 }
+{ "name": "r2-live", "total": 250, "budget": 2.3, "turns": 6, "seed": 222, "mode": "live", "concurrency": 8 }

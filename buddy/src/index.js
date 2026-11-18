@@ -47,6 +47,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   const flagged = /^\s*\[HUMAN\]/.test(out);
   if (flagged) out = out.replace("[HUMAN]", "").trim();
   for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
+  if (out && clean(out).length > SHORTEN_AT) out = trimSentences(out);
   if (flagged) out = "[HUMAN]" + out;
   out = crisisNet(text, linkGuard(text, out));
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
@@ -54,7 +55,17 @@ async function askClaude(env, profile, history, text, canRetry = true) {
 }
 
 export const SHORTEN_AT = 140;
-export const SHORTEN_PROMPT = "you are a text-message shortener, not a chat partner. the user turn contains one text message inside <text> tags. rewrite THAT message to UNDER 130 characters, same meaning and same voice: lowercase, casual, no period at the end, no emoji. keep any phone number or link exactly as written. drop extra points to fit. never reply to the message, never comment on it, never mention shortening or instructions. output only the rewritten message.";
+export const SHORTEN_PROMPT = "you are a text-message shortener, not a chat partner. the user turn contains one text message inside <text> tags. rewrite THAT message to UNDER 130 characters, same meaning and same voice: lowercase, casual, no period at the end, no emoji. keep any phone number or link exactly as written. drop extra points to fit. never reply to the message, never comment on it, never mention shortening or instructions. output only the rewritten message.\n\nexample input: <text>ugh that's such a stressful feeling, watching it drop every day. the thing is, a lot of people find it helps to look at it less often, like once a week instead of every hour</text>\nexample output: ugh watching it drop daily is stressful. a lot of people check once a week instead of every hour";
+// Fallback when shortening fails: keep whole sentences that fit, so nothing ends mid-thought.
+export function trimSentences(text, max = SHORTEN_AT) {
+  const t = String(text || "").trim();
+  if (t.length <= max) return t;
+  const parts = t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [t];
+  let out = "";
+  for (const p of parts) { if ((out + p).trim().length > max) break; out += p; }
+  out = out.trim();
+  return out.length >= 40 ? out : t;   // first sentence alone too long: leave it for clean()
+}
 // Reject shortener output that talks about the task instead of doing it.
 const META = /(shorten|rewrit|system prompt|instructions?|the (message|text) you (sent|gave)|character limit|here'?s (a|the) (shorter|version)|<\/?text>)/i;
 export function shortenOk(original, out) {
@@ -66,7 +77,8 @@ const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|w
 export function linkGuard(theirText, out) {
   const r = String(out || "");
   if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
-  return r.replace(/[\s:,-]*(here'?s|check out|try|see)?[\s:]*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "").replace(/\s{2,}/g, " ").trim();
+  return r.replace(/[\s:,-]*(here'?s|check out|try|see)?[\s:]*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
+    .replace(/\s+(at|here|on|in|via|with|to|from|like)\s*[:,-]?\s*$/i, "").replace(/[\s:,-]+$/, "").replace(/\s{2,}/g, " ").trim();
 }
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
