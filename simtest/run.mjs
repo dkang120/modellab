@@ -28,6 +28,7 @@ const SEED = Number(arg("seed", 2026));
 const CONC = Number(arg("concurrency", 4));
 const MOCK = flag("mock");
 const COMMIT = flag("commit");           // git add/commit/push OUT after each save (used on the results branch)
+const PROGRESS = flag("progress");       // commit a small progress.json to the repo branch after each round (CI only)
 const BUDDY_MODEL = arg("model", process.env.MODEL || "claude-haiku-5-5");
 const SIM_MODEL = arg("sim-model", "claude-haiku-5-5");
 const JUDGE_MODEL = arg("judge-model", "claude-haiku-5-5");
@@ -79,6 +80,15 @@ async function save() {
   ledger.runs[NAME] = { spent: S.spent, conversations: S.convos.length, done: S.convos.filter(c => c.stage === "done").length, updated: new Date().toISOString() };
   ledger.total_spent_usd = Object.values(ledger.runs).reduce((s, r) => s + r.spent, 0);
   await writeFile(LEDGER, JSON.stringify(ledger, null, 2));
+  if (PROGRESS && process.env.GITHUB_REF_NAME) {
+    try {
+      const dir = new URL(`./results/${NAME}/`, import.meta.url);
+      await mkdir(dir, { recursive: true });
+      const stages = S.convos.reduce((m, c) => (m[c.stage] = (m[c.stage] || 0) + 1, m), {});
+      await writeFile(new URL("progress.json", dir), JSON.stringify({ round: S.rounds, stages, spent: S.spent, all_runs: totalSpent(), updated: new Date().toISOString(), error: S.error || null }, null, 2));
+      execSync(`git add simtest/results/${NAME}/progress.json && git commit -q -m "simtest ${NAME}: round ${S.rounds} [skip ci]" && (git pull -q --rebase origin ${process.env.GITHUB_REF_NAME} || true) && git push -q origin HEAD:${process.env.GITHUB_REF_NAME}`, { stdio: "ignore" });
+    } catch { /* progress is best-effort */ }
+  }
   if (COMMIT) {
     try { execSync(`git -C ${OUT} add -A && git -C ${OUT} commit -q -m "simtest ${NAME}: round ${S.rounds}, $${S.spent.toFixed(3)}" && git -C ${OUT} push -q`, { stdio: "inherit" }); }
     catch { console.log("(commit skipped)"); }
@@ -262,6 +272,7 @@ function noteAvg(stage, c) { const a = (S.avg[stage] ||= { sum: 0, n: 0 }); a.su
 
 // ---------- main loop ----------
 const ACTIVE = new Set(["persona", "buddy", "shorten", "judge"]);
+try {
 while (true) {
   let work = S.convos.filter(c => ACTIVE.has(c.stage));
   if (!work.length) break;
@@ -314,7 +325,12 @@ while (true) {
   await save();
   if (totalSpent() > BUDGET) { console.log("Over budget after round (estimate was low). Stopping."); for (const c of S.convos) if (ACTIVE.has(c.stage)) c.stage = "stopped"; break; }
 }
-for (const c of S.convos) if (c.stage === "parked") c.stage = "stopped";
+} catch (e) {
+  // Keep what finished: write the report from completed conversations, record the error, rerun with the same name to resume.
+  S.error = String(e && e.message || e).slice(0, 500);
+  console.log(`ERROR: ${S.error}. Writing a partial report; rerun with the same name to resume.`);
+}
+if (!S.error) for (const c of S.convos) if (c.stage === "parked") c.stage = "stopped";
 await save();
 
 // ---------- report ----------
@@ -354,7 +370,7 @@ const ruleKeys = ["over_140", "trailing_period", "capitalized", "banned_emoji", 
 
 const report = `# Simulated user test: ${NAME}
 
-**SIMULATED.** AI personas built from the research in \`simtest/RESEARCH.md\`, not real users. Describe these results as simulated.
+${S.error ? `> ⚠️ Run stopped early: ${S.error}. Rerun with the same name to resume.\n\n` : ""}**SIMULATED.** AI personas built from the research in \`simtest/RESEARCH.md\`, not real users. Describe these results as simulated.
 
 - Conversations: **${done.length} graded** of ${S.convos.length} planned (${S.convos.filter(c => c.stage === "stopped").length} not run (budget cap), ${S.convos.filter(c => c.stage === "error").length} errors) · up to ${TURNS} texts each way
 - Buddy texts written: ${replies.length} · shortener outputs rejected (meta replies): ${S.shortenRejected || 0} · mode: ${S.mode} · models: buddy ${S.models.buddy}, personas ${S.models.sim}, judge ${S.models.judge}
