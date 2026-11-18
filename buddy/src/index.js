@@ -97,7 +97,7 @@ export function linkGuard(theirText, out) {
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
 // Safety net if the model misses a crisis: code-level check on the person's text.
-const HOPELESS = /(what'?s (even )?the point( anymore| of (even )?(anything|living|trying|it all|getting up|any of (this|it)))|what'?s (even )?the point\s*[?.!]*$|done with everything|(life|everything|it all) (feels|is) (pointless|hopeless)|tired of (feeling like this|everything|living)|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist|wake up)|no reason to (live|keep going)|kill (my ?self)|suicid|end (it all|my life)|better off (dead|without me)|hurt (my ?self)|give up on everything)/i;
+const HOPELESS = /(what'?s (even )?the point( anymore| of (even )?(anything|living|trying|it all|getting up|any of (this|it)))|(don'?t|can'?t) (even )?see the point (of (trying|anything|living|any of (this|it))|anymore)|done with everything|(life|everything|it all) (feels|is) (pointless|hopeless)|tired of (feeling like this|everything|living)|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist|wake up)|no reason to (live|keep going)|kill (my ?self)|suicid|\bend (it all|my life)\b|better off (dead|without me)|hurt (my ?self)|give up on everything)/i;
 const LOSS = /(lost|losing|blew|blown|down (like )?\$?\d|in the hole|wiped out|make (it |that |this )?back|win (it |that )?back|get back to even|chas(e|ing) (it|the loss))/i;
 const GAMBLE_WORDS = /(bet|bets|betting|parlay|sportsbook|casino|options|calls\b|puts\b|0dte|gambl|slots|draftkings|fanduel)/i;
 const NEED = /(rent|bills|can'?t (pay|cover|afford)|owe|all my|everything i had|back to even|win it back|make (it )?back|evict)/i;
