@@ -90,7 +90,9 @@ const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|w
 export function linkGuard(theirText, out) {
   const r = String(out || "");
   if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
-  if (!/modellab\.hidanielkang\.com\/(?!tools\/match\/)/.test(r)) return r;   // the style quiz link is allowed as homework
+  if (!/modellab\.hidanielkang\.com\/(?!tools\/match\/)/.test(r)) {   // the style quiz link is allowed as homework, never bare
+    return /quiz/i.test(r) ? r : r.replace(/(https?:\/\/)?modellab\.hidanielkang\.com\/tools\/match\/?/i, "2 min style quiz: modellab.hidanielkang.com/tools/match/");
+  }
   // Drop the short clause that introduces the link ("basics at <link>", "check this out: <link>"), not just the URL.
   const cut = r.replace(/(^|[.!?]\s+|,\s+)[^.!?,]{0,45}?(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, (m, lead) => (/[.!?]/.test(lead) ? lead.trim() : ""))
     .replace(/\s*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
