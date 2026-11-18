@@ -1,5 +1,5 @@
 {
-  "total_spent_usd": 2.882050549999999,
+  "total_spent_usd": 2.9209755499999988,
   "runs": {
     "pilot": {
       "spent": 0.05042114,
@@ -48,6 +48,12 @@
       "conversations": 40,
       "done": 40,
       "updated": "2026-11-18T14:01:58.211Z"
+    },
+    "buddy-first": {
+      "spent": 0.038925000000000015,
+      "conversations": 22,
+      "done": 20,
+      "updated": "2026-11-18T16:15:51.181Z"
     }
   }
 }
