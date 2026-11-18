@@ -43,19 +43,39 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   const d = await r.json();
   let out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
   if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
-  if (out && canRetry && clean(out).length > 150) out = (await shorten(env, out)) || out;
+  // Shorten anything over the rulebook's 140 chars (twice if needed) so clean() never has to chop mid-sentence.
+  const flagged = /^\s*\[HUMAN\]/.test(out);
+  if (flagged) out = out.replace("[HUMAN]", "").trim();
+  for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
+  if (flagged) out = "[HUMAN]" + out;
+  out = crisisNet(text, out);
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
 
+export const SHORTEN_AT = 140;
+export const SHORTEN_PROMPT = "you shorten text messages. rewrite the text you're given to UNDER 130 characters total, sounding like a friend texting. keep it lowercase, casual, no period at the end, no emoji. keep the main point and any phone number or link exactly as written (they count toward the limit); drop extra points instead. output only the rewritten text.";
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
+// Safety net if the model misses a crisis: code-level check on the person's text.
+const HOPELESS = /(what'?s (even )?the point( of (anything|living|trying))?( anymore)?\s*[?.!]*$|done with everything|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist)|no reason to (live|keep going)|kill (my ?self)|suicid|end (it all|my life)|better off (dead|without me)|hurt (my ?self))/i;
+const GAMBLING_LOSS = /(lost|losing|blew|down)\b.{0,40}\b(bet|bets|betting|parlay|sportsbook|casino|options|gambl)/i;
+export function crisisNet(theirText, out) {
+  const t = String(theirText || "");
+  const hopeless = HOPELESS.test(t), gamble = GAMBLING_LOSS.test(t) && /(rent|bills|can'?t (pay|cover)|owe|all my|win it back)/i.test(t);
+  if (!hopeless && !gamble) return out;
+  let r = String(out || "").replace("[HUMAN]", "").trim();
+  if (hopeless && !/988/.test(r)) r = "i'm really glad you told me. you can call or text 988 anytime, and daniel will check in on you";
+  else if (gamble && !/988|MY-RESET/i.test(r)) r = "that's a lot to carry. 1-800-MY-RESET is free and 24/7 for gambling stuff, and daniel will check in on you";
+  return "[HUMAN]" + r;
+}
+
 async function shorten(env, text) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
-      system: "you shorten text messages. rewrite the text you're given to UNDER 140 characters total, sounding like a friend texting. keep it lowercase, casual, no period at the end, no emoji. keep any link exactly as written, it counts toward the limit; drop extra points instead. output only the rewritten text.",
+      system: SHORTEN_PROMPT,
       messages: [{ role: "user", content: text }] }),
   });
   if (!r.ok) return null;

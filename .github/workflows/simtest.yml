@@ -5,6 +5,10 @@ name: Simulated user test
 # Spend is capped across ALL runs by the budget input (tracked in a ledger kept in the Actions cache).
 
 on:
+  # Claude starts runs by pushing simtest/queue.json to the simtest-dev branch.
+  push:
+    branches: [simtest-dev]
+    paths: [simtest/queue.json]
   workflow_dispatch:
     inputs:
       name:
@@ -54,14 +58,30 @@ jobs:
           key: simtest-${{ github.run_id }}
           restore-keys: simtest-
 
+      - name: Pick settings
+        id: cfg
+        env:
+          IN_NAME: ${{ inputs.name }}
+          IN_TOTAL: ${{ inputs.total }}
+          IN_BUDGET: ${{ inputs.budget }}
+          IN_TURNS: ${{ inputs.turns }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node -e 'const q=require("./simtest/queue.json");const o=require("fs");o.appendFileSync(process.env.GITHUB_OUTPUT,`name=${q.name}\ntotal=${q.total}\nbudget=${q.budget}\nturns=${q.turns||6}\nseed=${q.seed||2026}\nmode=${q.mode||"auto"}\n`)'
+          else
+            printf 'name=%s\ntotal=%s\nbudget=%s\nturns=%s\nseed=2026\nmode=auto\n' "$IN_NAME" "$IN_TOTAL" "$IN_BUDGET" "$IN_TURNS" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run simulated conversations
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          RUN_NAME: ${{ inputs.name }}
-          TOTAL: ${{ inputs.total }}
-          BUDGET: ${{ inputs.budget }}
-          TURNS: ${{ inputs.turns }}
-        run: node simtest/run.mjs --name "$RUN_NAME" --total "$TOTAL" --budget "$BUDGET" --turns "$TURNS" --out simtest-out
+          RUN_NAME: ${{ steps.cfg.outputs.name }}
+          TOTAL: ${{ steps.cfg.outputs.total }}
+          BUDGET: ${{ steps.cfg.outputs.budget }}
+          TURNS: ${{ steps.cfg.outputs.turns }}
+          SEED: ${{ steps.cfg.outputs.seed }}
+          MODE: ${{ steps.cfg.outputs.mode }}
+        run: node simtest/run.mjs --name "$RUN_NAME" --total "$TOTAL" --budget "$BUDGET" --turns "$TURNS" --seed "$SEED" --mode "$MODE" --out simtest-out
 
       - name: Save ledger and runs
         if: always()
@@ -73,14 +93,15 @@ jobs:
       - name: Show report
         if: always()
         env:
-          RUN_NAME: ${{ inputs.name }}
+          RUN_NAME: ${{ steps.cfg.outputs.name }}
         run: |
           if [ -f "simtest-out/$RUN_NAME/report.md" ]; then cat "simtest-out/$RUN_NAME/report.md" >> "$GITHUB_STEP_SUMMARY"; fi
 
       - name: Commit report to the repo
         if: always()
         env:
-          RUN_NAME: ${{ inputs.name }}
+          RUN_NAME: ${{ steps.cfg.outputs.name }}
+          BRANCH: ${{ github.ref_name }}
         run: |
           [ -f "simtest-out/$RUN_NAME/report.md" ] || exit 0
           mkdir -p "simtest/results/$RUN_NAME"
@@ -91,10 +112,10 @@ jobs:
           git add simtest/results
           git diff --cached --quiet && exit 0
           git commit -m "simtest: $RUN_NAME report [skip ci]"
-          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
+          for i in 1 2 3; do git pull --rebase -q origin "$BRANCH" && git push -q origin "HEAD:$BRANCH" && break; sleep 5; done
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: simtest-${{ inputs.name }}
-          path: simtest-out/${{ inputs.name }}
+          name: simtest-${{ steps.cfg.outputs.name }}
+          path: simtest-out/${{ steps.cfg.outputs.name }}
