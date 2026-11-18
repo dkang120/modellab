@@ -51,7 +51,8 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   if (flagged) out = "[HUMAN]" + out;
   const prior = [...history].reverse().find(m => m.role === "user")?.content || "";
   const already = history.some(m => m.role === "assistant" && /MY-RESET|988/.test(m.content || ""));
-  out = crisisNet(text, approvalGuard(linkGuard(text, out)), prior, already);
+  const prevReplies = history.filter(m => m.role === "assistant").map(m => m.content || "");
+  out = crisisNet(text, lolGuard(prevReplies, approvalGuard(linkGuard(text, out))), prior, already);
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
@@ -84,6 +85,18 @@ export function approvalGuard(out) {
   const parts = r.split(/(?<=[.!?])\s+|,\s+(?=(?:but|and|so|though)\b)/);
   const kept = parts.filter(p => !APPROVAL.test(p)).join(" ").replace(/\s{2,}/g, " ").trim();
   return kept.length >= 12 ? kept : r;   // if the whole text is the approval, leave it (judge/test will flag it)
+}
+// Rulebook: lol is a softener and "lol in every message" is an ick. Never open two texts in a row with lol,
+// and drop it if it's already in 2 of the last 3 buddy texts.
+export function lolGuard(prevReplies, out) {
+  const r = String(out || "");
+  if (!/\blol\b/i.test(r)) return r;
+  const last = (prevReplies || []).slice(-3);
+  const recent = last.filter(t => /\blol\b/i.test(t || "")).length;
+  const prevOpened = /^\s*lol\b/i.test(last[last.length - 1] || "");
+  if (recent < 2 && !(prevOpened && /^\s*lol\b/i.test(r))) return r;
+  const cut = r.replace(/^\s*lol[\s,.!]*/i, "").replace(/\s*\blol\b[\s,]*/gi, " ").replace(/\s{2,}/g, " ").trim();
+  return cut.length >= 8 ? cut : r;
 }
 // Links only when they asked for something a page answers.
 const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|where (can|do|is)|quiz|sim\b|simulator|tool|how bad|chart|history|look (at|it up)|send (me|it)|read more|learn more)/i;
