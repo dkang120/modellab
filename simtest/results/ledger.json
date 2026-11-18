@@ -1,0 +1,11 @@
+{
+  "total_spent_usd": 0.05042114,
+  "runs": {
+    "pilot": {
+      "spent": 0.05042114,
+      "conversations": 30,
+      "done": 30,
+      "updated": "2026-11-18T08:38:42.365Z"
+    }
+  }
+}
