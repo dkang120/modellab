@@ -12,7 +12,7 @@ import { existsSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { execSync } from "node:child_process";
 import { RULEBOOK, contextBlock } from "../buddy/src/prompt.js";
-import { clean, smsCredits, crisisNet, linkGuard, shortenOk, trimSentences, SHORTEN_AT, SHORTEN_PROMPT } from "../buddy/src/index.js";
+import { clean, smsCredits, crisisNet, linkGuard, approvalGuard, shortenOk, trimSentences, SHORTEN_AT, SHORTEN_PROMPT } from "../buddy/src/index.js";
 import { generatePersonas, corePersonas, personaBrief } from "./generate.mjs";
 
 // ---------- args ----------
@@ -226,7 +226,7 @@ function checks(reply) {
 }
 
 function finishBuddy(c, raw) {
-  let reply = clean(crisisNet(c.pendingUser, linkGuard(c.pendingUser, raw || ""))), human = false;
+  let reply = clean(crisisNet(c.pendingUser, approvalGuard(linkGuard(c.pendingUser, raw || "")))), human = false;
   if (reply.startsWith("[HUMAN]")) { human = true; reply = reply.replace("[HUMAN]", "").trim(); }
   c.transcript.push({ user: c.pendingUser, reply, human, credits: reply ? smsCredits(reply) : 0, checks: checks(reply) });
   c.hist = [...c.hist, { role: "user", content: c.pendingUser }, { role: "assistant", content: reply || "…" }].slice(-12);

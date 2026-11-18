@@ -49,7 +49,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
   if (out && clean(out).length > SHORTEN_AT) out = trimSentences(out);
   if (flagged) out = "[HUMAN]" + out;
-  out = crisisNet(text, linkGuard(text, out));
+  out = crisisNet(text, approvalGuard(linkGuard(text, out)));
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
@@ -71,6 +71,15 @@ const META = /(shorten|rewrit|system prompt|instructions?|the (message|text) you
 export function shortenOk(original, out) {
   const t = String(out || "").trim();
   return !!t && !META.test(t) && t.length < String(original).length;
+}
+// Drop clauses that approve or rate their specific plan ("solid move", "good call"), or name a product to put money in.
+const APPROVAL = /\b(solid (move|call|plan|pick|choice)|good (call|move|plan|pick|choice|idea)|smart (move|call|plan|choice)|fair call|right call|the move here|that's the move|i'?d (protect|keep|put|go with|do)|high[- ]yield savings|hysa)\b/i;
+export function approvalGuard(out) {
+  const r = String(out || "");
+  if (!APPROVAL.test(r)) return r;
+  const parts = r.split(/(?<=[.!?])\s+|,\s+(?=(?:but|and|so|though)\b)/);
+  const kept = parts.filter(p => !APPROVAL.test(p)).join(" ").replace(/\s{2,}/g, " ").trim();
+  return kept.length >= 20 ? kept : r;   // if the whole text is the approval, leave it (judge/test will flag it)
 }
 // Links only when they asked for something a page answers.
 const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|where (can|do|is)|quiz|sim\b|simulator|tool|how bad|chart|history|look (at|it up)|send (me|it)|read more|learn more)/i;
