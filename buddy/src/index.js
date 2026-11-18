@@ -34,7 +34,7 @@ async function askClaude(env, profile, history, text, canRetry = true) {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: env.MODEL || "claude-haiku-5-5", max_tokens: 300, thinking: { type: "disabled" },
+      model: env.MODEL || "claude-sonnet-5-5", max_tokens: 300, thinking: { type: "disabled" },
       system: [{ type: "text", text: RULEBOOK, cache_control: { type: "ephemeral" } }, { type: "text", text: contextBlock(profile) }],
       messages,
     }),
@@ -88,6 +88,7 @@ const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|w
 export function linkGuard(theirText, out) {
   const r = String(out || "");
   if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
+  if (!/modellab\.hidanielkang\.com\/(?!tools\/match\/)/.test(r)) return r;   // the style quiz link is allowed as homework
   // Drop the short clause that introduces the link ("basics at <link>", "check this out: <link>"), not just the URL.
   const cut = r.replace(/(^|[.!?]\s+|,\s+)[^.!?,]{0,45}?(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, (m, lead) => (/[.!?]/.test(lead) ? lead.trim() : ""))
     .replace(/\s*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
@@ -117,7 +118,7 @@ async function shorten(env, text) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
+    body: JSON.stringify({ model: "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },   // shortening stays on the cheap model
       system: SHORTEN_PROMPT,
       messages: [{ role: "user", content: `<text>${text}</text>` }] }),
   });

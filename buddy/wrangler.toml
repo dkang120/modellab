@@ -10,7 +10,7 @@ compatibility_date = "2026-11-01"
 binding = "BUDDY_KV"
 
 [vars]
-MODEL = "claude-haiku-5-5"
+MODEL = "claude-sonnet-5-5"
 # Klaviyo free plan = 150 SMS credits/month shared with the scheduled texts.
 # The AI may use at most this many credits a month; scheduled texts keep the rest.
 MONTHLY_CREDIT_CAP = "80"
