@@ -43,31 +43,95 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   const d = await r.json();
   let out = (d.content || []).filter(c => c.type === "text").map(c => c.text || "").join("").trim();
   if (!out) console.log("empty reply", JSON.stringify({ stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage }));
-  if (out && canRetry && clean(out).length > 150) out = (await shorten(env, out)) || out;
+  // Shorten anything over the rulebook's 140 chars (twice if needed) so clean() never has to chop mid-sentence.
+  const flagged = /^\s*\[HUMAN\]/.test(out);
+  if (flagged) out = out.replace("[HUMAN]", "").trim();
+  for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
+  if (out && clean(out).length > SHORTEN_AT) out = trimSentences(out);
+  if (flagged) out = "[HUMAN]" + out;
+  const prior = [...history].reverse().find(m => m.role === "user")?.content || "";
+  const already = history.some(m => m.role === "assistant" && /MY-RESET|988/.test(m.content || ""));
+  out = crisisNet(text, approvalGuard(linkGuard(text, out)), prior, already);
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
 
+export const SHORTEN_AT = 140;
+export const SHORTEN_PROMPT = "you are a text-message shortener, not a chat partner. the user turn contains one text message inside <text> tags. rewrite THAT message to UNDER 130 characters, same meaning and same voice: lowercase, casual, no period at the end, no emoji. keep any phone number or link exactly as written. drop extra points to fit. never reply to the message, never comment on it, never mention shortening or instructions. output only the rewritten message.\n\nexample input: <text>ugh that's such a stressful feeling, watching it drop every day. the thing is, a lot of people find it helps to look at it less often, like once a week instead of every hour</text>\nexample output: ugh watching it drop daily is stressful. a lot of people check once a week instead of every hour";
+// Fallback when shortening fails: keep whole sentences that fit, so nothing ends mid-thought.
+export function trimSentences(text, max = SHORTEN_AT) {
+  const t = String(text || "").trim();
+  if (t.length <= max) return t;
+  const parts = t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [t];
+  let out = "";
+  for (const p of parts) { if ((out + p).trim().length > max) break; out += p; }
+  out = out.trim();
+  return out.length >= 40 ? out : t;   // first sentence alone too long: leave it for clean()
+}
+// Reject shortener output that talks about the task instead of doing it.
+const META = /(shorten|rewrit|system prompt|instructions?|the (message|text) you (sent|gave)|character limit|here'?s (a|the) (shorter|version)|<\/?text>)/i;
+export function shortenOk(original, out) {
+  const t = String(out || "").trim();
+  return !!t && !META.test(t) && t.length < String(original).length;
+}
+// Drop clauses that approve or rate their specific plan ("solid move", "good call"), or name a product to put money in.
+const APPROVAL = /\b(solid (move|call|plan|pick|choice)|good (call|move|plan|pick|choice|idea)|smart (move|call|plan|choice)|fair call|right call|the move here|that's the move|i'?d (protect|keep|put|go with|do)|high[- ]yield savings|hysa)\b/i;
+export function approvalGuard(out) {
+  const r = String(out || "");
+  if (!APPROVAL.test(r)) return r;
+  const parts = r.split(/(?<=[.!?])\s+|,\s+(?=(?:but|and|so|though)\b)/);
+  const kept = parts.filter(p => !APPROVAL.test(p)).join(" ").replace(/\s{2,}/g, " ").trim();
+  return kept.length >= 12 ? kept : r;   // if the whole text is the approval, leave it (judge/test will flag it)
+}
+// Links only when they asked for something a page answers.
+const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|where (can|do|is)|quiz|sim\b|simulator|tool|how bad|chart|history|look (at|it up)|send (me|it)|read more|learn more)/i;
+export function linkGuard(theirText, out) {
+  const r = String(out || "");
+  if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
+  // Drop the short clause that introduces the link ("basics at <link>", "check this out: <link>"), not just the URL.
+  const cut = r.replace(/(^|[.!?]\s+|,\s+)[^.!?,]{0,45}?(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, (m, lead) => (/[.!?]/.test(lead) ? lead.trim() : ""))
+    .replace(/\s*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "")
+    .replace(/[\s:,-]+$/, "").replace(/\s{2,}/g, " ").trim();
+  return cut.length >= 15 ? cut : r;   // nothing meaningful left: keep the original rather than send an empty text
+}
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
+// Safety net if the model misses a crisis: code-level check on the person's text.
+const HOPELESS = /(what'?s (even )?the point( anymore| of (even )?(anything|living|trying|it all|getting up|any of (this|it)))|(don'?t|can'?t) (even )?see the point (of (trying|anything|living|any of (this|it))|anymore)|done with everything|(life|everything|it all) (feels|is) (pointless|hopeless)|tired of (feeling like this|everything|living)|can'?t (do this|go on|take (it|this)) anymore|don'?t want to (live|be here|exist|wake up)|no reason to (live|keep going)|kill (my ?self)|suicid|\bend (it all|my life)\b|better off (dead|without me)|hurt (my ?self)|give up on everything)/i;
+const LOSS = /(lost|losing|blew|blown|down (like )?\$?\d|in the hole|wiped out|make (it |that |this )?back|win (it |that )?back|get back to even|chas(e|ing) (it|the loss))/i;
+const GAMBLE_WORDS = /(bet|bets|betting|parlay|sportsbook|casino|options|calls\b|puts\b|0dte|gambl|slots|draftkings|fanduel)/i;
+const NEED = /(rent|bills|can'?t (pay|cover|afford)|owe|all my|everything i had|back to even|win it back|make (it )?back|evict)/i;
+// Safety net if the model misses a crisis. theirText = this text; prior = their previous text; already = already flagged in this chat.
+export function crisisNet(theirText, out, prior = "", already = false) {
+  const t = String(theirText || ""), both = `${prior || ""} ${t}`;
+  const hopeless = HOPELESS.test(t);
+  const gamble = !already && GAMBLE_WORDS.test(both) && LOSS.test(both) && NEED.test(both);
+  if (!hopeless && !gamble) return out;
+  let r = String(out || "").replace("[HUMAN]", "").trim();
+  if (hopeless && !/988/.test(r)) r = "i'm really glad you told me. you can call or text 988 anytime, and daniel will check in on you";
+  else if (gamble && !/988|MY-RESET/i.test(r)) r = (r ? r.replace(/[.!?\s]*$/, "") + ". " : "") + "1-800-MY-RESET is free and 24/7 for gambling stuff, and daniel will check in";
+  return "[HUMAN]" + r;
+}
+
 async function shorten(env, text) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
-      system: "you shorten text messages. rewrite the text you're given to UNDER 140 characters total, sounding like a friend texting. keep it lowercase, casual, no period at the end, no emoji. keep any link exactly as written, it counts toward the limit; drop extra points instead. output only the rewritten text.",
-      messages: [{ role: "user", content: text }] }),
+      system: SHORTEN_PROMPT,
+      messages: [{ role: "user", content: `<text>${text}</text>` }] }),
   });
   if (!r.ok) return null;
   const d = await r.json();
-  return (d.content || []).filter(c => c.type === "text").map(c => c.text).join("").trim();
+  const out = (d.content || []).filter(c => c.type === "text").map(c => c.text).join("").trim();
+  return shortenOk(text, out) ? out : null;
 }
 function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
   t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*(but\s+)?/gi, "");
   t = t.replace(BANNED, "");
   t = t.replace(/^[^:\n]{0,40}(shorter|rewritten|version)[^:\n]{0,20}:\s*/i, "");   // shortener preamble
-  if (/^[A-Z][a-z]/.test(t)) t = t[0].toLowerCase() + t.slice(1);            // rulebook: lowercase
+  t = t.replace(/(^|[.!?]\s+)([A-Z])(?=[a-z])/g, (m, a, b) => a + b.toLowerCase());  // rulebook: lowercase (keeps I, tickers)
   const emojis = t.match(EMOJI) || [];
   // An emoji makes the whole text cost UCS-2 rates (70 chars/credit), so only keep one in very short replies.
   if (emojis.length > 1 || (emojis.length && t.length > 68)) t = t.replace(EMOJI, "");
