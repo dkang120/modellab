@@ -1,14 +1,14 @@
 {
-  "round": 3,
+  "round": 4,
   "stages": {
-    "persona": 7,
+    "buddy": 11,
     "stopped": 12,
     "shorten": 3,
-    "parked": 8
+    "parked": 4
   },
-  "spent": 0.10875270000000005,
-  "all_runs": 3.5479110499999984,
-  "updated": "2026-11-18T16:34:54.109Z",
+  "spent": 0.10979760000000006,
+  "all_runs": 3.5489559499999985,
+  "updated": "2026-11-18T16:34:57.233Z",
   "error": null,
   "last_api_error": null
 }
