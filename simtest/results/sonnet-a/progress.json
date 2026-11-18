@@ -1,11 +1,10 @@
 {
-  "round": 6,
+  "round": 7,
   "stages": {
-    "error": 31,
-    "buddy": 9
+    "error": 40
   },
   "spent": 0.0014355000000000001,
   "all_runs": 2.9224110499999987,
-  "updated": "2026-11-18T16:30:31.953Z",
+  "updated": "2026-11-18T16:30:33.711Z",
   "error": null
 }
