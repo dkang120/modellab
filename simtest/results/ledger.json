@@ -1,5 +1,5 @@
 {
-  "total_spent_usd": 2.882050549999999,
+  "total_spent_usd": 3.875003549999998,
   "runs": {
     "pilot": {
       "spent": 0.05042114,
@@ -48,6 +48,42 @@
       "conversations": 40,
       "done": 40,
       "updated": "2026-11-18T14:01:58.211Z"
+    },
+    "buddy-first": {
+      "spent": 0.038925000000000015,
+      "conversations": 22,
+      "done": 20,
+      "updated": "2026-11-18T16:15:51.181Z"
+    },
+    "sonnet-a": {
+      "spent": 0.0014355000000000001,
+      "conversations": 40,
+      "done": 0,
+      "updated": "2026-11-18T16:30:36.544Z"
+    },
+    "sonnet-b": {
+      "spent": 0.5167472999999995,
+      "conversations": 40,
+      "done": 36,
+      "updated": "2026-11-18T16:33:54.844Z"
+    },
+    "sonnet-c": {
+      "spent": 0.30099799999999993,
+      "conversations": 30,
+      "done": 18,
+      "updated": "2026-11-18T16:36:31.744Z"
+    },
+    "normal-a": {
+      "spent": 0.08250870000000003,
+      "conversations": 22,
+      "done": 2,
+      "updated": "2026-11-18T16:48:52.340Z"
+    },
+    "rulebook-a": {
+      "spent": 0.05233849999999998,
+      "conversations": 3,
+      "done": 2,
+      "updated": "2026-11-18T17:01:08.901Z"
     }
   }
 }

@@ -1,0 +1,12 @@
+{
+  "round": 17,
+  "stages": {
+    "done": 2,
+    "stopped": 1
+  },
+  "spent": 0.05233849999999998,
+  "all_runs": 3.875003549999998,
+  "updated": "2026-11-18T17:01:08.902Z",
+  "error": null,
+  "last_api_error": null
+}
