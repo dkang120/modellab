@@ -1,13 +1,12 @@
 {
-  "round": 16,
+  "round": 17,
   "stages": {
-    "done": 16,
+    "done": 18,
     "stopped": 2,
-    "shorten": 2,
-    "judge": 2
+    "shorten": 2
   },
-  "spent": 0.03682970000000001,
-  "all_runs": 2.918880249999999,
-  "updated": "2026-11-18T16:15:36.538Z",
+  "spent": 0.03788600000000001,
+  "all_runs": 2.9199365499999987,
+  "updated": "2026-11-18T16:15:40.750Z",
   "error": null
 }
