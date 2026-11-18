@@ -1,12 +1,12 @@
 {
-  "round": 3,
+  "round": 4,
   "stages": {
-    "shorten": 72,
-    "persona": 80,
-    "buddy": 198
+    "shorten": 88,
+    "buddy": 80,
+    "persona": 182
   },
-  "spent": 0.08023933999999996,
-  "all_runs": 0.9661276400000002,
-  "updated": "2026-11-18T11:19:35.961Z",
+  "spent": 0.11012909999999997,
+  "all_runs": 0.9960174000000002,
+  "updated": "2026-11-18T11:20:21.489Z",
   "error": null
 }
