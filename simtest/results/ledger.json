@@ -1,5 +1,5 @@
 {
-  "total_spent_usd": 1.5785729300000022,
+  "total_spent_usd": 2.8075860899999987,
   "runs": {
     "pilot": {
       "spent": 0.05042114,
@@ -30,6 +30,18 @@
       "conversations": 350,
       "done": 350,
       "updated": "2026-11-18T11:31:12.295Z"
+    },
+    "r1": {
+      "spent": 0.49657435000000166,
+      "conversations": null,
+      "done": 500,
+      "updated": "2026-11-18T11:19:23.935Z"
+    },
+    "r4": {
+      "spent": 0.7324388099999948,
+      "conversations": 800,
+      "done": 721,
+      "updated": "2026-11-18T13:58:39.655Z"
     }
   }
 }
