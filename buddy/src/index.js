@@ -48,13 +48,26 @@ async function askClaude(env, profile, history, text, canRetry = true) {
   if (flagged) out = out.replace("[HUMAN]", "").trim();
   for (let i = 0; out && canRetry && i < 2 && clean(out).length > SHORTEN_AT; i++) out = (await shorten(env, out)) || out;
   if (flagged) out = "[HUMAN]" + out;
-  out = crisisNet(text, out);
+  out = crisisNet(text, linkGuard(text, out));
   askClaude.last = { stop: d.stop_reason, types: (d.content || []).map(c => c.type), usage: d.usage };
   return out;
 }
 
 export const SHORTEN_AT = 140;
-export const SHORTEN_PROMPT = "you shorten text messages. rewrite the text you're given to UNDER 130 characters total, sounding like a friend texting. keep it lowercase, casual, no period at the end, no emoji. keep the main point and any phone number or link exactly as written (they count toward the limit); drop extra points instead. output only the rewritten text.";
+export const SHORTEN_PROMPT = "you are a text-message shortener, not a chat partner. the user turn contains one text message inside <text> tags. rewrite THAT message to UNDER 130 characters, same meaning and same voice: lowercase, casual, no period at the end, no emoji. keep any phone number or link exactly as written. drop extra points to fit. never reply to the message, never comment on it, never mention shortening or instructions. output only the rewritten message.";
+// Reject shortener output that talks about the task instead of doing it.
+const META = /(shorten|rewrit|system prompt|instructions?|the (message|text) you (sent|gave)|character limit|here'?s (a|the) (shorter|version)|<\/?text>)/i;
+export function shortenOk(original, out) {
+  const t = String(out || "").trim();
+  return !!t && !META.test(t) && t.length < String(original).length;
+}
+// Links only when they asked for something a page answers.
+const ASKED_FOR_PAGE = /(link|site|website|page|show me|see (it|that|how|what)|where (can|do|is)|quiz|sim\b|simulator|tool|how bad|chart|history|look (at|it up)|send (me|it)|read more|learn more)/i;
+export function linkGuard(theirText, out) {
+  const r = String(out || "");
+  if (!/modellab\.hidanielkang\.com/.test(r) || ASKED_FOR_PAGE.test(String(theirText || ""))) return r;
+  return r.replace(/[\s:,-]*(here'?s|check out|try|see)?[\s:]*(https?:\/\/)?modellab\.hidanielkang\.com\/\S*/gi, "").replace(/\s{2,}/g, " ").trim();
+}
 const BANNED = /(👍|🙂|😂|🙏|✅|👌)\uFE0F?/gu;
 const EMOJI = /\p{Extended_Pictographic}\uFE0F?/gu;
 // Safety net if the model misses a crisis: code-level check on the person's text.
@@ -76,18 +89,19 @@ async function shorten(env, text) {
     headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: env.MODEL || "claude-haiku-5-5", max_tokens: 200, thinking: { type: "disabled" },
       system: SHORTEN_PROMPT,
-      messages: [{ role: "user", content: text }] }),
+      messages: [{ role: "user", content: `<text>${text}</text>` }] }),
   });
   if (!r.ok) return null;
   const d = await r.json();
-  return (d.content || []).filter(c => c.type === "text").map(c => c.text).join("").trim();
+  const out = (d.content || []).filter(c => c.type === "text").map(c => c.text).join("").trim();
+  return shortenOk(text, out) ? out : null;
 }
 function clean(reply) {
   let t = reply.replace(/^["'\s]+|["'\s]+$/g, "");
   t = t.replace(/\(?not (financial|investment) advice\)?[,.:;]?\s*(but\s+)?/gi, "");
   t = t.replace(BANNED, "");
   t = t.replace(/^[^:\n]{0,40}(shorter|rewritten|version)[^:\n]{0,20}:\s*/i, "");   // shortener preamble
-  if (/^[A-Z][a-z]/.test(t)) t = t[0].toLowerCase() + t.slice(1);            // rulebook: lowercase
+  t = t.replace(/(^|[.!?]\s+)([A-Z])(?=[a-z])/g, (m, a, b) => a + b.toLowerCase());  // rulebook: lowercase (keeps I, tickers)
   const emojis = t.match(EMOJI) || [];
   // An emoji makes the whole text cost UCS-2 rates (70 chars/credit), so only keep one in very short replies.
   if (emojis.length > 1 || (emojis.length && t.length > 68)) t = t.replace(EMOJI, "");
