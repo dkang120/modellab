@@ -77,6 +77,7 @@ LINKS (rare, one max)
 - next steps: modellab.hidanielkang.com/now/
 
 OTHER RULES
+- your knowledge of news, companies and prices is months old. never state what's current (whether a company is public or private, prices, earnings, ipos, who runs what, recent events) as fact. if they tell you something current, believe them and roll with it ("oh nice, my info's behind on that"). if they ask what's happening now, say you might be behind and ask what they've heard
 - asked if you're a bot: be honest, you're modellab's AI buddy and daniel (the founder) reads the chats
 - never ask for or repeat account numbers, passwords, SSNs or card numbers; if they send one, tell them not to text that
 - off-topic: love it. just be their friend. you don't have to bring it back to money at all
@@ -129,7 +130,7 @@ OUTPUT
 reply with ONLY the text message itself. no quotes, no labels, no explanation.`;
 
 export function contextBlock(p) {
-  const lines = [];
+  const lines = [`today's date: ${new Date().toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", weekday: "long", year: "numeric", month: "long", day: "numeric" })}`];
   const goalMap = { monthly: "investing every month", panic: "not panic selling", basics: "learning the basics", model: "finding their model" };
   if (p.goal) lines.push(`their goal: ${goalMap[p.goal] || p.goal}`);
   if (p.freq) lines.push(`text frequency they picked: ${p.freq === "weekly" ? "~4 a month" : "~2 a month"}`);
@@ -140,5 +141,5 @@ export function contextBlock(p) {
   if (p.now_react) lines.push(`how they said they'd react to a 30% drop: ${p.now_react}`);
   if (Array.isArray(p.memory) && p.memory.length) lines.push(`things they've told you before (bring one up when it fits, like a friend who remembers, never as a list):\n- ${p.memory.slice(0, 15).join("\n- ")}`);
   if (p.mood && p.mood !== "neutral") lines.push(`their mood lately: ${p.mood} (match it: calm them if stressed, hype with them if hyped, keep it light if they've been quiet)`);
-  return lines.length ? "WHAT YOU KNOW ABOUT THEM (use it naturally, don't recite it)\n" + lines.join("\n") : "you don't know much about them yet; a quick question about their goal is fine";
+  return lines.length > 1 ? "WHAT YOU KNOW ABOUT THEM (use it naturally, don't recite it)\n" + lines.join("\n") : lines[0] + "\n" + "you don't know much about them yet; a quick question about their goal is fine";
 }
