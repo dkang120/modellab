@@ -470,8 +470,13 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
   if(!SIGNUP.companyId){done();return;}
   var H={'Content-Type':'application/json','revision':'2024-10-15'},base='https://a.klaviyo.com/client/';
   fetch(base+'subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab text buddy ('+source+')',profile:{data:{type:'profile',attributes:{phone_number:ph,subscriptions:{sms:{marketing:{consent:'SUBSCRIBED'}}}}}}},relationships:{list:{data:{type:'list',id:SIGNUP.smsListId||SIGNUP.listId}}}}})})
-   .catch(function(){}).then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})});})
-   .then(function(r){if(r&&(r.ok||r.status===202||r.status===409))done();else fail();}).catch(fail);
+   .then(function(r){
+     if(r.ok||r.status===202)return r;
+     return r.text().then(function(t){try{console.error('[ModelLab] SMS subscribe failed',r.status,t);}catch(e){}throw new Error('sub '+r.status);});
+   })
+   .then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})}).catch(function(){});})
+   .then(function(){done();})
+   .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}fail();});
 }
 function bdSubmit(){
   var b=state.bd,ph=normPhone(document.getElementById('bd-ph').value),ok=document.getElementById('bd-ok').checked;
