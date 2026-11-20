@@ -473,7 +473,7 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
   var attrs={phone_number:ph,properties:props};if(em)attrs.email=em;
   function done(){try{localStorage.setItem('ml_buddy','1');}catch(e){}setUnlocked();mlTrack('sms_signup_succeeded',{source:source,goal:goal});ok();}
   if(!SIGNUP.companyId){done();return;}
-  var H={'Content-Type':'application/json','revision':'2024-10-15'},base='https://a.klaviyo.com/client/';
+  var H={'Content-Type':'application/json','revision':'2025-01-15'},base='https://a.klaviyo.com/client/';
   fetch(base+'subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab text buddy ('+source+')',profile:{data:{type:'profile',attributes:{phone_number:ph,subscriptions:{sms:{marketing:{consent:'SUBSCRIBED'}}}}}}},relationships:{list:{data:{type:'list',id:SIGNUP.smsListId||SIGNUP.listId}}}}})})
    .then(function(r){
      if(r.ok||r.status===202)return r;
