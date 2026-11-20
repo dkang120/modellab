@@ -306,7 +306,7 @@ export default {
     if (url.pathname === "/status") {
       const m = month();
       if (url.searchParams.get("phone")) return json({ plan: await planFor(env, url.searchParams.get("phone")), replies_this_month: await getNum(env.BUDDY_KV, `p:${m}:${url.searchParams.get("phone")}`) });
-      return json({ paid_credits_used: await getNum(env.BUDDY_KV, `paidcredits:${m}`), last_payload_keys: Object.keys(JSON.parse((await env.BUDDY_KV.get("seen_payload")) || "{}")), month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
+      return json({ last_error: JSON.parse((await env.BUDDY_KV.get("last_error")) || "null"), paid_credits_used: await getNum(env.BUDDY_KV, `paidcredits:${m}`), last_payload_keys: Object.keys(JSON.parse((await env.BUDDY_KV.get("seen_payload")) || "{}")), month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
     }
     if (url.pathname === "/reply" && req.method === "POST") {
       let body = {};
@@ -317,7 +317,12 @@ export default {
         await env.BUDDY_KV.put(`dry:${body.phone || "x"}`, JSON.stringify([...history, { role: "user", content: String(body.text || "") }, { role: "assistant", content: reply }].slice(-12)), { expirationTtl: 3600 });
         return json({ reply, credits: smsCredits(reply), debug: askClaude.last });
       }
-      ctx.waitUntil(handle(env, body).then(r => console.log(JSON.stringify(r))).catch(e => console.log("buddy error", e.message)));
+      ctx.waitUntil(handle(env, body).then(r => console.log(JSON.stringify(r))).catch(async e => {
+        console.log("buddy error", e.message);
+        // Surface failures where Daniel (and Claude, via the Klaviyo API) can see them.
+        try { await env.BUDDY_KV.put("last_error", JSON.stringify({ at: new Date().toISOString(), error: e.message }), { expirationTtl: 30 * 86400 }); } catch {}
+        try { await klaviyoEvent(env, "Buddy Error", body.phone || null, body.phone ? null : env.ALERT_EMAIL, { error: String(e.message).slice(0, 500) }); } catch (e2) { console.log("klaviyo error event failed", e2.message); }
+      }));
       return json({ accepted: true });   // answer Klaviyo fast; the reply is sent in the background
     }
     return json({ error: "not found" }, 404);
