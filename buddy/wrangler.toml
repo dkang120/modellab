@@ -15,6 +15,14 @@ MODEL = "claude-sonnet-5-5"
 # The AI may use at most this many credits a month; scheduled texts keep the rest.
 MONTHLY_CREDIT_CAP = "80"
 PER_PERSON_MONTHLY = "6"
+# Plans: free = 4 AI replies a month, pro ($4.99/mo via Stripe) = 100, owner numbers = unlimited.
+FREE_MONTHLY = "4"
+PRO_MONTHLY = "100"
+OWNER_PHONES = "+19256780687"
+# Email Daniel when pro/owner replies pass this many SMS credits in a month (time to add Klaviyo credits).
+PAID_CREDIT_ALERT = "50"
+# Stripe Payment Link for the $4.99/mo plan (set once Stripe is set up). Secret STRIPE_WEBHOOK_SECRET goes in Cloudflare.
+STRIPE_PAYMENT_LINK = ""
 ALERT_EMAIL = "kangd4u@gmail.com"
 
 # Secrets (set in the Cloudflare dashboard, never in this file):

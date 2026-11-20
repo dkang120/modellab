@@ -15,6 +15,20 @@ const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, header
 
 async function getNum(kv, k) { return Number((await kv.get(k)) || 0); }
 
+// ---------- plans: free (4 AI replies/mo), pro $4.99 (100/mo), owner (unlimited) ----------
+const digits = p => String(p || "").replace(/\D/g, "");
+const toE164 = p => { const d = digits(p); return d.length === 10 ? "+1" + d : (d.length === 11 && d[0] === "1" ? "+" + d : (d ? "+" + d : "")); };
+function isOwner(env, phone) { return String(env.OWNER_PHONES || "").split(",").map(toE164).filter(Boolean).includes(toE164(phone)); }
+async function planFor(env, phone) {
+  if (isOwner(env, phone)) return "owner";
+  return (await env.BUDDY_KV.get(`sub:${toE164(phone)}`)) === "active" ? "pro" : "free";
+}
+function upgradeLink(env, phone) {
+  if (!env.STRIPE_PAYMENT_LINK) return "modellab.hidanielkang.com/text/";
+  return env.STRIPE_PAYMENT_LINK + "?client_reference_id=" + digits(phone);
+}
+
+
 async function klaviyoEvent(env, metric, phone, email, properties) {
   const profile = phone ? { phone_number: phone } : { email };
   const r = await fetch("https://a.klaviyo.com/api/events/", {
@@ -177,12 +191,26 @@ async function handle(env, body) {
   if (env.BUDDY_KV && !(await env.BUDDY_KV.get("seen_payload"))) await env.BUDDY_KV.put("seen_payload", JSON.stringify(body).slice(0, 2000));
   if (!phone || !text || KEYWORDS.test(text)) return { skipped: "no phone/text or a compliance keyword" };
 
+  const plan = await planFor(env, phone);
   const used = await getNum(kv, `credits:${m}`);
   const cap = Number(env.MONTHLY_CREDIT_CAP || 80);
   const mine = await getNum(kv, `p:${m}:${phone}`);
-  const perCap = Number(env.PER_PERSON_MONTHLY || 6);
+  const perCap = plan === "owner" ? Infinity : Number(plan === "pro" ? (env.PRO_MONTHLY || 100) : (env.FREE_MONTHLY || 4));
+  // The shared credit budget only limits free users; pro and owner replies are tracked separately.
+  const overBudget = plan === "free" && used >= cap;
 
-  if (used >= cap || mine >= perCap) {
+  if (plan === "free" && !overBudget && mine >= perCap) {
+    // Free limit hit: one upgrade note per month, then silence.
+    if (!(await kv.get(`max:${m}:${phone}`))) {
+      const note = `that's your ${perCap} free replies this month. go pro for $4.99/mo and i'm here up to ${Number(env.PRO_MONTHLY || 100)}x a month: ${upgradeLink(env, phone)}`;
+      await klaviyoEvent(env, "Buddy Reply", phone, null, { reply: note, kind: "upgrade" });
+      await kv.put(`max:${m}:${phone}`, "1", { expirationTtl: 40 * 86400 });
+      await kv.put(`credits:${m}`, String(used + smsCredits(note)), { expirationTtl: 40 * 86400 });
+    }
+    return { skipped: "free limit", plan, mine, perCap };
+  }
+
+  if (overBudget || mine >= perCap) {
     // One "maxed out" note per person per month, then silence. Their text still sits in the Klaviyo inbox.
     const noted = await kv.get(`max:${m}:${phone}`);
     if (!noted && used < cap + 10) {
@@ -205,8 +233,17 @@ async function handle(env, body) {
   if (human && env.ALERT_EMAIL) await klaviyoEvent(env, "Buddy Needs Human", null, env.ALERT_EMAIL, { phone, their_text: text.slice(0, 500), buddy_reply: reply });
 
   const credits = smsCredits(reply);
-  const newUsed = used + credits;
-  await kv.put(`credits:${m}`, String(newUsed), { expirationTtl: 40 * 86400 });
+  const newUsed = plan === "free" ? used + credits : used;
+  if (plan === "free") await kv.put(`credits:${m}`, String(newUsed), { expirationTtl: 40 * 86400 });
+  else {
+    const paidUsed = (await getNum(kv, `paidcredits:${m}`)) + credits;
+    await kv.put(`paidcredits:${m}`, String(paidUsed), { expirationTtl: 40 * 86400 });
+    const warnAt = Number(env.PAID_CREDIT_ALERT || 50);
+    if (paidUsed >= warnAt && !(await kv.get(`paidalert:${m}`)) && env.ALERT_EMAIL) {
+      await klaviyoEvent(env, "Buddy Budget Alert", null, env.ALERT_EMAIL, { used: paidUsed, cap: warnAt, month: m, note: "Pro/owner replies passed the alert level. Time to add SMS credits in Klaviyo." });
+      await kv.put(`paidalert:${m}`, "1", { expirationTtl: 40 * 86400 });
+    }
+  }
   await kv.put(`p:${m}:${phone}`, String(mine + 1), { expirationTtl: 40 * 86400 });
   await kv.put(hKey, JSON.stringify([...history, { role: "user", content: text }, { role: "assistant", content: reply }].slice(-12)), { expirationTtl: 60 * 86400 });
 
@@ -214,16 +251,62 @@ async function handle(env, body) {
     await klaviyoEvent(env, "Buddy Budget Alert", null, env.ALERT_EMAIL, { used: newUsed, cap, month: m });
     await kv.put(`alert80:${m}`, "1", { expirationTtl: 40 * 86400 });
   }
-  return { ok: true, credits, used: newUsed, cap };
+  return { ok: true, plan, credits, used: newUsed, cap };
+}
+
+// ---------- Stripe: verify the webhook signature, then mark the phone number pro / free ----------
+async function hmacHex(secret, msg) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
+  return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function verifyStripe(secret, raw, header, tolerance = 300) {
+  if (!secret || !header) return false;
+  const parts = Object.fromEntries(header.split(",").map(x => x.split("=")).filter(x => x.length === 2).map(([k, v]) => [k, v]));
+  const all = header.split(",").filter(x => x.startsWith("v1=")).map(x => x.slice(3));
+  const t = Number(parts.t);
+  if (!t || !all.length || Math.abs(Date.now() / 1000 - t) > tolerance) return false;
+  const want = await hmacHex(secret, `${t}.${raw}`);
+  return all.some(v => v.length === want.length && v === want);
+}
+async function setPlan(env, phone, active, extra) {
+  const p = toE164(phone); if (!p) return;
+  if (active) await env.BUDDY_KV.put(`sub:${p}`, "active");
+  else await env.BUDDY_KV.delete(`sub:${p}`);
+  await klaviyoEvent(env, active ? "Buddy Pro Started" : "Buddy Pro Ended", p, null, { plan: active ? "pro" : "free", ...extra });
+}
+async function handleStripe(env, event) {
+  const o = event.data && event.data.object || {};
+  if (event.type === "checkout.session.completed") {
+    const phone = o.client_reference_id || (o.customer_details && o.customer_details.phone);
+    if (!phone || !o.subscription) return { skipped: "no phone or not a subscription" };
+    await env.BUDDY_KV.put(`subid:${o.subscription}`, toE164(phone));
+    await setPlan(env, phone, true, { subscription: o.subscription });
+    return { ok: "pro on", phone: toE164(phone) };
+  }
+  if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
+    const phone = await env.BUDDY_KV.get(`subid:${o.id}`);
+    if (!phone) return { skipped: "unknown subscription" };
+    const active = event.type === "customer.subscription.updated" && ["active", "trialing", "past_due"].includes(o.status);
+    await setPlan(env, phone, active, { subscription: o.id, status: o.status || "deleted" });
+    return { ok: active ? "pro kept" : "pro off", phone };
+  }
+  return { ignored: event.type };
 }
 
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
+    if (url.pathname === "/stripe" && req.method === "POST") {   // Stripe can't send our secret header; it signs instead
+      const raw = await req.text();
+      if (!(await verifyStripe(env.STRIPE_WEBHOOK_SECRET, raw, req.headers.get("stripe-signature")))) return json({ error: "bad signature" }, 400);
+      try { return json(await handleStripe(env, JSON.parse(raw))); } catch (e) { return json({ error: e.message }, 500); }
+    }
     if (req.headers.get("x-buddy-secret") !== env.BUDDY_SECRET) return json({ error: "unauthorized" }, 401);
     if (url.pathname === "/status") {
       const m = month();
-      return json({ last_payload_keys: Object.keys(JSON.parse((await env.BUDDY_KV.get("seen_payload")) || "{}")), month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
+      if (url.searchParams.get("phone")) return json({ plan: await planFor(env, url.searchParams.get("phone")), replies_this_month: await getNum(env.BUDDY_KV, `p:${m}:${url.searchParams.get("phone")}`) });
+      return json({ paid_credits_used: await getNum(env.BUDDY_KV, `paidcredits:${m}`), last_payload_keys: Object.keys(JSON.parse((await env.BUDDY_KV.get("seen_payload")) || "{}")), month: m, credits_used: await getNum(env.BUDDY_KV, `credits:${m}`), cap: Number(env.MONTHLY_CREDIT_CAP || 80), model: env.MODEL });
     }
     if (url.pathname === "/reply" && req.method === "POST") {
       let body = {};
@@ -240,4 +323,4 @@ export default {
     return json({ error: "not found" }, 404);
   },
 };
-export { smsCredits, clean };
+export { smsCredits, clean, verifyStripe, planFor, handleStripe, handle, toE164 };
