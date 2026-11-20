@@ -67,5 +67,8 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      # GitHub sometimes needs a moment to register the uploaded artifact before deploy can see it
+      - name: Wait for artifact
+        run: sleep 15
       - id: deployment
         uses: actions/deploy-pages@v4
