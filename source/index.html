@@ -480,6 +480,7 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
      return r.text().then(function(t){try{console.error('[ModelLab] SMS subscribe failed',r.status,t);}catch(e){}throw new Error('sub '+r.status);});
    })
    .then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})}).catch(function(){});})
+   .then(function(){return fetch(base+'events/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'event',attributes:{properties:{source:source,goal:goal,freq:freq},metric:{data:{type:'metric',attributes:{name:'Buddy Signup'}}},profile:{data:{type:'profile',attributes:{phone_number:ph}}}}}})}).catch(function(){});})
    .then(function(){done();})
    .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}mlTrack('sms_signup_failed',{source:source,error:String(e&&e.message||e)});fail();});
 }
