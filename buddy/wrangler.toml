@@ -22,7 +22,7 @@ OWNER_PHONES = "+19256780687"
 # Email Daniel when pro/owner replies pass this many SMS credits in a month (time to add Klaviyo credits).
 PAID_CREDIT_ALERT = "50"
 # Stripe Payment Link for the $4.99/mo plan (set once Stripe is set up). Secret STRIPE_WEBHOOK_SECRET goes in Cloudflare.
-STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_fZudR9gsxd7I5Gh0ce3F601"
+STRIPE_PAYMENT_LINK = "https://buy.stripe.com/28E6oG8tq7caaez58Z7bW01"
 ALERT_EMAIL = "kangd4u@gmail.com"
 # Smart first-move texts (payday etc.): at most this many a day across everyone.
 MAX_NUDGES_PER_DAY = "10"
