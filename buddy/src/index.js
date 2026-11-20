@@ -389,10 +389,13 @@ async function verifyStripe(secret, raw, header, tolerance = 300) {
   return all.some(v => v.length === want.length && v === want);
 }
 async function setPlan(env, phone, active, extra) {
-  const p = toE164(phone); if (!p) return;
+  const p = toE164(phone); if (!p) return false;
+  const was = (await env.BUDDY_KV.get(`sub:${p}`)) === "active";
+  if (was === active) return false;          // no change (e.g. renewal, card update, cancel scheduled for later): no text
   if (active) await env.BUDDY_KV.put(`sub:${p}`, "active");
   else await env.BUDDY_KV.delete(`sub:${p}`);
   await klaviyoEvent(env, active ? "Buddy Pro Started" : "Buddy Pro Ended", p, null, { plan: active ? "pro" : "free", ...extra });
+  return true;
 }
 async function handleStripe(env, event) {
   const o = event.data && event.data.object || {};
