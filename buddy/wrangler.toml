@@ -24,8 +24,14 @@ PAID_CREDIT_ALERT = "50"
 # Stripe Payment Link for the $4.99/mo plan (set once Stripe is set up). Secret STRIPE_WEBHOOK_SECRET goes in Cloudflare.
 STRIPE_PAYMENT_LINK = ""
 ALERT_EMAIL = "kangd4u@gmail.com"
+# Smart first-move texts (payday etc.): at most this many a day across everyone.
+MAX_NUDGES_PER_DAY = "10"
 
 # Secrets (set in the Cloudflare dashboard, never in this file):
 #   ANTHROPIC_API_KEY  - Claude API key
 #   KLAVIYO_BUDDY_KEY  - Klaviyo private key with Events: Full access
 #   BUDDY_SECRET       - shared secret Klaviyo sends in the x-buddy-secret header
+
+# Daily first-move texts at 17:30 UTC (9:30am PST / 10:30am PDT).
+[triggers]
+crons = ["30 17 * * *"]

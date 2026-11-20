@@ -138,5 +138,7 @@ export function contextBlock(p) {
   if (p.now_model) lines.push(`model suggested to them: ${p.now_model}`);
   if (p.now_time) lines.push(`when they need the money: ${p.now_time}`);
   if (p.now_react) lines.push(`how they said they'd react to a 30% drop: ${p.now_react}`);
+  if (Array.isArray(p.memory) && p.memory.length) lines.push(`things they've told you before (bring one up when it fits, like a friend who remembers, never as a list):\n- ${p.memory.slice(0, 15).join("\n- ")}`);
+  if (p.mood && p.mood !== "neutral") lines.push(`their mood lately: ${p.mood} (match it: calm them if stressed, hype with them if hyped, keep it light if they've been quiet)`);
   return lines.length ? "WHAT YOU KNOW ABOUT THEM (use it naturally, don't recite it)\n" + lines.join("\n") : "you don't know much about them yet; a quick question about their goal is fine";
 }

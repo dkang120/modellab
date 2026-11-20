@@ -224,7 +224,8 @@ async function handle(env, body) {
 
   const hKey = `h:${phone}`;
   const history = JSON.parse((await kv.get(hKey)) || "[]");
-  let reply = clean(await askClaude(env, body, history, text));
+  const mem = await getMemory(kv, phone);
+  let reply = clean(await askClaude(env, { ...body, memory: mem.facts, mood: mem.mood }, history, text));
   let human = false;
   if (reply.startsWith("[HUMAN]")) { human = true; reply = reply.replace("[HUMAN]", "").trim(); }
   if (!reply) return { skipped: "empty reply" };
@@ -246,12 +247,107 @@ async function handle(env, body) {
   }
   await kv.put(`p:${m}:${phone}`, String(mine + 1), { expirationTtl: 40 * 86400 });
   await kv.put(hKey, JSON.stringify([...history, { role: "user", content: text }, { role: "assistant", content: reply }].slice(-12)), { expirationTtl: 60 * 86400 });
+  // After the reply is out: remember what they said and read their mood (cheap model, never delays the text).
+  try { await updateMemory(env, phone, mem, text, reply); } catch (e) { console.log("memory error", e.message); }
 
   if (newUsed >= cap * 0.8 && !(await kv.get(`alert80:${m}`)) && env.ALERT_EMAIL) {
     await klaviyoEvent(env, "Buddy Budget Alert", null, env.ALERT_EMAIL, { used: newUsed, cap, month: m });
     await kv.put(`alert80:${m}`, "1", { expirationTtl: 40 * 86400 });
   }
   return { ok: true, plan, credits, used: newUsed, cap };
+}
+
+// ---------- Long-term memory + mood (Tomo-style "it remembers me") ----------
+// mem:<phone> = { facts: [...], dates: [{label, rule}], mood, intent, lastSeen, nudged: {label: iso} }
+async function getMemory(kv, phone) {
+  try { return { facts: [], dates: [], mood: "neutral", nudged: {}, ...JSON.parse((await kv.get(`mem:${phone}`)) || "{}") }; }
+  catch { return { facts: [], dates: [], mood: "neutral", nudged: {} }; }
+}
+export const MEMORY_PROMPT = `you update a text buddy's notes about one person. you get their current notes (json), their newest text, and the buddy's reply.
+return ONLY json: {"facts":[...],"dates":[...],"mood":"...","intent":"..."}
+facts: short notes (max 15, each under 80 chars) about THEIR life a friend would bring up later: job, school, payday, goals, money plans, names of people/pets, upcoming events, what stresses or excites them. keep old facts unless the new text changes them; drop the least useful when over 15. only what they actually said.
+never store: card, bank or account numbers, ssn, passwords, exact balances or income, health or medical details, anything about self-harm, crime or abuse.
+dates: recurring or upcoming dates they mentioned, as {"label":"payday","rule":R} where R is "weekly:friday", "biweekly:friday", "monthly:15", "monthly:last" or "once:YYYY-MM-DD". keep old ones unless changed. [] if none.
+mood: one of stressed, anxious, sad, annoyed, hyped, chill, neutral (from their newest text).
+intent: one of chat, question, venting, plan, checkin.`;
+async function updateMemory(env, phone, mem, text, reply) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: "claude-haiku-5-5", max_tokens: 500, thinking: { type: "disabled" }, system: MEMORY_PROMPT,
+      messages: [{ role: "user", content: `notes: ${JSON.stringify({ facts: mem.facts, dates: mem.dates })}\n\ntheir text: ${text}\n\nbuddy reply: ${reply}` }] }),
+  });
+  if (!r.ok) throw new Error(`memory anthropic ${r.status}`);
+  const d = await r.json();
+  const raw = (d.content || []).filter(c => c.type === "text").map(c => c.text).join("");
+  const parsed = parseMemory(raw);
+  if (!parsed) return;
+  const next = { ...mem, ...parsed, lastSeen: new Date().toISOString() };
+  await env.BUDDY_KV.put(`mem:${phone}`, JSON.stringify(next), { expirationTtl: 180 * 86400 });
+}
+const MOODS = ["stressed", "anxious", "sad", "annoyed", "hyped", "chill", "neutral"];
+const RULE = /^(weekly|biweekly):(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$|^monthly:([1-9]|[12]\d|3[01]|last)$|^once:\d{4}-\d{2}-\d{2}$/;
+const SENSITIVE = /\b\d{9,}\b|\b(ssn|social security|password|routing|account number|card number|diagnos|medication|suicid|self[- ]harm)\b/i;
+export function parseMemory(raw) {
+  const m = String(raw || "").match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  let j; try { j = JSON.parse(m[0]); } catch { return null; }
+  const facts = (Array.isArray(j.facts) ? j.facts : []).map(f => String(f).trim().slice(0, 80)).filter(f => f && !SENSITIVE.test(f)).slice(0, 15);
+  const dates = (Array.isArray(j.dates) ? j.dates : []).filter(x => x && RULE.test(String(x.rule))).map(x => ({ label: String(x.label || "").slice(0, 30), rule: String(x.rule) })).slice(0, 5);
+  return { facts, dates, mood: MOODS.includes(j.mood) ? j.mood : "neutral", intent: String(j.intent || "chat").slice(0, 12) };
+}
+
+// ---------- Smart first-move texts (cron, ~9:30am PT) ----------
+const DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+function ptToday(now = new Date()) {
+  const s = now.toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });   // YYYY-MM-DD
+  const d = new Date(s + "T12:00:00Z");
+  const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  return { iso: s, dow: DAYS[d.getUTCDay()], dom: d.getUTCDate(), isLast: d.getUTCDate() === last };
+}
+export function dueDate(dates, nudged, today) {
+  for (const x of dates || []) {
+    const [kind, v] = x.rule.split(":");
+    const lastNudge = nudged && nudged[x.label] ? (Date.parse(today.iso) - Date.parse(nudged[x.label])) / 86400000 : Infinity;
+    const hit = (kind === "weekly" && v === today.dow && lastNudge >= 6)
+      || (kind === "biweekly" && v === today.dow && lastNudge >= 13)
+      || (kind === "monthly" && (v === "last" ? today.isLast : Number(v) === today.dom) && lastNudge >= 20)
+      || (kind === "once" && v === today.iso && lastNudge >= 1);
+    if (hit) return x;
+  }
+  return null;
+}
+async function runNudges(env) {
+  const kv = env.BUDDY_KV, today = ptToday(), m = month();
+  const cap = Number(env.MONTHLY_CREDIT_CAP || 80);
+  let cursor, sent = 0;
+  do {
+    const page = await kv.list({ prefix: "mem:", cursor });
+    cursor = page.list_complete ? null : page.cursor;
+    for (const k of page.keys) {
+      if (sent >= Number(env.MAX_NUDGES_PER_DAY || 10)) return { sent };
+      const phone = k.name.slice(4);
+      const mem = await getMemory(kv, phone);
+      const quietDays = mem.lastSeen ? (Date.now() - Date.parse(mem.lastSeen)) / 86400000 : 999;
+      if (quietDays > 30 || quietDays < 0.5) continue;           // only people active this month, and not mid-conversation
+      const due = dueDate(mem.dates, mem.nudged, today);
+      if (!due) continue;
+      const plan = await planFor(env, phone);
+      const used = await getNum(kv, `credits:${m}`);
+      if (plan === "free" && used >= cap) continue;
+      const hKey = `h:${phone}`;
+      const history = JSON.parse((await kv.get(hKey)) || "[]");
+      const cue = `(no new text from them. you're texting first today because it's their ${due.label}. send one short, natural opener that shows you remembered. no "hey!" opener, no buying advice.)`;
+      const nudge = clean(await askClaude(env, { memory: mem.facts, mood: mem.mood }, history, cue));
+      if (!nudge || nudge.startsWith("[HUMAN]")) continue;
+      await klaviyoEvent(env, "Buddy Reply", phone, null, { reply: nudge, kind: "nudge", reason: due.label });
+      if (plan === "free") await kv.put(`credits:${m}`, String(used + smsCredits(nudge)), { expirationTtl: 40 * 86400 });
+      await kv.put(hKey, JSON.stringify([...history, { role: "user", content: `(you texted first: ${due.label})` }, { role: "assistant", content: nudge }].slice(-12)), { expirationTtl: 60 * 86400 });
+      await kv.put(`mem:${phone}`, JSON.stringify({ ...mem, nudged: { ...(mem.nudged || {}), [due.label]: today.iso } }), { expirationTtl: 180 * 86400 });
+      sent++;
+    }
+  } while (cursor);
+  return { sent };
 }
 
 // ---------- Stripe: verify the webhook signature, then mark the phone number pro / free ----------
@@ -318,6 +414,9 @@ async function handleStop(env, phoneIn) {
 }
 
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runNudges(env).then(r => console.log("nudges", JSON.stringify(r))).catch(e => console.log("nudge error", e.message)));
+  },
   async fetch(req, env, ctx) {
     if (new URL(req.url).pathname === "/stop" && req.method === "POST") {
       let b = {}; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
