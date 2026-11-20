@@ -669,7 +669,7 @@ document.addEventListener('click',function(e){
     shareCard(card).then(function(b){shb.textContent=o;shb.disabled=false;shareOut(b,'modellab-'+kind+'.png',kind==='pain'?'I tried the ModelLab pain simulator. Can you hold?':'My ModelLab investing style match.',kind==='pain'?painLink():new URL('tools/match/',document.baseURI).href);});return;}
   var lkb=cap(e,'[data-t-link]');if(lkb){copyTxt(lkb.getAttribute('data-t-link')==='pain'?painLink():new URL('tools/match/',document.baseURI).href,lkb);return;}
   var el;
-  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;if(Q.done){markProg('match');}ML.rerender();if(Q.done)qzSave();return;}
+  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));if(Q.i===0&&window.mlTrack)mlTrack('quiz_started');Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;if(Q.done){markProg('match');if(window.mlTrack)mlTrack('quiz_completed',{top_match:matchRank()[0].m.id});}ML.rerender();if(Q.done)qzSave();return;}
   if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;ML.rerender();return;}
   if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};ML.rerender();return;}
   if((el=cap(e,'[data-t-psc]'))){if(el.disabled)return;P.sc=el.getAttribute('data-t-psc');painReset();ML.rerender();return;}

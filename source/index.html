@@ -13,6 +13,11 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#7c4def">
 <script src="seo.js"></script>
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once unregister identify alias set_config reset opt_out_capturing opt_in_capturing has_opted_out_capturing get_distinct_id get_property".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init('phc_B7iPzXphZGLqzDWSSx6HmA47qos9CYnXTJRYgaCnssFc',{api_host:'https://us.i.posthog.com',person_profiles:'identified_only',capture_pageview:'history_change',autocapture:true,disable_session_recording:true});
+window.mlTrack=function(n,p){try{window.posthog&&posthog.capture(n,p||{});}catch(e){}};
+</script>
 </head>
 <body>
 <header class="top"><a class="logo" href="#home" aria-label="ModelLab home"><svg viewBox="0 0 48 20.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 5C10 5 12 17 21 17C31 17 33 4 45 4"/><circle cx="3" cy="5" r="2.6" fill="currentColor" stroke="none"/><circle cx="45" cy="4" r="2.6" fill="currentColor" stroke="none"/></svg>modellab</a><nav class="navl" aria-label="Primary"><a href="#library" data-nav="library">Library</a><a href="#match" data-nav="match">Quiz</a><a href="#now" data-nav="now">Now what?</a></nav><nav class="navl navr" aria-label="Featured"><a href="#text" data-nav="text" class="nav-hl">text buddy <i>new</i></a></nav></header>
@@ -427,7 +432,7 @@ function viewCompare(){
    (sel.length>=2?'<div class="vs">'+sel.map(function(m,i){return (i?'<span class="vs-x">vs</span>':'')+'<a class="vs-m" href="#m-'+m.id+'">'+av(m,'lg',true)+'<b>'+esc(handle(m))+'</b><small>risk '+m.risk+'/5 · effort '+m.effort+'/5</small></a>';}).join('')+'</div>':'')+
    '<div class="sel"><span>Comparing</span>'+chips+addBtn+menu+'</div>'+table+pollHtml(sel)+
    '<div class="fit" style="margin:28px 0 100px"><div><h2>Find your fit</h2><p>Tell us how you invest and we will rank the library.</p>'+slider('risk','Risk tolerance',f.risk)+slider('effort','Effort you will spend',f.effort)+slider('growth','Growth you want',f.growth)+'</div>'+
-   '<div class="bm"><small>BEST MATCHES</small><div id="rank">'+rankHtml()+'</div></div></div></div>';
+   '<div class="bm"><small>BEST MATCHES</small><div id="rank">'+rankHtml()+'</div></div></div>'+(buddyIn()?'':'<a class="buddy-cta" href="#text" style="margin-top:24px"><span class="im in">picked one? i\u2019ll text you when it gets rocky so you don\u2019t panic sell \uD83D\uDCF1</span><span class="im out pu">yes pls</span></a>')+'</div>';
 }
 
 function pollHtml(sel){
@@ -451,7 +456,7 @@ function viewBuddy(){
   if(b.step>=2)msgs.push(['in','how often can i text you?']);
   if(b.step>=3)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
   if(b.step>=3)msgs.push(['in',mm?'perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind':'perfect. drop your number and you’re in 🔒']);
-  if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','texts start as soon as our number goes live, then every lab drop after. reply STOP anytime.']);}
+  if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','check your phone 📱 your first text is on the way (i don’t text late at night, so it might land in the morning). reply STOP anytime.']);}
   if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
@@ -466,7 +471,7 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
   var mt=null,em=null;try{mt=localStorage.getItem('ml_match');em=localStorage.getItem('ml_email');}catch(e){}
   var props={buddy_goal:goal,buddy_freq:freq,buddy_consent_text_v:'2026-11-17',buddy_consent_at:new Date().toISOString(),buddy_source:source};if(mt)props.modellab_top_match=mt;if(extra)for(var xk in extra)props[xk]=extra[xk];
   var attrs={phone_number:ph,properties:props};if(em)attrs.email=em;
-  function done(){try{localStorage.setItem('ml_buddy','1');}catch(e){}setUnlocked();ok();}
+  function done(){try{localStorage.setItem('ml_buddy','1');}catch(e){}setUnlocked();mlTrack('sms_signup_succeeded',{source:source,goal:goal});ok();}
   if(!SIGNUP.companyId){done();return;}
   var H={'Content-Type':'application/json','revision':'2024-10-15'},base='https://a.klaviyo.com/client/';
   fetch(base+'subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab text buddy ('+source+')',profile:{data:{type:'profile',attributes:{phone_number:ph,subscriptions:{sms:{marketing:{consent:'SUBSCRIBED'}}}}}}},relationships:{list:{data:{type:'list',id:SIGNUP.smsListId||SIGNUP.listId}}}}})})
@@ -476,7 +481,7 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
    })
    .then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})}).catch(function(){});})
    .then(function(){done();})
-   .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}fail();});
+   .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}mlTrack('sms_signup_failed',{source:source,error:String(e&&e.message||e)});fail();});
 }
 function bdSubmit(){
   var b=state.bd,ph=normPhone(document.getElementById('bd-ph').value),ok=document.getElementById('bd-ok').checked;
@@ -530,7 +535,7 @@ function viewNow(){
   var out='';
   if(!ready){var left=NW_Q.filter(function(q){return !n[q[0]];}).length;out='<div class="nw-wait"><div class="im in">'+(left===NW_Q.length?'tap a situation up top, or answer 5 quick ones \uD83D\uDC46':left+' more tap'+(left>1?'s':'')+' and i\u2019ll lay it out \uD83D\uDC40')+'</div></div>';}
   else{
-    var r=nwSteps(n),m=r.pick.m,amtTxt=a?money(a):'your money';
+    var r=nwSteps(n),m=r.pick.m,amtTxt=a?money(a):'your money';if(!n._trk){n._trk=1;mlTrack('now_plan_shown',{model:m.id,time:n.time||''});}
     var intro='ok real talk. with '+amtTxt+(n.debt==='yes'?' and some card debt':'')+(n.ef==='no'?' and no cushion yet':'')+', here\u2019s the order most people in your spot consider \uD83D\uDC47';
     var bub='<div class="nw-thread"><div class="im in">'+esc(intro)+'</div>'+r.s.map(function(x,i){return '<div class="im in nw-st"><b>'+(i+1)+'. '+esc(x[1])+'</b>'+esc(x[2])+'</div>';}).join('')+'</div>';
     var split=a&&n.time!=='lt1'?m.hold.map(function(h){return '<div class="nw-sp"><b>'+esc(h[0])+'</b><span>'+esc(h[1])+'</span><i>'+money(a*h[2]/100)+'</i></div>';}).join(''):'';
@@ -541,7 +546,7 @@ function viewNow(){
     var card='<div class="nw-card" id="nwcard"><div class="nw-card-h"><span>my move</span><i>'+LOGO+' modellab</i></div><p class="nw-card-c">'+esc(nwChain(r))+'</p><small>'+esc(amtTxt)+' \u00b7 '+({'lt1':'<1 yr','1-3':'1\u20133 yrs','3-10':'3\u201310 yrs','10+':'10+ yrs'})[n.time]+' \u00b7 find yours at modellab</small></div>'+
       '<div class="nw-share"><button class="btn light" data-nwshare="1">'+(n.shared||'share my move \u2197')+'</button><button class="btn light" data-nwreset="1">start over</button></div>';
     var sms;
-    if(buddyIn()||n.done)sms='<div class="nw-sms"><div class="im in">you\u2019re in \uD83D\uDD12 i\u2019ll check in on this plan once texts go live</div></div>';
+    if(buddyIn()||n.done)sms='<div class="nw-sms"><div class="im in">you\u2019re in \uD83D\uDD12 i\u2019ll check in on this plan in 2 weeks. watch your texts</div></div>';
     else sms='<div class="nw-sms"><div class="im in">want me to text you this plan + check in on it? \uD83D\uDCF1</div><div class="im in">like a nudge when the cushion\u2019s full, or a \u201cbreathe\u201d when the market drops</div>'+
       '<form class="nw-f" data-nwform="1" novalidate><input id="nw-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number"><button class="tp-yes" type="submit">text me my plan \u203A</button>'+
       '<label class="tp-cons"><input type="checkbox" id="nw-ok"><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label><p class="tp-err" role="alert">'+esc(n.err||'')+'</p></form></div>';
@@ -570,9 +575,9 @@ function popSnoozed(){try{var t=Number(localStorage.getItem('ml_pop_snooze')||0)
 function consentMini(){return '<label class="tp-cons"><input type="checkbox" id="tp-ok"><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label>';}
 function popHtml(){
   var head='<div class="tp-h"><span class="av sm ring"><span>'+LOGO+'</span></span><div><b>modellab buddy</b><small><i class="tp-live"></i>your personalized investing tool</small></div><button class="tp-x" data-pop="close" aria-label="Close">\u00d7</button></div>';
-  var m=['hey \uD83D\uDC4B','i\u2019m your personalized investing tool, but in your texts','i check in when markets get wild + send you a new model every week. free'];
+  var m=['hey \uD83D\uDC4B','i\u2019m your personalized investing tool, but in your texts','i check in when markets get wild + send you a new model every 2 weeks. free'];
   var body='<div class="tp-b">'+m.map(function(t,i){return '<div class="im in" style="animation-delay:'+(i*.35)+'s">'+t+'</div>';}).join('');
-  if(POP.done)body+='<div class="im out pu">locked in \u2705</div><div class="im in">you\u2019re on the list \uD83D\uDD12 texts start as soon as our number goes live</div></div>';
+  if(POP.done)body+='<div class="im out pu">locked in \u2705</div><div class="im in">you\u2019re in \uD83D\uDD12 check your phone, your first text is on the way</div></div>';
   else if(POP.step===0)body+='</div><div class="tp-a"><button class="tp-yes" data-pop="yes">yes, text me \uD83D\uDCF1</button><button class="tp-no" data-pop="snooze">not rn</button></div>';
   else body+='<div class="im out pu">yes, text me \uD83D\uDCF1</div><div class="im in">bet. drop your number</div></div><form class="tp-f" data-popform="1" novalidate><input id="tp-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number">'+consentMini()+'<button class="tp-yes" type="submit">lock in \u203A</button><p class="tp-err" role="alert">'+esc(POP.err)+'</p></form>';
   return '<div class="tp-card" role="dialog" aria-label="Text buddy">'+head+body+(POP.done?'':'<a class="tp-more" href="#text">customize what i text you \u2192</a>')+'</div>';
@@ -581,8 +586,8 @@ function launcherHtml(){return '<button class="tp-launch" data-pop="open" aria-l
 function paintPop(){
   var w=document.getElementById('tpop');if(!w){w=document.createElement('div');w.id='tpop';document.body.appendChild(w);}
   var onText=curH()==='#text';
-  if(onText||(buddyIn()&&!POP.open)){w.innerHTML='';return;}
-  w.innerHTML=POP.open?popHtml():launcherHtml();w.className=POP.open?'open':'';
+  if(onText||(buddyIn()&&!POP.open)){w.innerHTML='';trackForms();return;}
+  w.innerHTML=POP.open?popHtml():launcherHtml();w.className=POP.open?'open':'';trackForms();
 }
 (function(){var y0=0,t;addEventListener('scroll',function(){var w=document.getElementById('tpop');if(!w)return;var y=scrollY;if(y>y0+6&&y>120)w.classList.add('tp-away');else if(y<y0-6)w.classList.remove('tp-away');y0=y;clearTimeout(t);t=setTimeout(function(){w.classList.remove('tp-away');},900);},{passive:true});})();
 function popAuto(){if(POP.open||buddyIn()||popSnoozed())return;setTimeout(function(){if(curH()==='#home'&&!POP.open&&!buddyIn()&&!popSnoozed()){POP.open=true;paintPop();}},4500);}
@@ -615,7 +620,7 @@ function viewPrivacy(){
   '<h2>What we collect</h2><ul><li><b>Email address</b>, if you follow @modellab by email.</li><li><b>Mobile number</b>, if you join the text buddy, plus the goal and texting frequency you pick, the time you gave consent and the version of the consent wording.</li><li><b>Quiz results</b>, such as your top Match Quiz model, if you’ve followed or joined the text buddy.</li><li><b>On your device only</b>: your browser stores settings like whether you’ve followed, tools you’ve finished and poll picks. This stays in your browser and isn’t sent to us.</li></ul>'+
   '<h2>How we use it</h2><ul><li>To send the emails and texts you signed up for, including the weekly Lab Drop.</li><li>To tailor those messages, for example mentioning your Match Quiz model.</li></ul><p>We don’t use your information for anything else, and we don’t sell it.</p>'+
   '<h2>Text messages</h2><p>We do not sell or share your mobile number or SMS opt-in consent with third parties or affiliates for their marketing or promotional purposes. Text messaging data is only shared with the service provider that sends our messages, so it can deliver them. See our <a href="#sms-terms">SMS Terms</a>.</p>'+
-  '<h2>Who processes it for us</h2><ul><li><b>Klaviyo</b> stores email and SMS subscriptions and sends our messages.</li><li><b>GitHub Pages</b> hosts the website.</li><li><b>Anthropic</b> (Claude) writes the text buddy\u2019s replies when you text us. It receives your message, your recent texts with us, and the preferences you picked (like your goal or quiz result), not your name or email.</li><li><b>Cloudflare</b> runs the small service that passes your text to Anthropic and keeps a short history of your recent texts with us for up to 60 days.</li></ul>'+
+  '<h2>Who processes it for us</h2><ul><li><b>Klaviyo</b> stores email and SMS subscriptions and sends our messages.</li><li><b>GitHub Pages</b> hosts the website.</li><li><b>Anthropic</b> (Claude) writes the text buddy\u2019s replies when you text us. It receives your message, your recent texts with us, and the preferences you picked (like your goal or quiz result), not your name or email.</li><li><b>PostHog</b> measures how people use the website (pages visited, quiz and signup steps) so we can improve it. It does not receive your phone number or email.</li><li><b>Cloudflare</b> runs the small service that passes your text to Anthropic and keeps a short history of your recent texts with us for up to 60 days.</li></ul>'+
   '<h2>Your choices</h2><ul><li>Unsubscribe from email with the link in any email.</li><li>Reply STOP to any text to stop texts.</li><li>To ask what we hold about you, or to have it deleted, contact us through <a href="'+CONTACT_URL+'" target="_blank" rel="noopener">hidanielkang.com</a>.</li></ul>'+
   '<h2>How long we keep it</h2><p>We keep your email or number while you’re subscribed. After you unsubscribe, we keep only the record that you opted out, so we don’t contact you again.</p>'+
   '<h2>Age</h2><p>ModelLab isn’t directed at children under 13, and the text buddy is for people 18 and older.</p>'+
@@ -726,6 +731,7 @@ function render(keep){
   if(rt&&rt.r.after)rt.r.after(rt.arg);
 }
 function routeFor(h){h=(h||'').replace(/^#/,'');var p=h.split('/'),r=ROUTES[p[0]];return (r&&typeof r==='object'&&p[0].charAt(0)!=='_')?{r:r,arg:p.slice(1).join('/')}:null;}
+var _seen={};function trackForms(){var f=[['[data-bdform]','text_page'],['[data-nwform]','now_page'],['[data-popform]','popup']];for(var i=0;i<f.length;i++){var k=f[i][1]+'|'+curH();if(!_seen[k]&&document.querySelector(f[i][0])){_seen[k]=1;mlTrack('sms_form_seen',{source:f[i][1]});}}}
 function rerender(){var y=window.scrollY;render(true);window.scrollTo(0,y);}
 document.addEventListener('click',function(e){
   var t=e.target;
