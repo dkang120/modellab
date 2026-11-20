@@ -1,0 +1,102 @@
+{
+  "_about": "Lab Drop queue. The weekly scheduled task builds the next 'queued' model, publishes it, sends the drop, then marks it 'live'. Edit order/dates here.",
+  "send_time_pt": "09:00",
+  "email_list": "WwRjNL",
+  "email_template": "SgJZRE",
+  "sms_segment_weekly": "XKsb8u",
+  "done": [
+    {
+      "n": 1,
+      "id": "dogs",
+      "name": "Dogs of the Dow",
+      "drop_date": "2026-11-19",
+      "status": "live"
+    }
+  ],
+  "queue": [
+    {
+      "n": 2,
+      "id": "thematic",
+      "name": "Thematic (AI, clean energy)",
+      "drop_date": "2026-11-26",
+      "status": "queued"
+    },
+    {
+      "n": 3,
+      "id": "canslim",
+      "name": "CANSLIM",
+      "drop_date": "2026-12-03",
+      "status": "queued"
+    },
+    {
+      "n": 4,
+      "id": "risk-parity",
+      "name": "Risk Parity",
+      "drop_date": "2026-12-10",
+      "status": "queued"
+    },
+    {
+      "n": 5,
+      "id": "esg",
+      "name": "ESG / Sustainable",
+      "drop_date": "2026-12-17",
+      "status": "queued"
+    },
+    {
+      "n": 6,
+      "id": "mpt",
+      "name": "Modern Portfolio Theory",
+      "drop_date": "2026-12-24",
+      "status": "queued"
+    },
+    {
+      "n": 7,
+      "id": "quant",
+      "name": "Quantitative / Systematic",
+      "drop_date": "2026-12-31",
+      "status": "queued"
+    },
+    {
+      "n": 8,
+      "id": "behavioral",
+      "name": "Behavioral Finance",
+      "drop_date": "2027-01-07",
+      "status": "queued"
+    },
+    {
+      "n": 9,
+      "id": "activist",
+      "name": "Activist",
+      "drop_date": "2027-01-14",
+      "status": "queued"
+    },
+    {
+      "n": 10,
+      "id": "event-driven",
+      "name": "Event-Driven",
+      "drop_date": "2027-01-21",
+      "status": "queued"
+    },
+    {
+      "n": 11,
+      "id": "market-timing",
+      "name": "Market Timing / Tactical Allocation",
+      "drop_date": "2027-01-28",
+      "status": "queued"
+    },
+    {
+      "n": 12,
+      "id": "technical",
+      "name": "Technical Analysis",
+      "drop_date": "2027-02-04",
+      "status": "queued"
+    },
+    {
+      "n": 13,
+      "id": "arbitrage",
+      "name": "Arbitrage",
+      "drop_date": "2027-02-11",
+      "status": "queued"
+    }
+  ]
+}
