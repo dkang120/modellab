@@ -29,6 +29,29 @@ function upgradeLink(env, phone) {
 }
 
 
+// ---------- Sending: Twilio (instant) when configured, else the Klaviyo "Buddy Reply" flow ----------
+const twilioOn = env => !!(env.TWILIO_SID && env.TWILIO_TOKEN && env.TWILIO_FROM);
+async function sendText(env, phone, props) {
+  if (!twilioOn(env)) return klaviyoEvent(env, "Buddy Reply", phone, null, props);
+  const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_SID}/Messages.json`, {
+    method: "POST",
+    headers: { Authorization: "Basic " + btoa(`${env.TWILIO_SID}:${env.TWILIO_TOKEN}`), "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ To: phone, From: env.TWILIO_FROM, Body: props.reply }),
+  });
+  if (!r.ok) throw new Error(`twilio ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  // Keep a record in Klaviyo under a name no send flow listens to (so nothing double-texts).
+  try { await klaviyoEvent(env, "Buddy Text Sent", phone, null, props); } catch (e) { console.log("log event failed", e.message); }
+}
+// Twilio signs each webhook: base64(HMAC-SHA1(token, url + sorted key+value pairs)).
+export async function twilioSignatureOk(token, url, params, sig) {
+  if (!token || !sig) return false;
+  const data = url + Object.keys(params).sort().map(k => k + params[k]).join("");
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(token), { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data)));
+  const want = btoa(String.fromCharCode(...mac));
+  return want.length === sig.length && want === sig;
+}
+
 async function klaviyoEvent(env, metric, phone, email, properties) {
   const profile = phone ? { phone_number: phone } : { email };
   const r = await fetch("https://a.klaviyo.com/api/events/", {
@@ -203,7 +226,7 @@ async function handle(env, body) {
     // Free limit hit: one upgrade note per month, then silence.
     if (!(await kv.get(`max:${m}:${phone}`))) {
       const note = `that's your ${perCap} free replies this month. go pro for $4.99/mo and i'm here up to ${Number(env.PRO_MONTHLY || 100)}x a month: ${upgradeLink(env, phone)}`;
-      await klaviyoEvent(env, "Buddy Reply", phone, null, { reply: note, kind: "upgrade" });
+      await sendText(env, phone, { reply: note, kind: "upgrade" });
       await kv.put(`max:${m}:${phone}`, "1", { expirationTtl: 40 * 86400 });
       await kv.put(`credits:${m}`, String(used + smsCredits(note)), { expirationTtl: 40 * 86400 });
     }
@@ -215,7 +238,7 @@ async function handle(env, body) {
     const noted = await kv.get(`max:${m}:${phone}`);
     if (!noted && used < cap + 10) {
       const note = "i'm maxed out on replies this month 😅 daniel reads every text and will get back to you personally";
-      await klaviyoEvent(env, "Buddy Reply", phone, null, { reply: note, kind: "maxed" });
+      await sendText(env, phone, { reply: note, kind: "maxed" });
       await kv.put(`max:${m}:${phone}`, "1", { expirationTtl: 40 * 86400 });
       await kv.put(`credits:${m}`, String(used + smsCredits(note)), { expirationTtl: 40 * 86400 });
     }
@@ -230,7 +253,7 @@ async function handle(env, body) {
   if (reply.startsWith("[HUMAN]")) { human = true; reply = reply.replace("[HUMAN]", "").trim(); }
   if (!reply) return { skipped: "empty reply" };
 
-  await klaviyoEvent(env, "Buddy Reply", phone, null, { reply, kind: human ? "human_flag" : "ai", their_text: text.slice(0, 500) });
+  await sendText(env, phone, { reply, kind: human ? "human_flag" : "ai", their_text: text.slice(0, 500) });
   if (human && env.ALERT_EMAIL) await klaviyoEvent(env, "Buddy Needs Human", null, env.ALERT_EMAIL, { phone, their_text: text.slice(0, 500), buddy_reply: reply });
 
   const credits = smsCredits(reply);
@@ -340,7 +363,7 @@ async function runNudges(env) {
       const cue = `(no new text from them. you're texting first today because it's their ${due.label}. send one short, natural opener that shows you remembered. no "hey!" opener, no buying advice.)`;
       const nudge = clean(await askClaude(env, { memory: mem.facts, mood: mem.mood }, history, cue));
       if (!nudge || nudge.startsWith("[HUMAN]")) continue;
-      await klaviyoEvent(env, "Buddy Reply", phone, null, { reply: nudge, kind: "nudge", reason: due.label });
+      await sendText(env, phone, { reply: nudge, kind: "nudge", reason: due.label });
       if (plan === "free") await kv.put(`credits:${m}`, String(used + smsCredits(nudge)), { expirationTtl: 40 * 86400 });
       await kv.put(hKey, JSON.stringify([...history, { role: "user", content: `(you texted first: ${due.label})` }, { role: "assistant", content: nudge }].slice(-12)), { expirationTtl: 60 * 86400 });
       await kv.put(`mem:${phone}`, JSON.stringify({ ...mem, nudged: { ...(mem.nudged || {}), [due.label]: today.iso } }), { expirationTtl: 180 * 86400 });
@@ -427,6 +450,17 @@ export default {
       const raw = await req.text();
       if (!(await verifyStripe(env.STRIPE_WEBHOOK_SECRET, raw, req.headers.get("stripe-signature")))) return json({ error: "bad signature" }, 400);
       try { return json(await handleStripe(env, JSON.parse(raw))); } catch (e) { return json({ error: e.message }, 500); }
+    }
+    if (url.pathname === "/twilio" && req.method === "POST") {   // Twilio inbound SMS: instant path
+      const params = Object.fromEntries(new URLSearchParams(await req.text()));
+      if (!(await twilioSignatureOk(env.TWILIO_TOKEN, env.TWILIO_WEBHOOK_URL || url.href, params, req.headers.get("x-twilio-signature")))) return new Response("bad signature", { status: 403 });
+      const body = { phone: params.From, text: params.Body || "" };
+      ctx.waitUntil(handle(env, body).then(r => console.log(JSON.stringify(r))).catch(async e => {
+        console.log("buddy error", e.message);
+        try { await env.BUDDY_KV.put("last_error", JSON.stringify({ at: new Date().toISOString(), error: e.message }), { expirationTtl: 30 * 86400 }); } catch {}
+        try { await klaviyoEvent(env, "Buddy Error", body.phone, null, { error: String(e.message).slice(0, 500) }); } catch {}
+      }));
+      return new Response("<Response/>", { headers: { "content-type": "text/xml" } });   // empty reply; ours goes out via the API
     }
     if (req.headers.get("x-buddy-secret") !== env.BUDDY_SECRET) return json({ error: "unauthorized" }, 401);
     if (url.pathname === "/status") {
