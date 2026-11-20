@@ -460,7 +460,7 @@ function viewBuddy(){
   if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
-  else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567"><label class="bd-cons"><input type="checkbox" id="bd-ok"><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p></form>';
+  else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p></form>';
   else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+msgs.map(function(x,i){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(i>=msgs.length-3?(i-(msgs.length-3))*.25:0)+'s">'+x[1]+'</div>';}).join('')+'</div>'+acts+
    (b.step===0?'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
@@ -484,7 +484,7 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
    .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}mlTrack('sms_signup_failed',{source:source,error:String(e&&e.message||e)});fail();});
 }
 function bdSubmit(){
-  var b=state.bd,ph=normPhone(document.getElementById('bd-ph').value),ok=document.getElementById('bd-ok').checked;
+  var b=state.bd,raw=document.getElementById('bd-ph').value,ph=normPhone(raw),ok=document.getElementById('bd-ok').checked;b.ph=raw;b.ok=ok;
   if(!ph){b.err='that number looks off. try a US mobile, like 555 123 4567';rerender();return;}
   if(!ok){b.err='check the box so we\u2019re allowed to text you';rerender();return;}
   b.err='';smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(){b.err='couldn\u2019t save that right now. try again?';rerender();});
@@ -548,8 +548,8 @@ function viewNow(){
     var sms;
     if(buddyIn()||n.done)sms='<div class="nw-sms"><div class="im in">you\u2019re in \uD83D\uDD12 i\u2019ll check in on this plan in 2 weeks. watch your texts</div></div>';
     else sms='<div class="nw-sms"><div class="im in">want me to text you this plan + check in on it? \uD83D\uDCF1</div><div class="im in">like a nudge when the cushion\u2019s full, or a \u201cbreathe\u201d when the market drops</div>'+
-      '<form class="nw-f" data-nwform="1" novalidate><input id="nw-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number"><button class="tp-yes" type="submit">text me my plan \u203A</button>'+
-      '<label class="tp-cons"><input type="checkbox" id="nw-ok"><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label><p class="tp-err" role="alert">'+esc(n.err||'')+'</p></form></div>';
+      '<form class="nw-f" data-nwform="1" novalidate><input id="nw-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number" value="'+esc(n.ph||'')+'"><button class="tp-yes" type="submit">text me my plan \u203A</button>'+
+      '<label class="tp-cons"><input type="checkbox" id="nw-ok"'+(n.ok?' checked':'')+'><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label><p class="tp-err" role="alert">'+esc(n.err||'')+'</p></form></div>';
     out=bub+'<div class="nw-res">'+modelCard+card+'</div>'+sms;
   }
   return '<div class="wrap nw"><header class="nw-hd"><p class="eyebrow">new \u00b7 your personalized investing tool</p><h1 class="h1">now what?</h1><p class="sub">tell us what you\u2019ve got. get the order of moves most people in your spot consider, plus the model that fits.</p></header>'+
@@ -557,7 +557,7 @@ function viewNow(){
    '<p class="note nw-disc">General, rule-based steps for education, not personal investment advice. The order follows common guidance (cushion, high-interest debt, employer match, then invest) and the model pick uses only the risk and effort ratings shown on each model. Your situation may differ; consider a licensed professional for advice.</p></div>';
 }
 function nwSubmit(){
-  var n=state.nw,ph=normPhone(document.getElementById('nw-ph').value),ok=document.getElementById('nw-ok').checked;
+  var n=state.nw,raw=document.getElementById('nw-ph').value,ph=normPhone(raw),ok=document.getElementById('nw-ok').checked;n.ph=raw;n.ok=ok;
   if(!ph){n.err='that number looks off. try a US mobile';rerender();return;}
   if(!ok){n.err='check the box so we\u2019re allowed to text you';rerender();return;}
   var r=nwSteps(n),goal=n.react==='sell'?'panic':((n.ef!=='yes'||n.debt==='yes')?'basics':'model');
@@ -572,14 +572,14 @@ function nwShare(){
 /* ---------- text buddy side popup + launcher ---------- */
 var POP={open:false,step:0,err:'',done:false};
 function popSnoozed(){try{var t=Number(localStorage.getItem('ml_pop_snooze')||0);return Date.now()<t;}catch(e){return false;}}
-function consentMini(){return '<label class="tp-cons"><input type="checkbox" id="tp-ok"><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label>';}
+function consentMini(on){return '<label class="tp-cons"><input type="checkbox" id="tp-ok"'+(on?' checked':'')+'><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label>';}
 function popHtml(){
   var head='<div class="tp-h"><span class="av sm ring"><span>'+LOGO+'</span></span><div><b>modellab buddy</b><small><i class="tp-live"></i>your personalized investing tool</small></div><button class="tp-x" data-pop="close" aria-label="Close">\u00d7</button></div>';
   var m=['hey \uD83D\uDC4B','i\u2019m your personalized investing tool, but in your texts','i check in when markets get wild + send you a new model every 2 weeks. free'];
   var body='<div class="tp-b">'+m.map(function(t,i){return '<div class="im in" style="animation-delay:'+(i*.35)+'s">'+t+'</div>';}).join('');
   if(POP.done)body+='<div class="im out pu">locked in \u2705</div><div class="im in">you\u2019re in \uD83D\uDD12 check your phone, your first text is on the way</div></div>';
   else if(POP.step===0)body+='</div><div class="tp-a"><button class="tp-yes" data-pop="yes">yes, text me \uD83D\uDCF1</button><button class="tp-no" data-pop="snooze">not rn</button></div>';
-  else body+='<div class="im out pu">yes, text me \uD83D\uDCF1</div><div class="im in">bet. drop your number</div></div><form class="tp-f" data-popform="1" novalidate><input id="tp-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number">'+consentMini()+'<button class="tp-yes" type="submit">lock in \u203A</button><p class="tp-err" role="alert">'+esc(POP.err)+'</p></form>';
+  else body+='<div class="im out pu">yes, text me \uD83D\uDCF1</div><div class="im in">bet. drop your number</div></div><form class="tp-f" data-popform="1" novalidate><input id="tp-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number" value="'+esc(POP.ph||'')+'">'+consentMini(POP.ok)+'<button class="tp-yes" type="submit">lock in \u203A</button><p class="tp-err" role="alert">'+esc(POP.err)+'</p></form>';
   return '<div class="tp-card" role="dialog" aria-label="Text buddy">'+head+body+(POP.done?'':'<a class="tp-more" href="#text">customize what i text you \u2192</a>')+'</div>';
 }
 function launcherHtml(){return '<button class="tp-launch" data-pop="open" aria-label="Open text buddy"><span class="av sm ring"><span>'+LOGO+'</span></span><span class="tp-lt"><b>text buddy</b><small>free \u00b7 personalized</small></span><i class="tp-dot"></i></button>';}
@@ -592,7 +592,7 @@ function paintPop(){
 (function(){var y0=0,t;addEventListener('scroll',function(){var w=document.getElementById('tpop');if(!w)return;var y=scrollY;if(y>y0+6&&y>120)w.classList.add('tp-away');else if(y<y0-6)w.classList.remove('tp-away');y0=y;clearTimeout(t);t=setTimeout(function(){w.classList.remove('tp-away');},900);},{passive:true});})();
 function popAuto(){if(POP.open||buddyIn()||popSnoozed())return;setTimeout(function(){if(curH()==='#home'&&!POP.open&&!buddyIn()&&!popSnoozed()){POP.open=true;paintPop();}},4500);}
 function popSubmit(){
-  var ph=normPhone(document.getElementById('tp-ph').value),ok=document.getElementById('tp-ok').checked;
+  var raw=document.getElementById('tp-ph').value,ph=normPhone(raw),ok=document.getElementById('tp-ok').checked;POP.ph=raw;POP.ok=ok;
   if(!ph){POP.err='that number looks off. try a US mobile';paintPop();return;}
   if(!ok){POP.err='check the box so we\u2019re allowed to text you';paintPop();return;}
   POP.err='';var btn=document.querySelector('.tp-f .tp-yes');if(btn){btn.disabled=true;btn.textContent='one sec\u2026';}
