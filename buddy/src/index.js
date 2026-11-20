@@ -281,6 +281,7 @@ async function handleStripe(env, event) {
     const phone = o.client_reference_id || (o.customer_details && o.customer_details.phone);
     if (!phone || !o.subscription) return { skipped: "no phone or not a subscription" };
     await env.BUDDY_KV.put(`subid:${o.subscription}`, toE164(phone));
+    await env.BUDDY_KV.put(`phonesub:${toE164(phone)}`, o.subscription);
     await setPlan(env, phone, true, { subscription: o.subscription });
     return { ok: "pro on", phone: toE164(phone) };
   }
@@ -294,8 +295,34 @@ async function handleStripe(env, event) {
   return { ignored: event.type };
 }
 
+// ---------- STOP cancels Pro: Klaviyo flow (on SMS unsubscribe) -> POST /stop {phone} ----------
+// No shared secret needed: we only cancel after Klaviyo itself confirms the number is unsubscribed.
+async function smsUnsubscribed(env, phone) {
+  const r = await fetch(`https://a.klaviyo.com/api/profiles/?filter=${encodeURIComponent(`equals(phone_number,"${phone}")`)}&additional-fields[profile]=subscriptions`, {
+    headers: { Authorization: "Klaviyo-API-Key " + env.KLAVIYO_BUDDY_KEY, revision: "2024-10-15", accept: "application/vnd.api+json" } });
+  if (!r.ok) throw new Error(`klaviyo profile lookup ${r.status}`);
+  const p = ((await r.json()).data || [])[0];
+  const c = p && p.attributes.subscriptions && p.attributes.subscriptions.sms && p.attributes.subscriptions.sms.marketing;
+  return !!c && c.consent === "UNSUBSCRIBED";
+}
+async function handleStop(env, phoneIn) {
+  const phone = toE164(phoneIn);
+  const sub = phone && await env.BUDDY_KV.get(`phonesub:${phone}`);
+  if (!sub || (await env.BUDDY_KV.get(`sub:${phone}`)) !== "active") return { skipped: "not pro" };
+  if (!env.STRIPE_SECRET_KEY) return { skipped: "no stripe key yet" };
+  if (!(await smsUnsubscribed(env, phone))) return { skipped: "klaviyo says still subscribed" };
+  const r = await fetch(`https://api.stripe.com/v1/subscriptions/${sub}`, { method: "DELETE", headers: { Authorization: "Bearer " + env.STRIPE_SECRET_KEY } });
+  if (!r.ok) throw new Error(`stripe cancel ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  await setPlan(env, phone, false, { subscription: sub, status: "canceled_by_stop" });
+  return { ok: "pro canceled after STOP", phone };
+}
+
 export default {
   async fetch(req, env, ctx) {
+    if (new URL(req.url).pathname === "/stop" && req.method === "POST") {
+      let b = {}; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
+      try { return json(await handleStop(env, b.phone)); } catch (e) { return json({ error: e.message }, 500); }
+    }
     const url = new URL(req.url);
     if (url.pathname === "/stripe" && req.method === "POST") {   // Stripe can't send our secret header; it signs instead
       const raw = await req.text();
@@ -328,4 +355,4 @@ export default {
     return json({ error: "not found" }, 404);
   },
 };
-export { smsCredits, clean, verifyStripe, planFor, handleStripe, handle, toE164 };
+export { smsCredits, clean, verifyStripe, planFor, handleStripe, handle, toE164, handleStop };
