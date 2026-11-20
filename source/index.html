@@ -276,7 +276,7 @@ function storiesRow(){
     return '<a role="listitem" class="story'+(fresh?' fresh':'')+'" href="#m-'+id+'" data-seen="'+id+'">'+av(m,'lg',true)+'<span class="st-t">'+(fresh?'<b>new</b> ':'')+esc(handle(m).slice(1))+'</span></a>';}).join('')+'</div>';
 }
 function bellHtml(){
-  var seen=false;try{seen=localStorage.getItem('ml_bell')==='1';}catch(e){}
+  var seen=false;try{seen=localStorage.getItem('ml_bell')===String(LABDROP[LABDROP.length-1].n);}catch(e){}
   var items=LABDROP.map(function(d){var m=byId[d.id];return '<a class="bn-item" href="#m-'+d.id+'">'+av(m,'sm',true)+'<span><b>'+esc(handle(m))+'</b> new post: Lab Drop #'+d.n+' · '+esc(m.name)+'<small>'+esc(d.when)+'</small></span></a>';}).join('');
   return '<button class="bell'+(seen?'':' dot')+'" data-bell="1" aria-label="Notifications" aria-expanded="'+(!!state.bell)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>'+
    (state.bell?'<div class="bell-pop" role="menu"><p class="bp-h">notifications</p>'+items+'<a class="bn-item" href="#text"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> new: get a text buddy that keeps you locked in \uD83D\uDCF1</span></a>'+(unlocked()?'':'<a class="bn-item" href="#follow-cta"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> follow to get every Lab Drop by email</span></a>')+'</div>':'');
@@ -748,7 +748,7 @@ document.addEventListener('click',function(e){
   var nwp=t.closest('[data-nwp]');if(nwp){var pi2=Number(nwp.getAttribute('data-nwp')),pd=NW_P[pi2][2];for(var pk in pd)state.nw[pk]=pd[pk];state.nw.persona=pi2;rerender();if(window.innerWidth<900){var no=document.querySelector('.nw-out');if(no)no.scrollIntoView({behavior:'smooth',block:'start'});}return;}
   if(t.closest('[data-nwshare]')){nwShare();return;}
   if(t.closest('[data-nwreset]')){state.nw={amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:state.nw.done,shared:''};rerender();return;}
-  var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell','1');}catch(x){}paintBell();return;}
+  var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell',String(LABDROP[LABDROP.length-1].n));}catch(x){}paintBell();return;}
   if(state.bell&&!t.closest('.bell-pop')){state.bell=false;paintBell();}
   var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
   var cb=t.closest('[data-carb]');if(cb){var cr=cb.closest('.post').querySelector('.car');cr.scrollBy({left:Number(cb.getAttribute('data-carb'))*cr.clientWidth,behavior:'smooth'});return;}
