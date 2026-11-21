@@ -307,7 +307,7 @@ function heroHtml(){
    '</div><div class="mm-footer"><div class="mm-headline"><h1 class="sr">Every investing model, built as a portfolio.</h1><p class="mm-line is-soft" aria-hidden="true">investing models</p><div class="mm-line-row" aria-hidden="true"><p class="mm-line">as portfolios.</p>'+heart+'</div></div>'+
    '<div class="mm-actions"><a class="btn pri" href="#text">get my text buddy →</a><p class="mm-trust">or <a href="#library" class="mm-buddy">explore the library first</a></p></div></div></section></div></div></main>';
 }
-function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',window.innerHeight);}}
+function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',Math.max(560,window.innerHeight-Math.max(0,f.getBoundingClientRect().top+window.scrollY)));}}
 function heroPaint(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e)return;d.innerHTML=heroDeck(HERO.i);e.className='mm-exch';e.innerHTML=heroEx(HERO.i);}
 function heroTick(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e){heroStop();return;}var f=d.querySelector('.front'),g=d.querySelector('.mid');if(!f||!g)return;e.classList.add('out');f.classList.add('leave');if(HERO.i%2)f.classList.add('r');g.classList.add('go');HERO.to=setTimeout(function(){HERO.i++;heroPaint();},680);}
 function heroStop(){if(HERO.timer){clearInterval(HERO.timer);HERO.timer=null;}if(HERO.to){clearTimeout(HERO.to);HERO.to=null;}}
