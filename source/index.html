@@ -460,7 +460,7 @@ function viewBuddy(){
   if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
-  else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p></form>';
+  else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p>'+(b.fails?'<p class="bd-alt">no luck? <a class="lk" href="#follow-cta">get the weekly Lab Drop by email instead</a></p>':'')+'</form>';
   else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+msgs.map(function(x,i){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(i>=msgs.length-3?(i-(msgs.length-3))*.25:0)+'s">'+x[1]+'</div>';}).join('')+'</div>'+acts+
    (b.step===0?'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
@@ -477,18 +477,19 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
   fetch(base+'subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab text buddy ('+source+')',profile:{data:{type:'profile',attributes:{phone_number:ph,subscriptions:{sms:{marketing:{consent:'SUBSCRIBED'}}}}}}},relationships:{list:{data:{type:'list',id:SIGNUP.smsListId||SIGNUP.listId}}}}})})
    .then(function(r){
      if(r.ok||r.status===202)return r;
-     return r.text().then(function(t){try{console.error('[ModelLab] SMS subscribe failed',r.status,t);}catch(e){}throw new Error('sub '+r.status);});
+     return r.text().then(function(t){try{console.error('[ModelLab] SMS subscribe failed',r.status,t);}catch(e){}var er=new Error('sub '+r.status),k={};try{k=(JSON.parse(t).errors||[])[0]||{};}catch(x){}er.kcode=String(k.code||'');er.kdetail=String(k.detail||k.title||'').replace(/\d/g,'#').slice(0,160);throw er;});
    })
    .then(function(){return fetch(base+'profiles/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'profile',attributes:attrs}})}).catch(function(){});})
    .then(function(){return fetch(base+'events/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:H,body:JSON.stringify({data:{type:'event',attributes:{properties:{source:source,goal:goal,freq:freq},metric:{data:{type:'metric',attributes:{name:'Buddy Signup'}}},profile:{data:{type:'profile',attributes:{phone_number:ph}}}}}})}).catch(function(){});})
    .then(function(){done();})
-   .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}mlTrack('sms_signup_failed',{source:source,error:String(e&&e.message||e)});fail();});
+   .catch(function(e){try{console.error('[ModelLab] SMS signup error',e);}catch(x){}var kd=(e&&e.kdetail)||'',kc=(e&&e.kcode)||'';mlTrack('sms_signup_failed',{source:source,error:String(e&&e.message||e),klaviyo_code:kc,klaviyo_detail:kd});
+     var bad=/phone|number|sms|mobile|country|region/i.test(kd+' '+kc);fail(bad?'that number can\u2019t get our texts. use your US cell number (not Google Voice, a landline or a non-US number)':'couldn\u2019t save that right now. try again in a sec?');});
 }
 function bdSubmit(){
   var b=state.bd,raw=document.getElementById('bd-ph').value,ph=normPhone(raw),ok=document.getElementById('bd-ok').checked;b.ph=raw;b.ok=ok;
   if(!ph){b.err='that number looks off. try a US mobile, like 555 123 4567';rerender();return;}
   if(!ok){b.err='check the box so we\u2019re allowed to text you';rerender();return;}
-  b.err='';smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(){b.err='couldn\u2019t save that right now. try again?';rerender();});
+  b.err='';smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(m){b.err=m;b.fails=(b.fails||0)+1;rerender();});
 }
 /* ---------- now what? (situation -> common next steps) ---------- */
 var NW_Q=[
@@ -562,7 +563,7 @@ function nwSubmit(){
   if(!ph){n.err='that number looks off. try a US mobile';rerender();return;}
   if(!ok){n.err='check the box so we\u2019re allowed to text you';rerender();return;}
   var r=nwSteps(n),goal=n.react==='sell'?'panic':((n.ef!=='yes'||n.debt==='yes')?'basics':'model');
-  n.err='';smsJoin(ph,goal,'low','modellab.now',function(){n.done=true;rerender();paintPop();},function(){n.err='couldn\u2019t save that right now. try again?';rerender();},{now_plan:r.s.map(function(x){return x[0];}).join('>'),now_model:r.pick.m.id,now_time:n.time,now_react:n.react});
+  n.err='';smsJoin(ph,goal,'low','modellab.now',function(){n.done=true;rerender();paintPop();},function(m){n.err=m;rerender();},{now_plan:r.s.map(function(x){return x[0];}).join('>'),now_model:r.pick.m.id,now_time:n.time,now_react:n.react});
 }
 function nwShare(){
   var n=state.nw,r=nwSteps(n),url=location.origin+BASE+'now',txt='my move: '+nwChain(r)+'\nfind yours \u2192 '+url;
@@ -597,7 +598,7 @@ function popSubmit(){
   if(!ph){POP.err='that number looks off. try a US mobile';paintPop();return;}
   if(!ok){POP.err='check the box so we\u2019re allowed to text you';paintPop();return;}
   POP.err='';var btn=document.querySelector('.tp-f .tp-yes');if(btn){btn.disabled=true;btn.textContent='one sec\u2026';}
-  smsJoin(ph,'model','low','modellab.popup',function(){POP.done=true;paintPop();rerender();},function(){POP.err='couldn\u2019t save that. try again?';paintPop();});
+  smsJoin(ph,'model','low','modellab.popup',function(){POP.done=true;paintPop();rerender();},function(m){POP.err=m;paintPop();});
 }
 var BDR=0;setInterval(function(){var el=document.getElementById('bdrot');if(el){BDR=(BDR+1)%BD_ROT.length;el.style.opacity=0;setTimeout(function(){el.textContent=BD_ROT[BDR];el.style.opacity=1;},250);}},2600);
 var LEGAL_UPDATED='November 17, 2026',CONTACT_URL='https://hidanielkang.com';

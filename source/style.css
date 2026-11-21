@@ -899,3 +899,4 @@ body.sec-tools .sq-bars i.cur{background:linear-gradient(90deg,#7b3be8 35%,#dede
 .try-row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:4px 4px 0;font-size:15px}
 .try-row span{color:var(--muted)}
 .try-row a,.try-row .lk{color:#6a35e0;font-weight:500;text-decoration:none;background:none;border:0;padding:0;font:inherit;font-weight:500;cursor:pointer}
+.bd-alt{margin:6px 0 0;font-size:14px;color:var(--muted,#666)}
