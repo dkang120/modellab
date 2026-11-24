@@ -202,6 +202,9 @@ var QZ=[
 ];
 var STOCKY={dogs:1,garp:1,'core-satellite':1};
 var Q={i:0,a:[],done:false,saved:0};
+/* quiz progress survives a reload */
+try{var _qp=JSON.parse(localStorage.getItem('ml_quizprog')||'null');if(_qp&&Array.isArray(_qp.a)&&_qp.i>=0&&_qp.i<QZ.length){Q.i=_qp.i;Q.a=_qp.a.slice(0,QZ.length);Q.done=!!_qp.done&&Q.a.length===QZ.length;}}catch(e){}
+function qzKeep(){try{if(!Q.i&&!Q.a.length&&!Q.done)localStorage.removeItem('ml_quizprog');else localStorage.setItem('ml_quizprog',JSON.stringify({i:Q.i,a:Q.a,done:Q.done}));}catch(e){}}
 function minYears(m){var x=(m.horizon||'').match(/\d+/);return x?Number(x[0]):1;}
 function matchRank(){
   var T=Q.a[0],Y=Q.a[1],E=Q.a[2],G=Q.a[3],S=Q.a[4],W=Q.a[5];
@@ -385,11 +388,17 @@ function viewStress(){
 /* ================= IMPLEMENT IT ================= */
 var IM={m:'index',amt:1000,frac:true,have:''};
 function parseHold(txt){
-  var out={},tot=0;
+  var out={},tot=0,bad=[];
   (txt||'').split(/\n|;/).forEach(function(line){
-    var m=line.match(/^\s*\$?([A-Za-z][A-Za-z.\-]{0,5})[\s:,\t]+\$?\s*([\d,]*\.?\d+)\s*%?/);if(!m)return;
-    var t=m[1].toUpperCase(),v=parseFloat(m[2].replace(/,/g,''));if(!(v>0))return;out[t]=(out[t]||0)+v;tot+=v;});
-  return {map:out,total:tot};
+    if(!line.trim())return;
+    var m=line.match(/^\s*\$?([A-Za-z][A-Za-z.\-]{0,5})[\s:,\t=-]+\$?\s*([\d,]*\.?\d+)\s*(k|%)?\s*$/i),t,v;
+    if(m){t=m[1];v=m[2];}
+    else{m=line.match(/^\s*\$?\s*([\d,]*\.?\d+)\s*(k|%)?\s*(?:of|in|[\s:,\t-])\s*\$?([A-Za-z][A-Za-z.\-]{0,5})\s*$/i);if(m){t=m[3];v=m[1];m[3]=m[2];}}
+    if(!m){bad.push(line.trim());return;}
+    t=t.toUpperCase();v=parseFloat(String(v).replace(/,/g,''));if(/k/i.test(m[3]||''))v*=1000;
+    if(!(v>0)){bad.push(line.trim());return;}
+    out[t]=(out[t]||0)+v;tot+=v;});
+  return {map:out,total:tot,bad:bad};
 }
 function priceOf(t){var d=ML.data();return d&&d.tickers&&d.tickers[t]?d.tickers[t].last:null;}
 function planText(m,rows,amt){
@@ -427,11 +436,21 @@ function viewImplement(arg){
 
 /* ================= OVERLAP CHECKER ================= */
 var OV={txt:''};
-function bucketOf(t){var id=H&&H.map[t];return id||'?';}
+/* common funds we don't track by name, counted with the fund they mirror (same index or same style) */
+var ALIAS={VOO:'SPY',IVV:'SPY',SPLG:'SPY',SCHX:'SPY',FXAIX:'SPY',SWPPX:'SPY',VFIAX:'SPY',VFINX:'SPY',
+  VTSAX:'VTI',FSKAX:'VTI',FZROX:'VTI',SWTSX:'VTI',ITOT:'VTI',SCHB:'VTI',SPTM:'VTI',
+  IXUS:'VXUS',VTIAX:'VXUS',FTIHX:'VXUS',FZILX:'VXUS',VEA:'VXUS',IEFA:'VXUS',EFA:'VXUS',SCHF:'VXUS',
+  AGG:'BND',VBTLX:'BND',SCHZ:'BND',FXNAX:'BND',SGOV:'BIL',SHV:'BIL',USFR:'BIL',VGLT:'TLT',SPTL:'TLT',VGIT:'IEF',IEI:'IEF',
+  QQQM:'QQQ',ONEQ:'QQQ',SCHG:'VUG',IWF:'VUG',MGK:'VUG',VGT:'VUG',XLK:'VUG',IWD:'VTV',SCHV:'VTV',DGRO:'VIG',NOBL:'VIG',HDV:'VYM',
+  IAU:'GLD',GLDM:'GLD',SGOL:'GLD',
+  AAPL:'VUG',MSFT:'VUG',NVDA:'VUG',AMZN:'VUG',GOOGL:'VUG',GOOG:'VUG',META:'VUG',TSLA:'VUG',AVGO:'VUG'};
+function aliasOf(t){return H&&!H.map[t]&&ALIAS[t]&&H.map[ALIAS[t]]?ALIAS[t]:null;}
+function bucketOf(t){var id=H&&(H.map[t]||(aliasOf(t)&&H.map[aliasOf(t)]));return id||'?';}
 function viewOverlap(){
   if(hState!=='ready')return loadingView('Overlap Checker.','See which model you already resemble.');
   if(!ML.unlocked())return gateView('Overlap Checker','Paste what you own and see which model it resembles.','Know your concentration.','overlap');
-  var u=parseHold(OV.txt),out='';
+  var u=parseHold(OV.txt),out='',lastLn=(OV.txt||'').split('\n').pop().trim();
+  if(lastLn&&/^\$?[A-Za-z.\-]{1,6}$/.test(lastLn)&&u.bad[u.bad.length-1]===lastLn)u.bad.pop(); /* still typing the amount */
   if(u.total>0){
     var ts=Object.keys(u.map).map(function(t){return {t:t,w:u.map[t]/u.total};}).sort(function(a,b){return b.w-a.w;});
     var b={};ts.forEach(function(x){var k=bucketOf(x.t);b[k]=(b[k]||0)+x.w;});
@@ -448,10 +467,12 @@ function viewOverlap(){
      '<div class="panel sh"><h2 style="font-size:22px">Your concentration</h2><div class="tl-stats" style="margin-top:12px">'+
       statBox('HOLDINGS',ts.length,'')+statBox('LARGEST',(ts[0].w*100).toFixed(0)+'%',esc(ts[0].t),ts[0].w>0.25?'dn':'up')+statBox('TOP 3',(top3*100).toFixed(0)+'%','of your money',top3>0.6?'dn':'na')+(bigB?statBox('BIGGEST BUCKET',(b[bigB]*100).toFixed(0)+'%',esc(H.proxies[bigB].name)):'')+'</div>'+
       (ts[0].w>0.25?'<div class="tl-warn">'+esc(ts[0].t)+' is '+(ts[0].w*100).toFixed(0)+'% of what you entered. A single position that large can dominate your results.</div>':'')+
-      (unm>0.001?note((unm*100).toFixed(0)+'% of your entry is in tickers we do not have history for, so it is not counted in the style overlap.'):'')+'</div></div>';
+      (unm>0.001?note((unm*100).toFixed(0)+'% of your entry ('+esc(ts.filter(function(x){return bucketOf(x.t)==='?';}).map(function(x){return x.t;}).join(', '))+') is in tickers we can\u2019t place yet, so it is not counted in the style overlap.'):'')+'</div></div>';
+    var al=ts.filter(function(x){return aliasOf(x.t);});
+    if(al.length)out+=note('Counted with the fund it mirrors: '+esc(al.map(function(x){return x.t+' \u2192 '+aliasOf(x.t);}).join(', '))+'. Same index or same style, so the overlap math treats them alike.');
   }
   return head('Overlap Checker.','Paste what you own. See which model it already resembles.','<div class="tl-steps"><span><b>Step 3</b> Act</span></div>')+
-   '<div class="stack"><div class="panel sh"><label class="tl-f">Your holdings (ticker and dollar amount, one per line)<textarea id="ov-txt" placeholder="VTI 5000&#10;SPY 2000&#10;AAPL 1000">'+esc(OV.txt)+'</textarea></label>'+note('Nothing you type leaves your browser. Percentages work too.')+'</div>'+out+'</div></div>';
+   '<div class="stack"><div class="panel sh"><label class="tl-f">Your holdings (ticker and dollar amount, one per line)<textarea id="ov-txt" placeholder="VTI 5000&#10;SPY 2000&#10;AAPL 1000">'+esc(OV.txt)+'</textarea></label>'+(u.bad.length?'<div class="tl-warn" role="alert">Couldn\u2019t read '+(u.bad.length>1?u.bad.length+' lines':'this line')+': <b>'+esc(u.bad.slice(0,3).join(' \u00b7 '))+'</b>'+(u.bad.length>3?' \u2026':'')+'. Use a ticker and an amount, like <b>VOO 5000</b> or <b>VOO 60%</b>.</div>':'')+note('Nothing you type leaves your browser. Percentages work too.')+'</div>'+out+'</div></div>';
 }
 
 /* ================= BUILD YOUR OWN ================= */
@@ -669,14 +690,14 @@ document.addEventListener('click',function(e){
     shareCard(card).then(function(b){shb.textContent=o;shb.disabled=false;shareOut(b,'modellab-'+kind+'.png',kind==='pain'?'I tried the ModelLab pain simulator. Can you hold?':'My ModelLab investing style match.',kind==='pain'?painLink():new URL('tools/match/',document.baseURI).href);});return;}
   var lkb=cap(e,'[data-t-link]');if(lkb){copyTxt(lkb.getAttribute('data-t-link')==='pain'?painLink():new URL('tools/match/',document.baseURI).href,lkb);return;}
   var el;
-  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));if(Q.i===0&&window.mlTrack)mlTrack('quiz_started');Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;if(Q.done){markProg('match');if(window.mlTrack)mlTrack('quiz_completed',{top_match:matchRank()[0].m.id});}ML.rerender();if(Q.done)qzSave();return;}
-  if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;ML.rerender();return;}
-  if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};ML.rerender();return;}
+  if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));if(Q.i===0&&window.mlTrack)mlTrack('quiz_started');Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;qzKeep();if(Q.done){markProg('match');if(window.mlEpAfter)mlEpAfter('quiz');if(window.mlTrack)mlTrack('quiz_completed',{top_match:matchRank()[0].m.id});}ML.rerender();if(Q.done)qzSave();return;}
+  if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;qzKeep();ML.rerender();return;}
+  if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};qzKeep();ML.rerender();window.scrollTo({top:0,behavior:'instant'});return;}
   if((el=cap(e,'[data-t-psc]'))){if(el.disabled)return;P.sc=el.getAttribute('data-t-psc');painReset();ML.rerender();return;}
   if(cap(e,'[data-t-pplay]')){if(!P.hold)return;if(P.pause!=null&&P.k===P.pause&&P.dec==null)return;if(P.done){painReset();}painPlay();return;}
   if(cap(e,'[data-t-pskip]')){if(!P.hold)return;painStop();P.k=P.len;P.done=true;if(P.pause!=null&&P.dec==null){P.dec='hold';P.decK=P.pause;}ML.rerender();return;}
   if((el=cap(e,'[data-t-pdec]'))){P.dec=el.getAttribute('data-t-pdec');P.decK=P.k;painPlay();return;}
-  if(cap(e,'[data-t-prestart]')){painReset();ML.rerender();window.scrollTo(0,0);return;}
+  if(cap(e,'[data-t-prestart]')){painReset();ML.rerender();window.scrollTo({top:0,behavior:'instant'});return;}
   if((el=cap(e,'[data-t-ssort]'))){SX.sort=el.getAttribute('data-t-ssort');ML.rerender();return;}
   var ce=cap(e,'[data-t-copyemb]');if(ce){var ta=document.querySelector('.tl-emb');if(ta)copyTxt(ta.value,ce);return;}
   if(cap(e,'[data-t-print]')){markProg('implement');window.print();return;}

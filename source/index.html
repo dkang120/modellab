@@ -180,11 +180,20 @@ var CATS=[];MODELS.forEach(function(m){if(CATS.indexOf(m.cat)<0)CATS.push(m.cat)
 var byId={};MODELS.forEach(function(m){byId[m.id]=m;});
 var HC=['#7c4def','#d9cbfb','#a3a3a8','#6a35e0','#707070','#dedee2','#38383b'];
 var MAXCMP=4;
+function loadCmp(){var d=['index','value','momentum','all-weather'];try{var v=JSON.parse(localStorage.getItem('ml_cmp')||'null');if(Array.isArray(v)){v=v.filter(function(id,i){return byId[id]&&v.indexOf(id)===i;}).slice(0,MAXCMP);return v;}}catch(e){}return d;}
+function cmpSaved(){try{return localStorage.getItem('ml_cmp')!==null;}catch(e){return true;}}
+function saveCmp(){try{localStorage.setItem('ml_cmp',JSON.stringify(state.compare));}catch(e){}}
+/* small confirmation toast (popover timing: 200ms in, auto-hides) */
+function toast(msg,href,label){
+  var w=document.getElementById('mltoast');if(!w){w=document.createElement('div');w.id='mltoast';w.setAttribute('role','status');w.setAttribute('aria-live','polite');document.body.appendChild(w);}
+  w.innerHTML='<span>'+esc(msg)+'</span>'+(href?'<a href="'+href+'">'+esc(label||'open')+'</a>':'');if(href&&typeof fixLinks==='function')fixLinks();
+  w.className='';void w.offsetWidth;w.className='on';clearTimeout(toast._t);toast._t=setTimeout(function(){w.className='';},3600);
+}
 /* Email signup (Klaviyo client API). Fill these two values to go live.
    companyId = your public API key (6 characters). listId = the list that receives signups.
    While both are empty the form unlocks locally without saving the email (development only). */
 var SIGNUP={companyId:'VqWQB7',listId:'WwRjNL',smsListId:'Ybnjeu'};
-var state={cat:'All',sort:'featured',compare:['index','value','momentum','all-weather'],fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0,tier:'risk',bd:{step:0,goal:'',freq:'',done:false,err:''},nw:{amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:false,shared:''}};
+var state={cat:'All',sort:'featured',compare:loadCmp(),fit:{risk:3,effort:2,growth:4},amount:10000,menu:false,step:0,tier:'risk',bd:{step:0,goal:'',freq:'',done:false,err:''},nw:{amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:false,shared:''}};
 
 function unlocked(){return true;} /* email gate removed 2026-11-17: everything is open, texts are the only signup */
 function setUnlocked(){try{localStorage.setItem('ml_sub','1');}catch(e){}}
@@ -263,24 +272,12 @@ function mdl(m,link){
   return link?'<a class="mdl" href="#m-'+m.id+'">'+inner+'</a>':'<div class="mdl">'+inner+'</div>';
 }
 function card(m){return mdl(m,true);}
-/* ---------- social pieces: avatars, stories, bell ---------- */
+/* ---------- social pieces: avatars ---------- */
 var LABDROP=[{n:1,id:'dogs',when:'this week'}];
 function initials(m){var w=m.name.replace(/[^A-Za-z ]/g,' ').trim().split(/\s+/);return (w.length>1&&w[1].length>2?w[0][0]+w[1][0]:w[0].slice(0,2)).toLowerCase();}
 function av(m,size,ring){return '<span class="av '+(size||'')+(ring?' ring':'')+'"><span>'+esc(initials(m))+'</span></span>';}
 function handle(m){return '@'+m.id.replace(/-/g,'');}
 function isNew(id){return LABDROP.some(function(d){return d.id===id;});}
-function storiesRow(){
-  var seen={};try{seen=JSON.parse(localStorage.getItem('ml_seen')||'{}');}catch(e){}
-  var ids=LABDROP.map(function(d){return d.id;}).concat(MODELS.map(function(m){return m.id;}).filter(function(id){return !isNew(id);}));
-  return '<div class="stories" role="list" aria-label="Models">'+ids.map(function(id){var m=byId[id],fresh=isNew(id)&&!seen[id];
-    return '<a role="listitem" class="story'+(fresh?' fresh':'')+'" href="#m-'+id+'" data-seen="'+id+'">'+av(m,'lg',true)+'<span class="st-t">'+(fresh?'<b>new</b> ':'')+esc(handle(m).slice(1))+'</span></a>';}).join('')+'</div>';
-}
-function bellHtml(){
-  var seen=false;try{seen=localStorage.getItem('ml_bell')===String(LABDROP[LABDROP.length-1].n);}catch(e){}
-  var items=LABDROP.map(function(d){var m=byId[d.id];return '<a class="bn-item" href="#m-'+d.id+'">'+av(m,'sm',true)+'<span><b>'+esc(handle(m))+'</b> new post: Lab Drop #'+d.n+' · '+esc(m.name)+'<small>'+esc(d.when)+'</small></span></a>';}).join('');
-  return '<button class="bell'+(seen?'':' dot')+'" data-bell="1" aria-label="Notifications" aria-expanded="'+(!!state.bell)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>'+
-   (state.bell?'<div class="bell-pop" role="menu"><p class="bp-h">notifications</p>'+items+'<a class="bn-item" href="#text"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> new: get a text buddy that keeps you locked in \uD83D\uDCF1</span></a>'+(unlocked()?'':'<a class="bn-item" href="#follow-cta"><span class="av sm">'+LOGO+'</span><span><b>@modellab</b> follow to get every Lab Drop by email</span></a>')+'</div>':'');
-}
 
 function footer(home){
   var L=[['library','Library'],['match','Quiz'],['now','Now what?'],['compare','Compare'],['tools','More tools'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
@@ -321,8 +318,8 @@ function buddySection(){
   var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}var mm=(mt&&byId[mt])||byId['index'];
   var th=[['in','market\u2019s down 10% from the top. pretty normal tbh. you good?'],['out','ngl kinda nervous'],['in','real talk, '+mm.name.toLowerCase()+' has fallen further before and came back. your plan > the headlines'],['out','ok holding \uD83D\uDD12'],['in','that\u2019s the energy. new drop friday \uD83E\uDDEA']];
   return '<section class="hb"><div class="hb-copy"><p class="eyebrow">the highlight</p><h2 class="h2"><em>your personalized</em>investing tool</h2><p class="sub">a buddy in your texts who knows your model, checks on you when the market gets wild, and keeps you locked in. free to start</p>'+
-   '<ul class="hb-pts"><li><b>about <i>your</i> model</b>, not the same tips everyone gets</li><li><b>calm check-ins</b> when the market drops, never panic</li><li><b>a lab drop every 2 weeks</b>: one new model, explained in one text</li></ul>'+
-   (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">'+(promoOn()?'free \u00b7 unlimited replies through dec 1 \u00b7 reply STOP anytime':'free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime')+'</p>')+'</div>'+
+   '<ul class="hb-pts"><li><b>about <i>your</i> model</b>, not the same tips everyone gets</li><li><b>calm check-ins</b> when the market drops, never panic</li><li><b>a lab drop every 2 weeks</b> (or weekly, your pick): one new model, explained in one text</li></ul>'+
+   (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">'+(promoOn()?'free \u00b7 unlimited replies through dec 1, then 4 free replies a month \u00b7 reply STOP anytime':'free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime')+'</p>')+'</div>'+
    '<div class="hb-phone" aria-hidden="true"><div class="hb-top"><span class="av sm ring"><span>'+LOGO+'</span></span><b>modellab buddy</b></div>'+th.map(function(x){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'">'+esc(x[1])+'</div>';}).join('')+'</div></section>';
 }
 function viewHome(){
@@ -331,7 +328,7 @@ function viewHome(){
    ['mint','the quiz','six questions about how you’d actually act. get the style that fits you','#match','take the quiz →'],
    ['peach','now what?','got money sitting there? get the order of moves that makes sense for your spot','#now','tap your situation →']];
   var faq=[['is this investment advice?','nope. ModelLab is educational. every portfolio is a hypothetical example using public funds, not a recommendation or a record of performance'],
-    ['what does the text buddy actually send?','2–4 texts a month: a lab drop every 2 weeks (one new model, explained in one text), a calm check-in when the market drops, and real replies when you text back. reply STOP anytime'],
+    ['what does the text buddy actually send?','2–4 texts a month: a lab drop every 2 weeks, or weekly if you pick “keep me locked in” (one new model, explained in one text; the email version comes weekly), a calm check-in when the market drops, and real replies when you text back. reply STOP anytime'],
     ['is it free?',(promoOn()?'yep, and this week replies are unlimited too, through dec 1. after that the texts stay free with 4 replies a month, or pro is $4.99/mo for up to 100. cancel anytime. msg & data rates may apply':'the texts are free, plus 4 replies a month when you text me. want more? pro is $4.99/mo for up to 100 replies, cancel anytime. msg & data rates may apply')]]
     .map(function(q){return '<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
   return heroHtml()+'<div class="wrap">'+buddySection()+
@@ -351,7 +348,7 @@ function viewLibrary(){
   var rows=[5,4,3,2,1].map(function(lv){var ms=list.filter(function(m){return m[key]===lv;});
     return '<div class="tier t'+lv+(ms.length?'':' is-empty')+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">none yet</span>')+'</div></div>';}).join('');
   return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">every investing model, ranked in a tier list. tap one to see what it owns</p>'+
-   '<a class="lib-new" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
+   '<a class="lib-new" data-drop="'+ld.n+'" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
    '<div class="tl-ctrl"><div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
    (buddyIn()?'':'<a class="lib-sms" href="#text">\uD83D\uDCF1 get every new drop by text \u2192</a>')+'<div class="tierlist">'+rows+'</div><p class="note tier-note">Rows are our 1–5 '+T[0]+' ratings, not a ranking of which model is better. Ratings are editorial.</p></div>';
 }
@@ -456,11 +453,16 @@ function viewBuddy(){
   if(b.step>=2)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'got you. bite-size only, promise':'ok cool. the match quiz helps, then i keep you on it'))]);
   if(b.step>=2)msgs.push(['in','how often can i text you?']);
   if(b.step>=3)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
-  if(b.step>=3)msgs.push(['in',mm?'perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind':'perfect. drop your number and you’re in 🔒']);
+  var askM=b.step>=3&&!mm;
+  if(b.step>=3&&mm)msgs.push(['in','perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind']);
+  if(askM)msgs.push(['in','last one. which model are you into? i’ll text you about that one']);
+  if(askM&&b.model)msgs.push(['out',b.model==='none'?'not sure yet':byId[b.model].name.toLowerCase()]);
+  if(askM&&b.model)msgs.push(['in',b.model==='none'?'all good, we’ll find it together. drop your number and you’re in 🔒':'good pick. drop your number and you’re in 🔒']);
   if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','check your phone 📱 your first text is on the way (i don’t text late at night, so it might land in the morning). reply STOP anytime.']);}
   if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
+  else if(askM&&!b.model)acts='<div class="bd-opts">'+['index','all-weather','dividend','growth'].filter(function(id){return byId[id];}).map(function(id){return '<button class="bd-o" data-bd="model:'+id+'">'+esc(byId[id].name.toLowerCase())+'<small>risk '+byId[id].risk+'/5</small></button>';}).join('')+'<button class="bd-o" data-bd="model:none">not sure yet<small>i’ll help you pick</small></button></div><p class="bd-rot"><a href="#match">or take the 2 min match quiz</a></p>';
   else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p>'+(b.fails?'<p class="bd-alt">no luck? <a class="lk" href="#follow-cta">get the weekly Lab Drop by email instead</a></p>':'')+'</form>';
   else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
   var T0=0,seenN=b.seenN||0,bub=msgs.map(function(x,i){
@@ -471,8 +473,10 @@ function viewBuddy(){
     return pre+'<div class="im '+x[0]+(x[0]==='out'?' pu':'')+(done?' bd-win':'')+(fresh?'':' bd-old')+'" style="animation-delay:'+d.toFixed(2)+'s">'+x[1]+'</div>';}).join('');
   b.seenN=msgs.length;
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+bub+'</div>'+acts+
-   (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies, free through dec 1</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
+   (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies through dec 1. after that it’s still free, with 4 replies a month</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
 }
+/* show a form error without redrawing: keeps the keyboard up and the chat from replaying */
+function inlineErr(sel,msg,focusId){var e=document.querySelector(sel);if(!e)return false;e.textContent=msg;var f=focusId&&document.getElementById(focusId);if(f)f.focus({preventScroll:true});return true;}
 function normPhone(v){var ph=(v||'').replace(/[^\d+]/g,'');if(ph.charAt(0)!=='+'){ph=ph.replace(/^1(?=\d{10}$)/,'');ph=(ph.length===10?'+1'+ph:'');}return /^\+\d{10,15}$/.test(ph)?ph:null;}
 // Launch promo: unlimited buddy replies until this moment (Dec 2, 2026 00:00 Pacific). Copy flips back by itself; keep in sync with buddy/wrangler.toml PROMO_UNTIL.
 var PROMO_UNTIL=Date.parse('2026-12-02T08:00:00Z');function promoOn(){return Date.now()<PROMO_UNTIL;}
@@ -497,9 +501,9 @@ function smsJoin(ph,goal,freq,source,ok,fail,extra){
 }
 function bdSubmit(){
   var b=state.bd,raw=document.getElementById('bd-ph').value,ph=normPhone(raw),ok=document.getElementById('bd-ok').checked;b.ph=raw;b.ok=ok;
-  if(!ph){b.err='that number looks off. try a US mobile, like 555 123 4567';rerender();return;}
-  if(!ok){b.err='check the box so we\u2019re allowed to text you';rerender();return;}
-  b.err='';smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(m){b.err=m;b.fails=(b.fails||0)+1;rerender();});
+  if(!ph){b.err='that number looks off. try a US mobile, like 555 123 4567';inlineErr('.bd-err',b.err,'bd-ph')||rerender();return;}
+  if(!ok){b.err='check the box so we\u2019re allowed to text you';inlineErr('.bd-err',b.err,'bd-ok')||rerender();return;}
+  b.err='';var bx=(b.model&&b.model!=='none')?{buddy_model:b.model,modellab_top_match:b.model}:(b.model?{buddy_model:'unsure'}:null);smsJoin(ph,b.goal,b.freq,'modellab.text',function(){b.done=true;rerender();paintPop();},function(m){b.err=m;b.fails=(b.fails||0)+1;rerender();},bx);
 }
 /* ---------- now what? (situation -> common next steps) ---------- */
 var NW_Q=[
@@ -520,20 +524,24 @@ function nwReady(n){return NW_Q.every(function(q){return n[q[0]];});}
 function nwAmt(n){var a=Number(String(n.amt).replace(/[^\d.]/g,''));return a>0?a:0;}
 function nwModel(n){
   var rc={calm:4,nervous:3,sell:2}[n.react]||3,tc={'lt1':2,'1-3':2,'3-10':3,'10+':4}[n.time]||3,mx=Math.min(rc,tc);
-  var fit=MODELS.filter(function(m){return m.risk<=mx;}).sort(function(a,b){return a.effort-b.effort||(n.time==='10+'?b.growth-a.growth:a.risk-b.risk)||a.name.localeCompare(b.name);});
+  /* same horizon rule as the match quiz: a model is only offered if its stated horizon fits the timeline */
+  var Y={'lt1':1,'1-3':3,'3-10':5,'10+':99}[n.time]||99,minY=function(m){var x=(m.horizon||'').match(/\d+/);return x?Number(x[0]):1;};
+  var fit=MODELS.filter(function(m){return m.risk<=mx&&minY(m)<=Y;}).sort(function(a,b){return a.effort-b.effort||(n.time==='10+'?b.growth-a.growth:a.risk-b.risk)||a.name.localeCompare(b.name);});
   var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
-  var quiz=mt&&byId[mt]&&byId[mt].risk<=mx?byId[mt]:null;
+  var quiz=mt&&byId[mt]&&byId[mt].risk<=mx&&minY(byId[mt])<=Y?byId[mt]:null;
+  var short=!fit.length;if(short)fit=MODELS.filter(function(m){return m.risk<=mx;}).sort(function(a,b){return a.risk-b.risk||a.effort-b.effort;});
   var main=quiz||fit[0],alt=fit.filter(function(m){return m!==main;})[0];
-  return {m:main,alt:alt,quiz:!!quiz,mx:mx};
+  return {m:main,alt:alt,quiz:!!quiz,mx:mx,short:short};
 }
 function nwSteps(n){
   var s=[],pick=nwModel(n),a=nwAmt(n);
   if(n.time==='lt1')s.push(['park','park it somewhere boring','money you need within a year usually sits in high-yield savings or T-bills. stocks can drop 30% in that window and not come back in time']);
+  else if(pick.short)s.push(['park','keep most of it boring','money you need in 1\u20133 years usually sits in high-yield savings, T-bills or CDs. every model here is built for 5+ years, and a crash can take longer than that to recover']);
   if(n.ef==='no')s.push(['ef','emergency fund first','most people start with 3\u20136 months of expenses in high-yield savings. it\u2019s what keeps you from selling in a dip']);
   else if(n.ef==='some')s.push(['ef','finish the emergency fund','top it up to 3\u20136 months of expenses before going all in. future you says thanks']);
   if(n.debt==='yes')s.push(['debt','kill the card debt','paying off ~20%+ APR is basically a guaranteed 20% return. no model reliably beats that']);
   if(n.match==='yes')s.push(['match','grab the full 401(k) match','an employer match is free money, often a 50\u2013100% instant bump on what you put in']);
-  if(n.time!=='lt1')s.push(['model','pick a model + automate it',handle(pick.m)+' fits your timeline and how you said you\u2019d react. set a monthly auto-buy so you don\u2019t have to think']);
+  if(n.time!=='lt1'&&!pick.short)s.push(['model','pick a model + automate it',handle(pick.m)+' fits your timeline and how you said you\u2019d react. set a monthly auto-buy so you don\u2019t have to think']);
   if(n.react==='sell')s.push(['rules','write your dip rules now','decide today what you\u2019ll do at \u221220%, while you\u2019re calm. most losses come from selling at the bottom']);
   return {s:s,pick:pick,a:a};
 }
@@ -547,14 +555,14 @@ function viewNow(){
   var out='';
   if(!ready){var left=NW_Q.filter(function(q){return !n[q[0]];}).length;out='<div class="nw-wait"><div class="im in">'+(left===NW_Q.length?'tap a situation up top, or answer 5 quick ones \uD83D\uDC46':left+' more tap'+(left>1?'s':'')+' and i\u2019ll lay it out \uD83D\uDC40')+'</div></div>';}
   else{
-    var r=nwSteps(n),m=r.pick.m,amtTxt=a?money(a):'your money';if(!n._trk){n._trk=1;mlTrack('now_plan_shown',{model:m.id,time:n.time||''});}
+    var r=nwSteps(n),m=r.pick.m,amtTxt=a?money(a):'your money';if(!n._trk){n._trk=1;mlTrack('now_plan_shown',{model:m.id,time:n.time||''});epAfter('now_plan');}
     var intro='ok real talk. with '+amtTxt+(n.debt==='yes'?' and some card debt':'')+(n.ef==='no'?' and no cushion yet':'')+', here\u2019s the order most people in your spot consider \uD83D\uDC47';
     var bub='<div class="nw-thread"><div class="im in">'+esc(intro)+'</div>'+r.s.map(function(x,i){return '<div class="im in nw-st"><b>'+(i+1)+'. '+esc(x[1])+'</b>'+esc(x[2])+'</div>';}).join('')+'</div>';
-    var split=a&&n.time!=='lt1'?m.hold.map(function(h){return '<div class="nw-sp"><b>'+esc(h[0])+'</b><span>'+esc(h[1])+'</span><i>'+money(a*h[2]/100)+'</i></div>';}).join(''):'';
+    var split=a&&n.time!=='lt1'&&!r.pick.short?m.hold.map(function(h){return '<div class="nw-sp"><b>'+esc(h[0])+'</b><span>'+esc(h[1])+'</span><i>'+money(a*h[2]/100)+'</i></div>';}).join(''):'';
     var modelCard='<a class="nw-model" href="#m-'+m.id+'">'+av(m,'sm',true)+'<div><b>'+esc(handle(m))+'</b><small>'+(r.pick.quiz?'your quiz match, and it fits':'fits your timeline + gut check')+' \u00b7 risk '+m.risk+'/5 \u00b7 effort '+m.effort+'/5</small></div><span>view \u2192</span></a>'+
       (split?'<div class="nw-split"><p>if '+esc(amtTxt)+' went into its example mix'+((n.ef!=='yes'||n.debt==='yes')?', once the basics above are handled':'')+':</p>'+split+'</div>':'')+
       (r.pick.alt?'<p class="nw-alt">also worth a look: <a href="#m-'+r.pick.alt.id+'">'+esc(handle(r.pick.alt))+'</a> \u00b7 not sure? take the <a href="#match">match quiz</a></p>':'');
-    if(n.time==='lt1')modelCard='<p class="nw-alt">when your timeline stretches past a year or two, come back and we\u2019ll match you a model. in the meantime, peek at <a href="#m-'+m.id+'">'+esc(handle(m))+'</a></p>';
+    if(n.time==='lt1'||r.pick.short)modelCard='<p class="nw-alt">when your timeline stretches past a year or two, come back and we\u2019ll match you a model. in the meantime, peek at <a href="#m-'+m.id+'">'+esc(handle(m))+'</a></p>';
     var card='<div class="nw-card" id="nwcard"><div class="nw-card-h"><span>my move</span><i>'+LOGO+' modellab</i></div><p class="nw-card-c">'+esc(nwChain(r))+'</p><small>'+esc(amtTxt)+' \u00b7 '+({'lt1':'<1 yr','1-3':'1\u20133 yrs','3-10':'3\u201310 yrs','10+':'10+ yrs'})[n.time]+' \u00b7 find yours at modellab</small></div>'+
       '<div class="nw-share"><button class="btn light" data-nwshare="1">'+(n.shared||'share my move \u2197')+'</button><button class="btn light" data-nwreset="1">start over</button></div>';
     var sms;
@@ -570,8 +578,8 @@ function viewNow(){
 }
 function nwSubmit(){
   var n=state.nw,raw=document.getElementById('nw-ph').value,ph=normPhone(raw),ok=document.getElementById('nw-ok').checked;n.ph=raw;n.ok=ok;
-  if(!ph){n.err='that number looks off. try a US mobile';rerender();return;}
-  if(!ok){n.err='check the box so we\u2019re allowed to text you';rerender();return;}
+  if(!ph){n.err='that number looks off. try a US mobile';inlineErr('.nw-f .tp-err',n.err,'nw-ph')||rerender();return;}
+  if(!ok){n.err='check the box so we\u2019re allowed to text you';inlineErr('.nw-f .tp-err',n.err,'nw-ok')||rerender();return;}
   var r=nwSteps(n),goal=n.react==='sell'?'panic':((n.ef!=='yes'||n.debt==='yes')?'basics':'model');
   n.err='';smsJoin(ph,goal,'low','modellab.now',function(){n.done=true;rerender();paintPop();},function(m){n.err=m;rerender();},{now_plan:r.s.map(function(x){return x[0];}).join('>'),now_model:r.pick.m.id,now_time:n.time,now_react:n.react});
 }
@@ -587,32 +595,35 @@ function popSnoozed(){try{var t=Number(localStorage.getItem('ml_pop_snooze')||0)
 function consentMini(on){return '<label class="tp-cons"><input type="checkbox" id="tp-ok"'+(on?' checked':'')+'><span>Yes, text me. I agree to recurring automated marketing texts from ModelLab Text Buddy (about 2 a month) and I\u2019m 18+. Not a condition of purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. <a href="#sms-terms">SMS Terms</a> \u00b7 <a href="#privacy">Privacy</a></span></label>';}
 function popHtml(){
   var head='<div class="tp-h"><span class="av sm ring"><span>'+LOGO+'</span></span><div><b>modellab buddy</b><small><i class="tp-live"></i>your personalized investing tool</small></div><button class="tp-x" data-pop="close" aria-label="Close">\u00d7</button></div>';
-  var m=['hey \uD83D\uDC4B','i\u2019m your personalized investing tool, but in your texts','i check in when markets get wild + send you a new model every 2 weeks. free'];
+  var m=['hey \uD83D\uDC4B','i\u2019m your personalized investing tool, but in your texts','i check in when markets get wild + send you a new model every 2 weeks. free'+(promoOn()?', unlimited replies through dec 1':', with 4 replies a month')];
   var body='<div class="tp-b">'+m.map(function(t,i){return '<div class="im in" style="animation-delay:'+(i*.35)+'s">'+t+'</div>';}).join('');
   if(POP.done)body+='<div class="im out pu">locked in \u2705</div><div class="im in">you\u2019re in \uD83D\uDD12 check your phone, your first text is on the way</div></div>';
   else if(POP.step===0)body+='</div><div class="tp-a"><button class="tp-yes" data-pop="yes">yes, text me \uD83D\uDCF1</button><button class="tp-no" data-pop="snooze">not rn</button></div>';
   else body+='<div class="im out pu">yes, text me \uD83D\uDCF1</div><div class="im in">bet. drop your number</div></div><form class="tp-f" data-popform="1" novalidate><input id="tp-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" aria-label="Mobile number" value="'+esc(POP.ph||'')+'">'+consentMini(POP.ok)+'<button class="tp-yes" type="submit">lock in \u203A</button><p class="tp-err" role="alert">'+esc(POP.err)+'</p></form>';
-  return '<div class="tp-card" role="dialog" aria-label="Text buddy">'+head+body+(POP.done?'':'<a class="tp-more" href="#text">customize what i text you \u2192</a>')+'</div>';
+  return '<div class="tp-card'+(POP.still?' tp-still':'')+'" role="dialog" aria-label="Text buddy">'+head+body+(POP.done?'':'<a class="tp-more" href="#text">customize what i text you \u2192</a>')+'</div>';
 }
 function launcherHtml(){return '<button class="tp-launch" data-pop="open" aria-label="Open text buddy"><span class="av sm ring"><span>'+LOGO+'</span></span><span class="tp-lt"><b>text buddy</b><small>free \u00b7 personalized</small></span><i class="tp-dot"></i></button>';}
 function paintPop(){
   var w=document.getElementById('tpop');if(!w){w=document.createElement('div');w.id='tpop';document.body.appendChild(w);}
   var onText=curH()==='#text';
   if(onText||(buddyIn()&&!POP.open)){w.innerHTML='';trackForms();return;}
-  w.innerHTML=POP.open?popHtml():launcherHtml();w.className=POP.open?'open':'';trackForms();
+  var wasOpen=!!w.querySelector('.tp-card');
+  w.innerHTML=POP.open?popHtml():launcherHtml();w.className=POP.open?'open':'';POP.still=POP.open;
+  if(POP.open&&!wasOpen){var fb=w.querySelector('#tp-ph')||w.querySelector('.tp-yes')||w.querySelector('.tp-x');fb&&fb.focus({preventScroll:true});}
+  else if(!POP.open&&wasOpen){var lb=w.querySelector('.tp-launch');lb&&lb.focus({preventScroll:true});}
+  trackForms();
 }
 (function(){var y0=0,t;addEventListener('scroll',function(){var w=document.getElementById('tpop');if(!w)return;var y=scrollY;if(y>y0+6&&y>120)w.classList.add('tp-away');else if(y<y0-6)w.classList.remove('tp-away');y0=y;clearTimeout(t);t=setTimeout(function(){w.classList.remove('tp-away');},900);},{passive:true});})();
-function popAuto(){if(POP.open||buddyIn()||popSnoozed())return;setTimeout(function(){if(curH()==='#home'&&!POP.open&&!buddyIn()&&!popSnoozed()){POP.open=true;paintPop();}},4500);}
 function popSubmit(){
   var raw=document.getElementById('tp-ph').value,ph=normPhone(raw),ok=document.getElementById('tp-ok').checked;POP.ph=raw;POP.ok=ok;
-  if(!ph){POP.err='that number looks off. try a US mobile';paintPop();return;}
-  if(!ok){POP.err='check the box so we\u2019re allowed to text you';paintPop();return;}
+  if(!ph){POP.err='that number looks off. try a US mobile';inlineErr('.tp-f .tp-err',POP.err,'tp-ph')||paintPop();return;}
+  if(!ok){POP.err='check the box so we\u2019re allowed to text you';inlineErr('.tp-f .tp-err',POP.err,'tp-ok')||paintPop();return;}
   POP.err='';var btn=document.querySelector('.tp-f .tp-yes');if(btn){btn.disabled=true;btn.textContent='one sec\u2026';}
-  smsJoin(ph,'model','low','modellab.popup',function(){POP.done=true;paintPop();rerender();},function(m){POP.err=m;paintPop();});
+  smsJoin(ph,'model','low','modellab.popup',function(){POP.done=true;paintPop();rerender();},function(m){POP.err=m;var bt=document.querySelector('.tp-f .tp-yes');if(bt){bt.disabled=false;bt.textContent='lock in \u203A';}inlineErr('.tp-f .tp-err',m)||paintPop();});
 }
 /* ---------- email popup: Lab Drop signup (layout after rhode's welcome modal, styled in ModelLab's system) ---------- */
 var EP={open:false,done:false,err:'',busy:false,last:null};
-var EP_DELAY=6000,EP_SNOOZE_DAYS=14;
+var EP_SNOOZE_DAYS=14;
 function epBlocked(){
   if(/[?&]popup\b/.test(location.search))return false;
   var h=curH();if(h==='#text'||h==='#sms-terms'||h==='#privacy'||h==='#data')return true;
@@ -641,11 +652,20 @@ function epClose(reason){
   if(!EP.done){try{localStorage.setItem('ml_ep_snooze',String(Date.now()+EP_SNOOZE_DAYS*864e5));}catch(e){}mlTrack('email_popup_closed',{reason:reason||'x',page:curH()});}
   epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
 }
-function epAuto(){
-  if(EP.sched||EP.open||EP.shown||epBlocked())return;
-  EP.sched=true;
-  setTimeout(function(){EP.sched=false;if(EP.open||EP.shown||epBlocked()||document.querySelector('.drawer-open,.gl-open'))return;EP.open=true;EP.shown=true;epPaint();mlTrack('email_popup_shown',{page:curH()});},EP_DELAY);
+/* when it shows: never on a timer. after the visitor scrolls halfway down a real page, or right after they finish
+   something (a quiz result, a "now what?" plan). never in the first 8s, never over the text buddy panel, once per visit */
+var EP_T0=Date.now(),EP_MIN=8000;
+function epTry(trigger){
+  if(EP.open||EP.shown||epBlocked()||POP.open||document.querySelector('.drawer-open,.gl-open,#mltoast.on'))return false;
+  if(Date.now()-EP_T0<EP_MIN&&trigger!=='forced')return false;
+  EP.open=true;EP.shown=true;epPaint();mlTrack('email_popup_shown',{page:curH(),trigger:trigger});return true;
 }
+function epAfter(what){if(EP.shown||epBlocked())return;setTimeout(function(){epTry(what);},2500);}
+window.mlEpAfter=epAfter;
+function epAuto(){if(!EP.shown&&/[?&]popup\b/.test(location.search))setTimeout(function(){epTry('forced');},1500);}
+(function(){var q=false;addEventListener('scroll',function(){if(q||EP.shown)return;q=true;requestAnimationFrame(function(){q=false;
+  var de=document.documentElement,h=de.scrollHeight,vh=window.innerHeight;if(h<vh*1.6)return;
+  if((window.scrollY+vh)/h>=0.5)epTry('scroll');});},{passive:true});})();
 function epSubmit(){
   var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){EP.err='that email looks off, try again';epPaint();var i=document.getElementById('ep-em');i&&i.focus();return;}
@@ -669,7 +689,7 @@ var LEGAL_UPDATED='November 17, 2026',CONTACT_URL='https://hidanielkang.com';
 function legalPage(title,sub,body){return '<div class="wrap"><article class="legal"><h1 class="display">'+title+'</h1><p class="sub">'+sub+' · Last updated '+LEGAL_UPDATED+'</p>'+body+'</article></div>';}
 function viewSmsTerms(){
   return legalPage('SMS Terms.','ModelLab Text Buddy',
-  '<h2>1. The program</h2><p>ModelLab Text Buddy (the “program”) sends recurring automated text messages about investing habits: check-ins when the stock market falls, reminders you ask for, and our weekly Lab Drop about a new investing model. The program has a free plan and an optional paid Pro plan, and is run by ModelLab, an educational project by Daniel Kang.</p>'+
+  '<h2>1. The program</h2><p>ModelLab Text Buddy (the “program”) sends recurring automated text messages about investing habits: check-ins when the stock market falls, reminders you ask for, and the Lab Drop about a new investing model (every 2 weeks, or weekly if you choose that frequency). The program has a free plan and an optional paid Pro plan, and is run by ModelLab, an educational project by Daniel Kang.</p>'+
   '<h2>2. How you join</h2><p>You join by entering your mobile number on <a href="#text">our text buddy page</a> and checking the consent box. By joining you agree to these SMS Terms and our <a href="#privacy">Privacy Policy</a>, and you confirm you are 18 or older and the account holder or authorized user of the number. Consent is not a condition of any purchase.</p>'+
   '<h2>3. How often</h2><p>Message frequency varies with what you choose at signup: about 2 messages a month (“only when it matters”) or about 4 a month (“keep me locked in”). Scheduled texts go out between 8am and 8pm in your time zone. Your welcome text, and replies to texts you send us, can arrive anytime. You can reply LESS anytime to get fewer.</p>'+
   '<h2>4. Cost</h2><p><b>Free plan:</b> the scheduled texts plus up to 4 personal replies a month when you text us. <b>Pro plan:</b> $4.99 a month for up to 100 personal replies a month. <b>Launch offer:</b> until December 1, 2026 (11:59 pm Pacific), personal replies are unlimited on the free plan, subject to a fair-use limit of 300 a month per number; after that the plans above apply automatically, with no charge unless you choose Pro. Pro is billed monthly through Stripe and renews automatically until you cancel. Cancelling stops future charges, and you keep Pro until the end of the month you paid for. Texting STOP stops all texts and also cancels Pro, so you won’t be charged again. You can also cancel Pro and keep the free texts through the link in your Pro confirmation, or by contacting us. Message and data rates may apply, depending on your mobile plan.</p>'+
@@ -714,7 +734,7 @@ function viewAbout(){
 
 
 /* ---------- your data ---------- */
-var DLAB={ml_sub:'you followed @modellab by email (older signup)',ml_email:'the email you followed with',ml_buddy:'you signed up for text buddy',ml_match:'your match quiz result',ml_goals:'goals you saved in the goal simulator',ml_prog:'which tool steps you finished',ml_bell:'notifications you’ve read',ml_seen:'models you’ve viewed',ml_pop_snooze:'when you closed the text buddy popup',ml_cmp:'models in your compare list'};
+var DLAB={ml_sub:'you followed @modellab by email (older signup)',ml_email:'the email you followed with',ml_buddy:'you signed up for text buddy',ml_match:'your match quiz result',ml_goals:'goals you saved in the goal simulator',ml_prog:'which tool steps you finished',ml_bell:'notifications you’ve read',ml_seen:'models you’ve viewed',ml_pop_snooze:'when you closed the text buddy popup',ml_cmp:'models in your compare list',ml_dropseen:'the newest Lab Drop you’ve seen',ml_quizprog:'your match quiz answers so far'};
 function myData(){var o={};try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ml_')===0)o[k]=localStorage.getItem(k);}}catch(e){}return o;}
 function viewData(){
   var d=myData(),ks=Object.keys(d).sort();
@@ -738,7 +758,7 @@ var BASE=new URL('.',document.baseURI).pathname,TOOLN=['match','pain','stress','
 function fromPath(p){p=(p||'').replace(/^\/+|\/+$/g,'');if(!p)return '#home';if(p.indexOf('models/')===0)return '#m-'+p.slice(7);if(p.indexOf('tools/')===0&&p.length>6)return '#'+p.slice(6);return '#'+p;}
 function toPath(h){h=(h||'').replace(/^#/,'');if(!h||h==='home')return '';if(h.indexOf('m-')===0)return 'models/'+h.slice(2)+'/';var n=h.split('/')[0];return (TOOLN.indexOf(n)>-1?'tools/':'')+h.replace(/\/+$/,'')+'/';}
 function curH(){var p=decodeURIComponent(location.pathname).slice(BASE.length);if(!p.replace(/\//g,'')&&location.hash.length>1)return location.hash;return fromPath(p);}
-function go(h,replace){var u=BASE+toPath(h);if(location.pathname===u&&!location.hash){render();return;}history[replace?'replaceState':'pushState'](null,'',u);state.menu=false;render();}
+function go(h,replace){var u=BASE+toPath(h);if(location.pathname===u&&!location.hash){render();return;}if(!replace)try{history.replaceState({y:window.scrollY},'',location.href);}catch(e){}history[replace?'replaceState':'pushState'](null,'',u);state.menu=false;render();}
 function fixLinks(){document.querySelectorAll('a[href^="#"]').forEach(function(a){var h=a.getAttribute('href');if(h.length>1||h==='#home')a.setAttribute('href',BASE+toPath(h));});}
 (function(){var h=location.hash;if(h.length>1&&!decodeURIComponent(location.pathname).slice(BASE.length).replace(/\//g,''))history.replaceState(null,'',BASE+toPath(h));})();
 /* ---------- glossary: first mention of a term on a page gets a tap-for-definition ---------- */
@@ -794,29 +814,28 @@ function render(keep){
   paintPop();document.body.classList.toggle('home',home);document.body.classList.toggle('sec-tools',nav==='tools');fixLinks();glClose();if(!home)glossary();
   if(window.seoFor){var sx=seoFor(curH(),MODELS),dm=document.querySelector('meta[name=description]');document.title=sx.title;if(dm)dm.setAttribute('content',sx.desc);}
   document.querySelectorAll('[data-nav]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-nav')===nav);});
-  if(!keep)window.scrollTo(0,0);
+  if(!keep)jumpTo(0);
   if(rt&&rt.r.after)rt.r.after(rt.arg);
   if(typeof epAuto==='function')epAuto();
 }
 function routeFor(h){h=(h||'').replace(/^#/,'');var p=h.split('/'),r=ROUTES[p[0]];return (r&&typeof r==='object'&&p[0].charAt(0)!=='_')?{r:r,arg:p.slice(1).join('/')}:null;}
 var _seen={};function trackForms(){var f=[['[data-bdform]','text_page'],['[data-nwform]','now_page'],['[data-popform]','popup']];for(var i=0;i<f.length;i++){var k=f[i][1]+'|'+curH();if(!_seen[k]&&document.querySelector(f[i][0])){_seen[k]=1;mlTrack('sms_form_seen',{source:f[i][1]});}}}
-function rerender(){var y=window.scrollY;render(true);window.scrollTo(0,y);}
+function jumpTo(y){window.scrollTo({top:y,left:0,behavior:'instant'});}
+function rerender(){var y=window.scrollY;render(true);jumpTo(y);}
 document.addEventListener('click',function(e){
   var t=e.target;
   var glb=t.closest&&t.closest('.gl');if(glb){glOpen(glb);return;}if(glPop&&!(t.closest&&t.closest('.gl-pop')))glClose();
   var ln=t.closest&&t.closest('a[href]');
   if(ln&&!ln.target&&e.button===0&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey){var hr=ln.getAttribute('href'),u=new URL(ln.href,location.href);
-    if(hr==='#follow-cta'){e.preventDefault();state.bell=false;paintBell();var fc=document.getElementById('follow');if(fc){fc.scrollIntoView({behavior:'smooth',block:'center'});var fi=fc.querySelector('input');if(fi)setTimeout(function(){fi.focus({preventScroll:true});},400);}else go('#about');return;}
+    if(hr==='#follow-cta'){e.preventDefault();var fc=document.getElementById('follow');if(fc){fc.scrollIntoView({behavior:'smooth',block:'center'});var fi=fc.querySelector('input');if(fi)setTimeout(function(){fi.focus({preventScroll:true});},400);}else go('#about');return;}
     if(hr.charAt(0)==='#'&&hr.length>1){e.preventDefault();go(hr);return;}
     if(u.origin===location.origin&&u.pathname.indexOf(BASE)===0&&!/\.[a-z0-9]+$/i.test(u.pathname)&&!u.hash){e.preventDefault();go(fromPath(decodeURIComponent(u.pathname).slice(BASE.length)));return;}}
   var pb=t.closest('[data-pop]');if(pb){var pv=pb.getAttribute('data-pop');if(pv==='open'){POP.open=true;}else if(pv==='close'){POP.open=false;if(!POP.done){try{localStorage.setItem('ml_pop_snooze',String(Date.now()+3*864e5));}catch(x){}}}else if(pv==='snooze'){POP.open=false;try{localStorage.setItem('ml_pop_snooze',String(Date.now()+7*864e5));}catch(x){}}else if(pv==='yes'){POP.step=1;}paintPop();if(pv==='yes'){var pi=document.getElementById('tp-ph');if(pi)pi.focus();}return;}
-  var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
+  var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}else if(v.indexOf('model:')===0){var mv=v.slice(6);bb.model=(mv==='none'||byId[mv])?mv:'none';}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
   var nwb=t.closest('[data-nw]');if(nwb){var nv=nwb.getAttribute('data-nw'),nk=nv.split(':')[0];state.nw[nk]=nv.slice(nk.length+1);state.nw.persona=-1;rerender();return;}
   var nwp=t.closest('[data-nwp]');if(nwp){var pi2=Number(nwp.getAttribute('data-nwp')),pd=NW_P[pi2][2];for(var pk in pd)state.nw[pk]=pd[pk];state.nw.persona=pi2;rerender();if(window.innerWidth<900){var no=document.querySelector('.nw-out');if(no)no.scrollIntoView({behavior:'smooth',block:'start'});}return;}
   if(t.closest('[data-nwshare]')){nwShare();return;}
-  if(t.closest('[data-nwreset]')){state.nw={amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:state.nw.done,shared:''};rerender();return;}
-  var bl=t.closest('[data-bell]');if(bl){state.bell=!state.bell;try{localStorage.setItem('ml_bell',String(LABDROP[LABDROP.length-1].n));}catch(x){}paintBell();return;}
-  if(state.bell&&!t.closest('.bell-pop')){state.bell=false;paintBell();}
+  if(t.closest('[data-nwreset]')){state.nw={amt:'',ef:'',debt:'',match:'',time:'',react:'',persona:-1,err:'',done:state.nw.done,shared:''};render(true);jumpTo(0);return;}
   var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
   var cb=t.closest('[data-carb]');if(cb){var cr=cb.closest('.post').querySelector('.car');cr.scrollBy({left:Number(cb.getAttribute('data-carb'))*cr.clientWidth,behavior:'smooth'});return;}
   var sn=t.closest('[data-seen]');if(sn){try{var sv=JSON.parse(localStorage.getItem('ml_seen')||'{}');sv[sn.getAttribute('data-seen')]=1;localStorage.setItem('ml_seen',JSON.stringify(sv));}catch(x){}}
@@ -826,13 +845,15 @@ document.addEventListener('click',function(e){
   var cmp=t.closest('[data-cmp]');
   if(cmp){
     var id=cmp.getAttribute('data-cmp'),i=state.compare.indexOf(id);
-    if(i>-1)state.compare.splice(i,1);else{if(state.compare.length>=MAXCMP)state.compare.shift();state.compare.push(id);}
-    state.menu=false;rerender();return;
+    if(i>-1)state.compare.splice(i,1);
+    else if(!cmpSaved()){state.compare=[id].concat(state.compare.filter(function(x){return x!==id;})).slice(0,MAXCMP);if(curH()!=='#compare')toast(byId[id].name+' added to compare','#compare','compare now');}
+    else if(state.compare.length>=MAXCMP){state.menu=false;toast('compare is full (4 max). remove one to add '+byId[id].name,'#compare','open compare');return;}
+    else{state.compare.push(id);if(curH()!=='#compare')toast(byId[id].name+' added to compare ('+state.compare.length+'/'+MAXCMP+')','#compare','compare now');}
+    saveCmp();state.menu=false;rerender();return;
   }
   if(state.menu&&!t.closest('.menu')){state.menu=false;if(curH()==='#compare')rerender();}
 });
 document.addEventListener('scroll',function(e){var c=e.target;if(!c.classList||!c.classList.contains('car'))return;var n=c.children.length,i=Math.round(c.scrollLeft/c.clientWidth),p=c.closest('.post');p.querySelectorAll('.car-dots i').forEach(function(d,k){d.classList.toggle('on',k===i);});p.querySelector('.car-c').textContent=(i+1)+'/'+n;},true);
-function paintBell(){var w=document.getElementById('bellw');if(w)w.innerHTML=bellHtml();}
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.hasAttribute&&t.hasAttribute('data-fit')){var k=t.getAttribute('data-fit');state.fit[k]=Number(t.value);t.style.setProperty('--p',((t.value-1)*25)+'%');$('#v-'+k).textContent=t.value+'/5';$('#rank').innerHTML=rankHtml();}
@@ -857,9 +878,10 @@ document.addEventListener('submit',function(e){
   }).then(function(r){if(r.status===202||r.ok)done();else fail();}).catch(fail);
 });
 document.addEventListener('change',function(e){if(e.target.id==='sort'){state.sort=e.target.value;rerender();}});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')glClose();if(e.key==='Escape'&&state.menu){state.menu=false;rerender();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&POP.open&&!EP.open){POP.open=false;paintPop();return;}if(e.key==='Escape')glClose();if(e.key==='Escape'&&state.menu){state.menu=false;rerender();}});
 window.addEventListener('hashchange',function(){if(location.hash.length>1){history.replaceState(null,'',BASE+toPath(location.hash));}state.menu=false;render();});
-window.addEventListener('popstate',function(){state.menu=false;render();});
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+window.addEventListener('popstate',function(e){state.menu=false;var y=(e.state&&e.state.y)||0;render(true);jumpTo(y);requestAnimationFrame(function(){if(Math.abs(window.scrollY-y)>2)jumpTo(y);});});
 window.ML={av:av,handle:handle,LOGO:LOGO,MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
 render();
 loadLive();

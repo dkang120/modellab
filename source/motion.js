@@ -6,6 +6,7 @@
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)');
   var reduced = function () { return RM.matches; };
   var view = document.getElementById('view') || document.querySelector('main') || document.body;
+  try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('mo-drop-') === 0) localStorage.removeItem(k); }); } catch (e) {}
   function once(key) { try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, '1'); return true; } catch (e) { return true; } }
 
   /* 2 · Tier list / quiz result -> model page: the tapped card grows into the model's avatar (View Transitions). */
@@ -33,7 +34,7 @@
     var id = b.getAttribute('data-cmp'), adding = b.getAttribute('aria-pressed') !== 'true';
     requestAnimationFrame(function () {
       var nb = document.querySelector('.igp-btn[data-cmp="' + id + '"]');
-      if (nb && adding && !reduced()) { nb.classList.remove('mo-bump'); void nb.offsetWidth; nb.classList.add('mo-bump'); }
+      if (nb && adding && nb.getAttribute('aria-pressed') === 'true' && !reduced()) { nb.classList.remove('mo-bump'); void nb.offsetWidth; nb.classList.add('mo-bump'); }
     });
   });
 
@@ -81,14 +82,15 @@
       var key = 'mo-quiz-' + [].map.call(res.querySelectorAll('.tl-hit b'), function (b) { return b.textContent; }).join('|');
       if (once(key)) res.classList.add('mo-reveal');
     }
-    // 8 · new-drop pill shimmers once per drop
+    // 8 · new-drop pill shimmers once per drop (stored as {n: drop number, t: first seen})
     var pill = document.querySelector('.lib-new:not(.mo-seen)');
     if (pill) {
-      pill.classList.add('mo-seen'); var k = 'mo-drop-' + (pill.textContent || '');
+      pill.classList.add('mo-seen'); var n = pill.getAttribute('data-drop') || '';
       try {
-        var seen = Number(localStorage.getItem(k) || 0);
+        var rec = JSON.parse(localStorage.getItem('ml_dropseen') || 'null');
         // first view of this drop (or a re-render within 2s of it, so the shimmer survives the data refresh)
-        if (!seen || Date.now() - seen < 2000) { if (!seen) localStorage.setItem(k, String(Date.now())); pill.classList.add('mo-shine'); }
+        if (!rec || String(rec.n) !== n) { localStorage.setItem('ml_dropseen', JSON.stringify({ n: n, t: Date.now() })); pill.classList.add('mo-shine'); }
+        else if (Date.now() - rec.t < 2000) pill.classList.add('mo-shine');
       } catch (e) {}
     }
   }

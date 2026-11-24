@@ -490,18 +490,6 @@ body.sec-tools .mdl .bg{background:linear-gradient(180deg,#4c90f7 0%,#3d6bf4 45%
 .av.lg{width:66px;height:66px}.av.lg>span{font-size:21px;border-width:3px}
 .av.xl{width:96px;height:96px}.av.xl>span{font-size:30px;border-width:3px}
 .av.hist>span{background:var(--t-gray);color:var(--muted)}
-/* bell */
-.bellw{position:absolute;right:20px;top:27px}
-@media(min-width:900px){.bellw{right:32px}}
-.bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
-.bell svg{width:24px;height:24px}
-.bell:hover{background:var(--t-gray)}
-.bell.dot:after{content:"";position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #fff}
-.bell-pop{position:absolute;right:0;top:48px;width:320px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px -20px rgba(0,0,0,.3);padding:10px;z-index:30;font-family:var(--inter)}
-.bp-h{margin:4px 8px 6px;font-weight:600;font-size:15px}
-.bn-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:14px;line-height:19px}
-.bn-item:hover{background:var(--t-gray)}
-.bn-item small{display:block;color:var(--muted);font-size:12px}
 /* stories */
 .home-stories{padding:24px 0 8px}
 .home-stories .eyebrow{display:block;text-align:center;margin-bottom:14px}
@@ -594,16 +582,6 @@ body.sec-tools .mdl .bg{background:linear-gradient(180deg,#4c90f7 0%,#3d6bf4 45%
 .story-q .tl-opt{border-radius:20px}
 .story-q .tl-opt:hover,.story-q .tl-opt:focus-visible{background:var(--blue);color:#fff;border-color:transparent}
 .story-q .tl-opt:hover small,.story-q .tl-opt:focus-visible small{color:rgba(255,255,255,.85)}
-/* leaderboard recap */
-.recap{border-radius:28px;padding:28px;color:#fff;background:linear-gradient(150deg,#993bd8 0%,#683ff1 55%,#2b1a5c 100%);font-family:var(--inter)}
-.rc-k{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
-.rc-h{margin:6px 0 18px;font-family:var(--sauce);font-size:30px;letter-spacing:-.02em}
-.rc-g{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(min-width:700px){.rc-g{grid-template-columns:repeat(4,1fr)}}
-.rc-g div{background:rgba(255,255,255,.14);border-radius:16px;padding:14px}
-.rc-g small{display:block;font-size:12px;opacity:.8}
-.rc-g b{font-size:20px;font-weight:600}
-.rc-f{margin:16px 0 0;font-size:13px;opacity:.8}
 @media(min-width:1100px){.stories{flex-wrap:nowrap;justify-content:safe center}}
 .car-s{aspect-ratio:auto;min-height:260px;max-height:340px}
 @media(max-width:700px){.car-s{min-height:300px}.car-s p{font-size:21px;line-height:27px}}
@@ -977,8 +955,8 @@ html:has(.mm-screen){scroll-snap-type:y proximity}
 :root{--mo-out:cubic-bezier(.32,.72,0,1);--mo-in:cubic-bezier(.55,0,1,.45);--mo-io:cubic-bezier(.77,0,.175,1)}
 
 /* 3 · press feedback: small controls shrink a touch; wide surfaces darken instead of scaling */
-.btn,.chip,.seg-b,.tl-opt,.igp-btn,.bd-o,.bd-go,.tp-yes,.tp-no,.cp,.bell,.ep-go,.tp-launch{transition:scale .15s var(--mo-out),background-color .15s ease,border-color .15s ease,filter .15s ease}
-.btn:active,.chip:active,.seg-b:active,.tl-opt:active,.igp-btn:active,.bd-o:active,.bd-go:active,.tp-yes:active,.tp-no:active,.cp:active,.bell:active,.tp-launch:active{scale:.96}
+.btn,.chip,.seg-b,.tl-opt,.igp-btn,.bd-o,.bd-go,.tp-yes,.tp-no,.cp,.ep-go,.tp-launch{transition:scale .15s var(--mo-out),background-color .15s ease,border-color .15s ease,filter .15s ease}
+.btn:active,.chip:active,.seg-b:active,.tl-opt:active,.igp-btn:active,.bd-o:active,.bd-go:active,.tp-yes:active,.tp-no:active,.cp:active,.tp-launch:active{scale:.96}
 .tcard:active,.tl-hit:active,.nw-pc:active,.nw-promo:active,.mm-door:active{filter:brightness(.96)}
 /* hover lifts only where a real pointer hovers (touch screens fire hover on tap) */
 @media (hover:none){.tcard:hover,.bio-a:hover,.nw-pc:hover,.nw-promo:hover{transform:none}}
@@ -1023,17 +1001,15 @@ html:has(.mm-screen){scroll-snap-type:y proximity}
 .igp-btn.mo-bump{animation:mo-bump .3s var(--mo-out)}
 @keyframes mo-bump{0%{scale:.96}55%{scale:1.04}100%{scale:1}}
 
-/* 8 · new-drop pill: one shimmer per drop; bell badge pops in */
+/* 8 · new-drop pill: one shimmer per drop */
 .lib-new{position:relative;overflow:hidden}
 .lib-new.mo-shine::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(124,77,239,.18) 50%,transparent 70%);transform:translateX(-100%);animation:mo-shine 1s var(--mo-io) .4s both;pointer-events:none}
 @keyframes mo-shine{to{transform:translateX(100%)}}
-.bell.dot:after{animation:mo-pop .35s var(--mo-out) .6s both}
-@keyframes mo-pop{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
 
 @media (prefers-reduced-motion:reduce){
-  .tl-res.mo-reveal .tl-hit,.tl-res.mo-reveal .tl-hit::after,.sq-bars i::after,.bd-dots,.bd-win::after,.igp-btn.mo-bump,.lib-new.mo-shine::after,.bell.dot:after{animation:none!important}
+  .tl-res.mo-reveal .tl-hit,.tl-res.mo-reveal .tl-hit::after,.sq-bars i::after,.bd-dots,.bd-win::after,.igp-btn.mo-bump,.lib-new.mo-shine::after{animation:none!important}
   .bd-dots{display:none!important}
-  .btn:active,.chip:active,.seg-b:active,.tl-opt:active,.igp-btn:active,.bd-o:active,.bd-go:active,.tp-yes:active,.tp-no:active,.cp:active,.bell:active,.tp-launch:active{scale:1}
+  .btn:active,.chip:active,.seg-b:active,.tl-opt:active,.igp-btn:active,.bd-o:active,.bd-go:active,.tp-yes:active,.tp-no:active,.cp:active,.tp-launch:active{scale:1}
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
 }
 .bd-chat .im.bd-old{animation:none!important}
@@ -1048,3 +1024,24 @@ html:has(.mm-screen){scroll-snap-type:y proximity}
 .mm-heart path{animation-duration:.6s;animation-delay:1.7s}
 .mm-heart circle.a{animation-delay:1.75s}
 .mm-heart circle.b{animation-delay:2.3s}
+
+/* toast: compare confirmations */
+#mltoast{position:fixed;left:50%;width:max-content;box-sizing:border-box;bottom:max(20px,env(safe-area-inset-bottom));z-index:90;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:12px 12px 12px 18px;border-radius:999px;background:var(--ink);color:#fff;font:500 14px/20px var(--inter);box-shadow:0 14px 40px -16px rgba(0,0,0,.45);transform:translate(-50%,12px);opacity:0;pointer-events:none;transition:opacity .2s var(--mo-out),transform .2s var(--mo-out)}
+#mltoast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#mltoast a{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600}
+@media (prefers-reduced-motion:reduce){#mltoast{transition:opacity .2s linear;transform:translate(-50%,0)}}
+
+/* floating buddy: redraws (step change, errors) don't replay the intro */
+.tp-card.tp-still,.tp-card.tp-still .im{animation:none!important}
+
+/* touch: every tap target gets at least a 44px hit area. Visual size stays the same; the extra area is invisible */
+@media (pointer:coarse){
+  .crumb a,.navrow a,.nav-hl,.seg-b,.chip,.lib-sms,.igp-btn,.car-b,.lk,.cp,.nw-o,.mm-actions .btn,.site-footer-links a,.legal-links a,.mm-trust a,.addm,.tl-f select{position:relative}
+  .crumb a::before,.navrow a::before,.logo::before,.nav-hl::before,.seg-b::before,.chip::before,.lib-sms::before,.igp-btn::before,.car-b::before,.lk::before,.cp::before,.nw-o::before,.mm-actions .btn::before,.site-footer-links a::before,.legal-links a::before,.mm-trust a::before,.addm::before{
+    content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+  .car-b{min-width:36px;min-height:36px}
+  .faq summary,.mfaq summary,details>summary{padding-top:9px;padding-bottom:9px;min-height:44px}
+  input[type=range]{height:8px;padding:18px 0;box-sizing:content-box;background-clip:content-box}
+  input[type=number],input[type=tel],input[type=email],select{min-height:44px}
+}
+@media(max-width:640px){#mltoast{bottom:calc(84px + env(safe-area-inset-bottom));font-size:13px}}
