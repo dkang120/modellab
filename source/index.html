@@ -462,7 +462,14 @@ function viewBuddy(){
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
   else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p>'+(b.fails?'<p class="bd-alt">no luck? <a class="lk" href="#follow-cta">get the weekly Lab Drop by email instead</a></p>':'')+'</form>';
   else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
-  return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+msgs.map(function(x,i){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(i>=msgs.length-3?(i-(msgs.length-3))*.25:0)+'s">'+x[1]+'</div>';}).join('')+'</div>'+acts+
+  var T0=0,seenN=b.seenN||0,bub=msgs.map(function(x,i){
+    var fresh=i>=seenN,d=fresh?T0:0,pre='';
+    if(fresh&&x[0]==='in'){pre='<div class="im in bd-dots" aria-hidden="true" style="--d:'+T0.toFixed(2)+'s"><i></i><i></i><i></i></div>';d=T0+.45;}
+    if(fresh)T0=d+.2;
+    var done=b.done&&x[1]==='done \u2705';
+    return pre+'<div class="im '+x[0]+(x[0]==='out'?' pu':'')+(done?' bd-win':'')+(fresh?'':' bd-old')+'" style="animation-delay:'+d.toFixed(2)+'s">'+x[1]+'</div>';}).join('');
+  b.seenN=msgs.length;
+  return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+bub+'</div>'+acts+
    (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies, free through dec 1</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
 }
 function normPhone(v){var ph=(v||'').replace(/[^\d+]/g,'');if(ph.charAt(0)!=='+'){ph=ph.replace(/^1(?=\d{10}$)/,'');ph=(ph.length===10?'+1'+ph:'');}return /^\+\d{10,15}$/.test(ph)?ph:null;}
@@ -856,5 +863,6 @@ epAuto();
 })();
 </script>
 <script src="tools.js"></script>
+<script src="motion.js" defer></script>
 </body>
 </html>
