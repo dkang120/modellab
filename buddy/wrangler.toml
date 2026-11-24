@@ -18,6 +18,10 @@ PER_PERSON_MONTHLY = "6"
 # Plans: free = 4 AI replies a month, pro ($4.99/mo via Stripe) = 100, owner numbers = unlimited.
 FREE_MONTHLY = "4"
 PRO_MONTHLY = "100"
+# Launch promo: unlimited replies for everyone until this moment (Dec 2, 2026 00:00 Pacific = 08:00 UTC),
+# then free = FREE_MONTHLY again automatically. PROMO_FAIR_USE is a hidden anti-abuse ceiling per number per month.
+PROMO_UNTIL = "2026-12-02T08:00:00Z"
+PROMO_FAIR_USE = "300"
 OWNER_PHONES = "+19256780687"
 # Email Daniel when pro/owner replies pass this many SMS credits in a month (time to add Klaviyo credits).
 PAID_CREDIT_ALERT = "50"

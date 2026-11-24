@@ -321,7 +321,7 @@ function buddySection(){
   var th=[['in','market\u2019s down 10% from the top. pretty normal tbh. you good?'],['out','ngl kinda nervous'],['in','real talk, '+mm.name.toLowerCase()+' has fallen further before and came back. your plan > the headlines'],['out','ok holding \uD83D\uDD12'],['in','that\u2019s the energy. new drop friday \uD83E\uDDEA']];
   return '<section class="hb"><div class="hb-copy"><p class="eyebrow">the highlight</p><h2 class="h2"><em>your personalized</em>investing tool</h2><p class="sub">a buddy in your texts who knows your model, checks on you when the market gets wild, and keeps you locked in. free to start</p>'+
    '<ul class="hb-pts"><li><b>about <i>your</i> model</b>, not the same tips everyone gets</li><li><b>calm check-ins</b> when the market drops, never panic</li><li><b>a lab drop every 2 weeks</b>: one new model, explained in one text</li></ul>'+
-   (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime</p>')+'</div>'+
+   (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">'+(promoOn()?'free \u00b7 unlimited replies through dec 1 \u00b7 reply STOP anytime':'free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime')+'</p>')+'</div>'+
    '<div class="hb-phone" aria-hidden="true"><div class="hb-top"><span class="av sm ring"><span>'+LOGO+'</span></span><b>modellab buddy</b></div>'+th.map(function(x){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'">'+esc(x[1])+'</div>';}).join('')+'</div></section>';
 }
 function viewHome(){
@@ -331,7 +331,7 @@ function viewHome(){
    ['peach','now what?','got money sitting there? get the order of moves that makes sense for your spot','#now','tap your situation →']];
   var faq=[['is this investment advice?','nope. ModelLab is educational. every portfolio is a hypothetical example using public funds, not a recommendation or a record of performance'],
     ['what does the text buddy actually send?','2–4 texts a month: a lab drop every 2 weeks (one new model, explained in one text), a calm check-in when the market drops, and real replies when you text back. reply STOP anytime'],
-    ['is it free?','the texts are free, plus 4 replies a month when you text me. want more? pro is $4.99/mo for up to 100 replies, cancel anytime. msg & data rates may apply']]
+    ['is it free?',(promoOn()?'yep, and this week replies are unlimited too, through dec 1. after that the texts stay free with 4 replies a month, or pro is $4.99/mo for up to 100. cancel anytime. msg & data rates may apply':'the texts are free, plus 4 replies a month when you text me. want more? pro is $4.99/mo for up to 100 replies, cancel anytime. msg & data rates may apply')]]
     .map(function(q){return '<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
   return heroHtml()+'<div class="wrap">'+buddySection()+
    '<section class="s doors"><h2 class="h2">start anywhere</h2><p class="sub center">three ways in. each one ends with a buddy who keeps you on track</p><div class="grid3" style="margin-top:36px">'+
@@ -348,7 +348,7 @@ function viewLibrary(){
   var seg=Object.keys(TIERS).map(function(k){return '<button class="seg-b" data-tier="'+k+'" aria-pressed="'+(state.tier===k)+'">'+k+'</button>';}).join('');
   var ld=LABDROP[LABDROP.length-1],lm=byId[ld.id];
   var rows=[5,4,3,2,1].map(function(lv){var ms=list.filter(function(m){return m[key]===lv;});
-    return '<div class="tier t'+lv+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">nobody here yet</span>')+'</div></div>';}).join('');
+    return '<div class="tier t'+lv+(ms.length?'':' is-empty')+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">none yet</span>')+'</div></div>';}).join('');
   return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">every investing model, ranked in a tier list. tap one to see what it owns</p>'+
    '<a class="lib-new" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
    '<div class="tl-ctrl"><div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
@@ -447,7 +447,7 @@ var BD_FREQ=[['low','only when it matters','~2 texts a month'],['weekly','keep m
 var BD_ROT=['people locking in on their first $1k','people who almost sold in a dip','people investing every payday','people who hate finance bros'];
 function viewBuddy(){
   var b=state.bd,mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
-  var mm=mt&&byId[mt],msgs=[['in','hey! 👋'],['in','i’m modellab, your personalized investing tool. in your texts'],['in','i text you when markets get wild so you don’t do anything you regret 😅']];
+  var mm=mt&&byId[mt],msgs=[['in','hey! 👋'],['in','i’m modellab, your investing buddy, right in your texts'],['in','i text you when markets get wild so you don’t do anything you regret 😅']];
   var acts='';
   if(b.step>=1)msgs.push(['out','yo let’s do this']);
   if(b.step>=1)msgs.push(['in','what are you locking in on?']);
@@ -463,9 +463,11 @@ function viewBuddy(){
   else if(!b.done)acts='<form class="bd-form" data-bdform="1" novalidate><label class="sr" for="bd-ph">Mobile number</label><input id="bd-ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 123-4567" value="'+esc(b.ph||'')+'"><label class="bd-cons"><input type="checkbox" id="bd-ok"'+(b.ok?' checked':'')+'><span>Yes, text me. By checking this box I agree to receive recurring automated marketing texts from ModelLab Text Buddy at this number (about '+(b.freq==='weekly'?'4':'2')+' a month), and I confirm I\u2019m 18 or older. Consent is not a condition of any purchase. Msg &amp; data rates may apply. Reply HELP for help, STOP to cancel. Educational only, not investment advice. See our <a href="#sms-terms">SMS Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="bd-go" type="submit">lock in <span>›</span></button><p class="bd-err" role="alert">'+esc(b.err||'')+'</p>'+(b.fails?'<p class="bd-alt">no luck? <a class="lk" href="#follow-cta">get the weekly Lab Drop by email instead</a></p>':'')+'</form>';
   else acts='<a class="bd-go" href="#library">browse the library <span>›</span></a>';
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+msgs.map(function(x,i){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(i>=msgs.length-3?(i-(msgs.length-3))*.25:0)+'s">'+x[1]+'</div>';}).join('')+'</div>'+acts+
-   (b.step===0?'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
+   (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies, free through dec 1</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
 }
 function normPhone(v){var ph=(v||'').replace(/[^\d+]/g,'');if(ph.charAt(0)!=='+'){ph=ph.replace(/^1(?=\d{10}$)/,'');ph=(ph.length===10?'+1'+ph:'');}return /^\+\d{10,15}$/.test(ph)?ph:null;}
+// Launch promo: unlimited buddy replies until this moment (Dec 2, 2026 00:00 Pacific). Copy flips back by itself; keep in sync with buddy/wrangler.toml PROMO_UNTIL.
+var PROMO_UNTIL=Date.parse('2026-12-02T08:00:00Z');function promoOn(){return Date.now()<PROMO_UNTIL;}
 function buddyIn(){try{return localStorage.getItem('ml_buddy')==='1';}catch(e){return false;}}
 function smsJoin(ph,goal,freq,source,ok,fail,extra){
   var mt=null,em=null;try{mt=localStorage.getItem('ml_match');em=localStorage.getItem('ml_email');}catch(e){}
@@ -600,6 +602,58 @@ function popSubmit(){
   POP.err='';var btn=document.querySelector('.tp-f .tp-yes');if(btn){btn.disabled=true;btn.textContent='one sec\u2026';}
   smsJoin(ph,'model','low','modellab.popup',function(){POP.done=true;paintPop();rerender();},function(m){POP.err=m;paintPop();});
 }
+/* ---------- email popup: Lab Drop signup (layout after rhode's welcome modal, styled in ModelLab's system) ---------- */
+var EP={open:false,done:false,err:'',busy:false,last:null};
+var EP_DELAY=6000,EP_SNOOZE_DAYS=14;
+function epBlocked(){
+  var h=curH();if(h==='#text'||h==='#sms-terms'||h==='#privacy'||h==='#data')return true;
+  try{if(localStorage.getItem('ml_email'))return true;var t=Number(localStorage.getItem('ml_ep_snooze')||0);if(Date.now()<t)return true;}catch(e){return true;}
+  return false;
+}
+function epHtml(){
+  var ld=LABDROP[LABDROP.length-1];
+  var art='<div class="ep-art" aria-hidden="true"><span class="ep-pill">Lab Drop #'+ld.n+' is live</span><span class="ep-bub"><i class="ep-b1">new drop just landed \uD83E\uDDEA</i><i class="ep-b2">ok show me</i></span><span class="ep-word">'+LOGO+'<b>modellab</b></span></div>';
+  var body=EP.done
+    ?'<div class="ep-copy"><h2 id="ep-t">you’re in 🔒</h2><p>check your inbox, your welcome email is on the way. then one new investing model a week, explained like a friend would.</p><a class="ep-alt" href="#text" data-ep="close">want it by text too? get your buddy →</a></div>'
+    :'<div class="ep-copy"><h2 id="ep-t">welcome to modellab</h2><p>get the Lab Drop: one new investing model every week, explained in plain English.</p>'+
+     '<form class="ep-f" data-epform="1" novalidate><label class="sr" for="ep-em">Email</label><input id="ep-em" type="email" inputmode="email" autocomplete="email" placeholder="Email" value="'+esc(EP.last||'')+'"'+(EP.err?' aria-invalid="true" aria-describedby="ep-err"':'')+'>'+
+     '<button class="ep-go" type="submit"'+(EP.busy?' disabled':'')+'>'+(EP.busy?'one sec…':'sign up')+'</button><p class="ep-err" id="ep-err" role="alert">'+esc(EP.err)+'</p></form>'+
+     '<p class="ep-note">free · unsubscribe anytime · educational only · <a href="#privacy" data-ep="close">privacy</a></p></div>';
+  return '<div class="ep-back" data-ep="back"></div><div class="ep-card" role="dialog" aria-modal="true" aria-labelledby="ep-t"><button class="ep-x" data-ep="close" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13"/></svg></button>'+art+body+'</div>';
+}
+function epPaint(){
+  var w=document.getElementById('epop');if(!w){w=document.createElement('div');w.id='epop';document.body.appendChild(w);}
+  if(!EP.open){if(w.innerHTML){w.classList.add('ep-out');setTimeout(function(){w.innerHTML='';w.className='';},180);}return;}
+  var first=!w.innerHTML;w.className='on';w.innerHTML=epHtml();
+  if(first){EP.ret=document.activeElement;var i=w.querySelector('#ep-em');if(i&&matchMedia('(hover:hover) and (pointer:fine)').matches)i.focus({preventScroll:true});else{var x=w.querySelector('.ep-x');x&&x.focus({preventScroll:true});}}
+}
+function epClose(reason){
+  if(!EP.open)return;EP.open=false;
+  if(!EP.done){try{localStorage.setItem('ml_ep_snooze',String(Date.now()+EP_SNOOZE_DAYS*864e5));}catch(e){}mlTrack('email_popup_closed',{reason:reason||'x',page:curH()});}
+  epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
+}
+function epAuto(){
+  if(epBlocked())return;
+  setTimeout(function(){if(EP.open||epBlocked()||document.querySelector('.drawer-open,.gl-open'))return;EP.open=true;epPaint();mlTrack('email_popup_shown',{page:curH()});},EP_DELAY);
+}
+function epSubmit(){
+  var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){EP.err='that email looks off, try again';epPaint();var i=document.getElementById('ep-em');i&&i.focus();return;}
+  EP.err='';EP.busy=true;epPaint();
+  function ok(){try{localStorage.setItem('ml_email',email);}catch(x){}setUnlocked();EP.busy=false;EP.done=true;mlTrack('email_popup_signup',{page:curH()});epPaint();}
+  function bad(){EP.busy=false;EP.err='couldn’t sign you up right now. try again in a sec';epPaint();}
+  if(!SIGNUP.companyId||!SIGNUP.listId){ok();return;}
+  fetch('https://a.klaviyo.com/client/subscriptions/?company_id='+encodeURIComponent(SIGNUP.companyId),{method:'POST',headers:{'Content-Type':'application/json','revision':'2024-10-15'},
+    body:JSON.stringify({data:{type:'subscription',attributes:{custom_source:'ModelLab site (popup)',profile:{data:{type:'profile',attributes:{email:email}}}},relationships:{list:{data:{type:'list',id:SIGNUP.listId}}}}})})
+  .then(function(r){if(r.status===202||r.ok)ok();else bad();}).catch(bad);
+}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-ep]');if(!t)return;var a=t.getAttribute('data-ep');if(a==='close'||a==='back'){if(t.tagName!=='A')e.preventDefault();epClose(a==='back'?'backdrop':'x');}});
+document.addEventListener('submit',function(e){if(e.target.closest&&e.target.closest('form[data-epform]')){e.preventDefault();e.stopImmediatePropagation();epSubmit();}},true);
+document.addEventListener('keydown',function(e){
+  if(!EP.open)return;
+  if(e.key==='Escape'){epClose('esc');return;}
+  if(e.key==='Tab'){var c=document.querySelector('.ep-card');if(!c)return;var f=[].slice.call(c.querySelectorAll('button,input,a[href]')).filter(function(n){return !n.disabled;});if(!f.length)return;var a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}
+});
 var BDR=0;setInterval(function(){var el=document.getElementById('bdrot');if(el){BDR=(BDR+1)%BD_ROT.length;el.style.opacity=0;setTimeout(function(){el.textContent=BD_ROT[BDR];el.style.opacity=1;},250);}},2600);
 var LEGAL_UPDATED='November 17, 2026',CONTACT_URL='https://hidanielkang.com';
 function legalPage(title,sub,body){return '<div class="wrap"><article class="legal"><h1 class="display">'+title+'</h1><p class="sub">'+sub+' · Last updated '+LEGAL_UPDATED+'</p>'+body+'</article></div>';}
@@ -608,7 +662,7 @@ function viewSmsTerms(){
   '<h2>1. The program</h2><p>ModelLab Text Buddy (the “program”) sends recurring automated text messages about investing habits: check-ins when the stock market falls, reminders you ask for, and our weekly Lab Drop about a new investing model. The program has a free plan and an optional paid Pro plan, and is run by ModelLab, an educational project by Daniel Kang.</p>'+
   '<h2>2. How you join</h2><p>You join by entering your mobile number on <a href="#text">our text buddy page</a> and checking the consent box. By joining you agree to these SMS Terms and our <a href="#privacy">Privacy Policy</a>, and you confirm you are 18 or older and the account holder or authorized user of the number. Consent is not a condition of any purchase.</p>'+
   '<h2>3. How often</h2><p>Message frequency varies with what you choose at signup: about 2 messages a month (“only when it matters”) or about 4 a month (“keep me locked in”). Scheduled texts go out between 8am and 8pm in your time zone. Your welcome text, and replies to texts you send us, can arrive anytime. You can reply LESS anytime to get fewer.</p>'+
-  '<h2>4. Cost</h2><p><b>Free plan:</b> the scheduled texts plus up to 4 personal replies a month when you text us. <b>Pro plan:</b> $4.99 a month for up to 100 personal replies a month. Pro is billed monthly through Stripe and renews automatically until you cancel. Cancelling stops future charges, and you keep Pro until the end of the month you paid for. Texting STOP stops all texts and also cancels Pro, so you won’t be charged again. You can also cancel Pro and keep the free texts through the link in your Pro confirmation, or by contacting us. Message and data rates may apply, depending on your mobile plan.</p>'+
+  '<h2>4. Cost</h2><p><b>Free plan:</b> the scheduled texts plus up to 4 personal replies a month when you text us. <b>Pro plan:</b> $4.99 a month for up to 100 personal replies a month. <b>Launch offer:</b> until December 1, 2026 (11:59 pm Pacific), personal replies are unlimited on the free plan, subject to a fair-use limit of 300 a month per number; after that the plans above apply automatically, with no charge unless you choose Pro. Pro is billed monthly through Stripe and renews automatically until you cancel. Cancelling stops future charges, and you keep Pro until the end of the month you paid for. Texting STOP stops all texts and also cancels Pro, so you won’t be charged again. You can also cancel Pro and keep the free texts through the link in your Pro confirmation, or by contacting us. Message and data rates may apply, depending on your mobile plan.</p>'+
   '<p><b>Refunds:</b> if a charge looks wrong or something isn’t working, contact us within 14 days of the charge and we’ll fix it or refund that month in full. Otherwise, a month that has already started isn’t refunded, but cancelling stops all future charges. Please reach out to us before filing a dispute with your bank so we can sort it out quickly.</p>'+
   '<h2>5. Stopping</h2><p>Reply <b>STOP</b> to any message to cancel. You can also reply END, CANCEL, UNSUBSCRIBE or QUIT. You’ll get one message confirming you’ve been unsubscribed, and no more texts after that. To rejoin, sign up again on the website.</p>'+
   '<h2>6. Help and contact</h2><p>Reply <b>HELP</b> to any message, email <a href="mailto:modellab@hidanielkang.com">modellab@hidanielkang.com</a>, or contact us through <a href="'+CONTACT_URL+'" target="_blank" rel="noopener">hidanielkang.com</a>. We reply within 2 business days.</p>'+
@@ -798,6 +852,7 @@ window.addEventListener('popstate',function(){state.menu=false;render();});
 window.ML={av:av,handle:handle,LOGO:LOGO,MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
 render();
 loadLive();
+epAuto();
 })();
 </script>
 <script src="tools.js"></script>

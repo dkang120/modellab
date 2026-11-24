@@ -16,12 +16,18 @@ const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, header
 async function getNum(kv, k) { return Number((await kv.get(k)) || 0); }
 
 // ---------- plans: free (4 AI replies/mo), pro $4.99 (100/mo), owner (unlimited) ----------
+// Launch promo: until PROMO_UNTIL (ISO time), everyone not on pro gets unlimited replies ("promo"),
+// with a hidden fair-use ceiling (PROMO_FAIR_USE/month) so one number can't run up the bill.
+// After PROMO_UNTIL the normal free/pro plans apply on their own: no redeploy needed.
+export const promoActive = (env, now = Date.now()) => !!env.PROMO_UNTIL && now < Date.parse(env.PROMO_UNTIL);
+export const promoEndLabel = env => env.PROMO_UNTIL ? new Date(Date.parse(env.PROMO_UNTIL) - 1).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "long", day: "numeric" }) : "";
 const digits = p => String(p || "").replace(/\D/g, "");
 const toE164 = p => { const d = digits(p); return d.length === 10 ? "+1" + d : (d.length === 11 && d[0] === "1" ? "+" + d : (d ? "+" + d : "")); };
 function isOwner(env, phone) { return String(env.OWNER_PHONES || "").split(",").map(toE164).filter(Boolean).includes(toE164(phone)); }
 async function planFor(env, phone) {
   if (isOwner(env, phone)) return "owner";
-  return (await env.BUDDY_KV.get(`sub:${toE164(phone)}`)) === "active" ? "pro" : "free";
+  if ((await env.BUDDY_KV.get(`sub:${toE164(phone)}`)) === "active") return "pro";
+  return promoActive(env) ? "promo" : "free";
 }
 function upgradeLink(env, phone) {
   if (!env.STRIPE_PAYMENT_LINK) return "modellab.hidanielkang.com/text/";
@@ -218,7 +224,7 @@ async function handle(env, body) {
   const used = await getNum(kv, `credits:${m}`);
   const cap = Number(env.MONTHLY_CREDIT_CAP || 80);
   const mine = await getNum(kv, `p:${m}:${phone}`);
-  const perCap = plan === "owner" ? Infinity : Number(plan === "pro" ? (env.PRO_MONTHLY || 100) : (env.FREE_MONTHLY || 4));
+  const perCap = plan === "owner" ? Infinity : Number(plan === "pro" ? (env.PRO_MONTHLY || 100) : plan === "promo" ? (env.PROMO_FAIR_USE || 300) : (env.FREE_MONTHLY || 4));
   // The shared credit budget only limits free users; pro and owner replies are tracked separately.
   const overBudget = plan === "free" && used >= cap;
 
@@ -248,7 +254,7 @@ async function handle(env, body) {
   const hKey = `h:${phone}`;
   const history = JSON.parse((await kv.get(hKey)) || "[]");
   const mem = await getMemory(kv, phone);
-  let reply = clean(await askClaude(env, { ...body, memory: mem.facts, mood: mem.mood }, history, text));
+  let reply = clean(await askClaude(env, { ...body, memory: mem.facts, mood: mem.mood, plan, promo_until: promoActive(env) ? promoEndLabel(env) : "" }, history, text));
   let human = false;
   if (reply.startsWith("[HUMAN]")) { human = true; reply = reply.replace("[HUMAN]", "").trim(); }
   if (!reply) return { skipped: "empty reply" };

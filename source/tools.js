@@ -562,7 +562,7 @@ ML.crashComments=function(m){
   if(hState!=='ready')return head+'<p class="note">Loading real crash history…</p></div>';
   var rows=[],ms=MS[m.id];
   if(ms)rows.push(['since 1992','worst fall '+pct1(ms.mdd)+(ms.recover!=null?' · back to its old high in '+ms.recover+' months':' · not back to its old high yet')]);
-  SCEN.forEach(function(sc){var c=stressCell(m,sc);if(c)rows.push([sc.name.toLowerCase(),'fell '+pct1(c.mdd)+' at the worst · '+pct1(c.tot)+' by '+mlab(sc.to)]);});
+  SCEN.forEach(function(sc){var c=stressCell(m,sc);if(c)rows.push([sc.name.toLowerCase(),Math.abs(c.tot-c.mdd)<0.005?'fell '+pct1(c.mdd)+', bottomed out in '+mlab(sc.to):'fell '+pct1(c.mdd)+' at the worst, '+(c.tot>=0?'still ':'')+pct1(c.tot)+' overall by '+mlab(sc.to)]);});
   var reply=ms?(ms.mdd<-0.4?'that is a lot of pain. could you hold through it?':(ms.mdd<-0.2?'real dips, but it came back.':'pretty calm, all things considered.')):'';
   return head+'<div class="cm-l">'+rows.map(function(r){return '<div class="cm-r">'+hav+'<p><b>@history</b> <span class="cm-y">'+esc(r[0])+'</span><br>'+esc(r[1])+'</p></div>';}).join('')+
    (reply?'<div class="cm-r reply">'+ML.av(m,'sm',true)+'<p><b>'+esc(me)+'</b> '+esc(reply)+'</p></div>':'')+'</div>'+

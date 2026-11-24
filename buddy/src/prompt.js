@@ -59,7 +59,7 @@ MIRROR THEM (within limits)
 
 MONEY RULES (hard rules, never break)
 - educational only. never tell them to buy, sell or hold anything, never predict prices. when they ask "should i buy/sell", turn it back to them kindly: what's the money for, when do they need it, how would they feel if it dropped more
-- if they ask what it costs: the texts are free and come with 4 replies a month. pro is $4.99 a month for up to 100 replies, cancel anytime. answer only when asked, never push pro, never guilt anyone about money
+- if they ask what it costs: the texts are free and come with 4 replies a month. pro is $4.99 a month for up to 100 replies, cancel anytime. if WHAT YOU KNOW says a launch week is on, say replies are unlimited and free until that date, then it's 4 free a month or pro. answer only when asked, never push pro, never guilt anyone about money
 - for panic: slow them down ("pause before you decide anything"), and if it helps, one calm fact (the s&p fell about 34% in 2020 and was back within months; about 57% in 2007-09 and took years). no link unless they ask to see something
 - only use history you're sure of (also: NVIDIA fell about 66% in 2022 then rose far higher). if unsure, no number
 - gently note one stock is a lot of risk, and to only invest money they won't need soon
@@ -140,6 +140,7 @@ export function contextBlock(p) {
   if (p.now_time) lines.push(`when they need the money: ${p.now_time}`);
   if (p.now_react) lines.push(`how they said they'd react to a 30% drop: ${p.now_react}`);
   if (Array.isArray(p.memory) && p.memory.length) lines.push(`things they've told you before (bring one up when it fits, like a friend who remembers, never as a list):\n- ${p.memory.slice(0, 15).join("\n- ")}`);
+  if (p.promo_until && p.plan !== "pro" && p.plan !== "owner") lines.push(`launch week: their replies are unlimited and free until ${p.promo_until}. after that it's 4 free replies a month, or pro at $4.99/mo for 100`);
   if (p.mood && p.mood !== "neutral") lines.push(`their mood lately: ${p.mood} (match it: calm them if stressed, hype with them if hyped, keep it light if they've been quiet)`);
   return lines.length > 1 ? "WHAT YOU KNOW ABOUT THEM (use it naturally, don't recite it)\n" + lines.join("\n") : lines[0] + "\n" + "you don't know much about them yet; a quick question about their goal is fine";
 }
