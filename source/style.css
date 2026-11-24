@@ -1037,3 +1037,14 @@ html:has(.mm-screen){scroll-snap-type:y proximity}
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
 }
 .bd-chat .im.bd-old{animation:none!important}
+
+/* hero, restaged (one thing moves at a time): bubbles out -> card swaps -> stat bubble -> reply -> heart */
+.mm-spin{transition:transform .45s cubic-bezier(.77,0,.175,1),opacity .45s cubic-bezier(.77,0,.175,1)}
+.mm-spin .cast{transition:opacity .45s}
+.mm-spin.leave{animation-duration:.42s,.2s;animation-delay:.12s,.32s;animation-timing-function:cubic-bezier(.55,0,1,.45),linear}
+.mm-exch.out .mm-msg.is-inyo,.mm-exch.out .mm-msg.is-reply{animation-duration:.25s,.2s;animation-delay:0s,0s}
+.mm-msg.is-inyo{animation-duration:.42s;animation-delay:.55s;animation-timing-function:cubic-bezier(.32,.72,0,1)}
+.mm-msg.is-reply{animation-duration:.42s;animation-delay:1.25s;animation-timing-function:cubic-bezier(.32,.72,0,1)}
+.mm-heart path{animation-duration:.6s;animation-delay:1.7s}
+.mm-heart circle.a{animation-delay:1.75s}
+.mm-heart circle.b{animation-delay:2.3s}

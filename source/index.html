@@ -309,9 +309,10 @@ function heroHtml(){
 }
 function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',Math.max(560,window.innerHeight-Math.max(0,f.getBoundingClientRect().top+window.scrollY)));}}
 function heroPaint(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e)return;d.innerHTML=heroDeck(HERO.i);e.className='mm-exch';e.innerHTML=heroEx(HERO.i);}
-function heroTick(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e){heroStop();return;}var f=d.querySelector('.front'),g=d.querySelector('.mid');if(!f||!g)return;e.classList.add('out');f.classList.add('leave');if(HERO.i%2)f.classList.add('r');g.classList.add('go');HERO.to=setTimeout(function(){HERO.i++;heroPaint();},680);}
+function heroTick(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e){heroStop();return;}var f=d.querySelector('.front'),g=d.querySelector('.mid');if(!f||!g)return;e.classList.add('out');f.classList.add('leave');if(HERO.i%2)f.classList.add('r');g.classList.add('go');HERO.to=setTimeout(function(){HERO.i++;heroPaint();},500);}
 function heroStop(){if(HERO.timer){clearInterval(HERO.timer);HERO.timer=null;}if(HERO.to){clearTimeout(HERO.to);HERO.to=null;}}
-function heroStart(){heroStop();heroFit();if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;HERO.timer=setInterval(heroTick,4200);}
+(function(){if(!('IntersectionObserver' in window))return;var io=new IntersectionObserver(function(es){es.forEach(function(x){HERO.off=!x.isIntersecting;});},{threshold:.15});new MutationObserver(function(){var d=document.getElementById('mmdeck');if(d&&!d._mo){d._mo=1;io.observe(d);}}).observe(document.body,{childList:true,subtree:true});})();
+function heroStart(){heroStop();heroFit();if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;HERO.timer=setInterval(function(){if(document.hidden||HERO.off)return;heroTick();},6000);}
 window.addEventListener('resize',heroFit);
 function hl(soft,main){return '<h2 class="h2"><em>'+soft+'</em>'+main+'</h2>';}
 
@@ -613,6 +614,7 @@ function popSubmit(){
 var EP={open:false,done:false,err:'',busy:false,last:null};
 var EP_DELAY=6000,EP_SNOOZE_DAYS=14;
 function epBlocked(){
+  if(/[?&]popup\b/.test(location.search))return false;
   var h=curH();if(h==='#text'||h==='#sms-terms'||h==='#privacy'||h==='#data')return true;
   try{if(localStorage.getItem('ml_email'))return true;var t=Number(localStorage.getItem('ml_ep_snooze')||0);if(Date.now()<t)return true;}catch(e){return true;}
   return false;
@@ -640,8 +642,9 @@ function epClose(reason){
   epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
 }
 function epAuto(){
-  if(epBlocked())return;
-  setTimeout(function(){if(EP.open||epBlocked()||document.querySelector('.drawer-open,.gl-open'))return;EP.open=true;epPaint();mlTrack('email_popup_shown',{page:curH()});},EP_DELAY);
+  if(EP.sched||EP.open||EP.shown||epBlocked())return;
+  EP.sched=true;
+  setTimeout(function(){EP.sched=false;if(EP.open||EP.shown||epBlocked()||document.querySelector('.drawer-open,.gl-open'))return;EP.open=true;EP.shown=true;epPaint();mlTrack('email_popup_shown',{page:curH()});},EP_DELAY);
 }
 function epSubmit(){
   var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
@@ -793,6 +796,7 @@ function render(keep){
   document.querySelectorAll('[data-nav]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-nav')===nav);});
   if(!keep)window.scrollTo(0,0);
   if(rt&&rt.r.after)rt.r.after(rt.arg);
+  if(typeof epAuto==='function')epAuto();
 }
 function routeFor(h){h=(h||'').replace(/^#/,'');var p=h.split('/'),r=ROUTES[p[0]];return (r&&typeof r==='object'&&p[0].charAt(0)!=='_')?{r:r,arg:p.slice(1).join('/')}:null;}
 var _seen={};function trackForms(){var f=[['[data-bdform]','text_page'],['[data-nwform]','now_page'],['[data-popform]','popup']];for(var i=0;i<f.length;i++){var k=f[i][1]+'|'+curH();if(!_seen[k]&&document.querySelector(f[i][0])){_seen[k]=1;mlTrack('sms_form_seen',{source:f[i][1]});}}}
