@@ -141,7 +141,8 @@ def main():
     tmap = {"VTI": "MKT", "SPY": "MKT", "VXUS": "INTL", "BND": "B5", "VTV": "LV", "VBR": "SV", "EFV": "INTLV", "VUG": "LG",
             "QQQ": "LG", "VBK": "SG", "BIL": "CASH", "QUAL": "QLTY", "MOAT": "QLTY", "SCHD": "DIV", "VIG": "DIVG", "VYM": "DIV",
             "MTUM": "MOM", "VLUE": "LV", "USMV": "LOVOL", "TLT": "B20", "GLD": "GOLD", "IEF": "B7", "DBC": "CMDTY",
-            "12 to 20 names": "LB", "Stock picks": "MKT", "Themes": "MKT"}
+            "12 to 20 names": "LB", "Stock picks": "MKT", "Themes": "MKT",
+            "AIQ": "LG", "BOTZ": "LG", "ICLN": "SG"}  # theme funds are too young for long history; style proxies
     for t in ["NKE", "CVX", "IBM", "MCD", "HD", "PG", "MRK", "UNH", "KO", "AMGN"]:
         tmap[t] = "DIV"
     out["map"] = tmap

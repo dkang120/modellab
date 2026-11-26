@@ -71,7 +71,7 @@ MONEY RULES (hard rules, never break)
 
 LINKS (rare, one max)
 - models library: modellab.hidanielkang.com/library/
-- one model: modellab.hidanielkang.com/models/<id>/ (ids: index, value, growth, garp, quality, dividend, dogs, contrarian, momentum, factor, core-satellite, permanent, all-weather)
+- one model: modellab.hidanielkang.com/models/<id>/ (ids: index, value, growth, garp, quality, dividend, dogs, contrarian, momentum, factor, thematic, core-satellite, permanent, all-weather)
 - style quiz: modellab.hidanielkang.com/tools/match/
 - pain sim: modellab.hidanielkang.com/tools/pain/
 - next steps: modellab.hidanielkang.com/now/

@@ -127,6 +127,17 @@ var MODELS=[
  best:'Mixed markets where leadership rotates',worst:'Narrow, cap-weighted rallies',
  origin:'Fama and French introduced the three-factor model in 1992 and 1993.',
  suits:'Someone who wants more than a plain index but less than full stock picking.'},
+{id:'thematic',name:'Thematic',cat:'Thematic',tag:'Bet on big trends like AI and clean energy through rules-based theme funds.',
+ risk:4,effort:2,growth:4,turnover:'Low (the funds rebalance themselves)',horizon:'7+ years',
+ belief:'A few long-running shifts, like artificial intelligence and the move to clean energy, could reshape whole industries. Owning the companies tied to those trends could beat the market if the trend plays out.',
+ steps:['Pick the trends you think will matter for a decade or more.','Use index funds whose published rules pick the companies, so nobody hand-picks stocks.','Keep a broad market fund as the anchor and cap the themes at a set share.','Rebalance once a year so one hot theme does not take over.'],
+ hold:[['VTI','US total stock market',40,'Core anchor'],['AIQ','AI and big data',25,'AI theme'],['BOTZ','Robotics and AI',10,'Automation theme'],['ICLN','Global clean energy',25,'Clean energy theme']],
+ pros:['Lets you act on a view about the future without picking single stocks','Each theme fund follows a published index rulebook','The broad anchor limits the damage if a theme fades'],
+ cons:['Themes get hyped, and you often buy after prices already ran up','Clean energy funds lost more than half their value after their early-2021 peak','Higher fees than plain index funds, around 0.4% to 0.7% a year for these'],
+ best:'Years when the market rewards the trend you picked',worst:'When a hyped theme cools off or interest rates jump',
+ origin:'Thematic ETFs took off in the 2010s, with issuers like Global X building whole fund lineups around trends. iShares launched its global clean energy fund in 2008.',
+ note:'Chosen by rule, not by hand: each theme fund tracks a published index. AIQ follows the Indxx Artificial Intelligence & Big Data Index (up to 85 companies tied to AI software, services and hardware). BOTZ follows the Indxx Global Robotics & Artificial Intelligence Thematic Index (up to 100 companies, revenue-screened, rebalanced twice a year). ICLN follows the S&P Global Clean Energy Transition Index. The 40/25/10/25 split is this example\'s fixed allocation. Funds checked on issuer sites Nov 25, 2026.',
+ suits:'Someone with a strong view on where the world is heading who wants to act on it without betting the whole portfolio.'},
 {id:'core-satellite',name:'Core-Satellite',cat:'Allocation',tag:'A cheap anchor plus a few controlled bets.',
  risk:3,effort:2,growth:3,turnover:'Low',horizon:'7+ years',
  belief:'A low-cost core captures the market. A small capped satellite sleeve lets you express views without putting the whole portfolio at risk.',
@@ -170,11 +181,12 @@ var META={
  'contrarian':{name:'Contrarian',cat:'Stock selection',c:'lilac'},
  'momentum':{name:'Momentum',cat:'Trend',c:'peach'},
  'factor':{name:'Factor',cat:'Systematic',c:'mint'},
+ 'thematic':{name:'Thematic',cat:'Thematic',c:'mint'},
  'core-satellite':{name:'Core-Satellite',cat:'Structure',c:'yellow'},
  'permanent':{name:'Permanent',cat:'Risk balanced',c:'blue'},
  'all-weather':{name:'All-Weather',cat:'Risk balanced',c:'lilac'}
 };
-var TAGS={"index": "Own the whole market and keep costs near zero.", "value": "Buy solid businesses priced below what they are worth.", "growth": "Back companies growing faster than the market.", "garp": "Growth at a reasonable price.", "quality": "Own durable, profitable, low-debt businesses.", "dogs": "Buy the ten highest-yielding Dow stocks and reset once a year.", "dividend": "Build income from steady dividend payers.", "contrarian": "Buy what the crowd is selling.", "momentum": "Ride what is already working.", "factor": "Blend proven return drivers in one portfolio.", "core-satellite": "A steady core with a few active bets.", "permanent": "Four assets for four economic seasons.", "all-weather": "Balance risk across growth, inflation, and downturns."};
+var TAGS={"index": "Own the whole market and keep costs near zero.", "value": "Buy solid businesses priced below what they are worth.", "growth": "Back companies growing faster than the market.", "garp": "Growth at a reasonable price.", "quality": "Own durable, profitable, low-debt businesses.", "dogs": "Buy the ten highest-yielding Dow stocks and reset once a year.", "dividend": "Build income from steady dividend payers.", "contrarian": "Buy what the crowd is selling.", "momentum": "Ride what is already working.", "factor": "Blend proven return drivers in one portfolio.", "thematic": "Bet on big trends like AI and clean energy, by rule.", "core-satellite": "A steady core with a few active bets.", "permanent": "Four assets for four economic seasons.", "all-weather": "Balance risk across growth, inflation, and downturns."};
 MODELS.forEach(function(m){var o=META[m.id];if(o){m.name=o.name;m.cat=o.cat;m.color=o.c;if(TAGS[m.id])m.tag=TAGS[m.id];}else{m.color='blue';}});
 var CATS=[];MODELS.forEach(function(m){if(CATS.indexOf(m.cat)<0)CATS.push(m.cat);});
 var byId={};MODELS.forEach(function(m){byId[m.id]=m;});
@@ -273,7 +285,7 @@ function mdl(m,link){
 }
 function card(m){return mdl(m,true);}
 /* ---------- social pieces: avatars ---------- */
-var LABDROP=[{n:1,id:'dogs',when:'this week'}];
+var LABDROP=[{n:2,id:'thematic',when:'this week'}];
 function initials(m){var w=m.name.replace(/[^A-Za-z ]/g,' ').trim().split(/\s+/);return (w.length>1&&w[1].length>2?w[0][0]+w[1][0]:w[0].slice(0,2)).toLowerCase();}
 function av(m,size,ring){return '<span class="av '+(size||'')+(ring?' ring':'')+'"><span>'+esc(initials(m))+'</span></span>';}
 function handle(m){return '@'+m.id.replace(/-/g,'');}

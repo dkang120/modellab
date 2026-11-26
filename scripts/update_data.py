@@ -5,7 +5,7 @@ Output schema matches data.json used by index.html."""
 import csv, io, json, sys, urllib.request, datetime as dt
 
 T = ["VTI","VXUS","BND","VTV","VBR","EFV","VUG","QQQ","VBK","SPY","BIL","QUAL","MOAT",
-     "SCHD","VIG","VYM","MTUM","VLUE","USMV","TLT","GLD","IEF","DBC",
+     "SCHD","VIG","VYM","MTUM","VLUE","USMV","TLT","GLD","IEF","DBC","AIQ","BOTZ","ICLN",
      "AMGN","NKE","CVX","IBM","MCD","HD","PG","MRK","UNH","KO"]
 
 UA = {"User-Agent": "Mozilla/5.0 (ModelLab price refresh; +https://modellab.hidanielkang.com/)"}
