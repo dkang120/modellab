@@ -89,3 +89,12 @@ Voice: headlines, buttons and bubbles are lowercase in the reference; footer and
 7. Footer wordmark is longer ("modellab" vs "inyo"), so the footer logo is wider than 96px at the same height.
 8. Footer rounding (30px) applies on inner pages only, as in the reference.
 9. The reference's lowercase CSS is applied to headings, buttons, chips and bubbles only; financial disclaimers, tickers and data stay as written.
+
+## Deviations added 2026-11-27 (audit pass)
+No equivalent exists in the reference, so these are derived from existing tokens:
+- **Lab-notebook grid paper** (`.nb`): 22px grid in `line` #e9e9eb on white, r28 like inner-page cards. Used on the Lab Drop sample, text buddy info, scenario mode.
+- **Model glyph icon set** (`GLYPH`, 24px, 1.6px round stroke): one metaphor per model. In Library cards, Compare headers, scenario cards.
+- **Tube meters** for risk/effort on Library cards (JetBrains Mono 9px label, 38×7 capsule).
+- **Compare**: 3 models max (was 4), sticky header, rows tinted `#faf8ff` where models differ, stacked grid under 760px (no sideways scroll).
+- **Contrast**: `muted2` text uses moved to `#75757a` (AA on white); Instagram-style tab label `#8e8e93` → `#6e6e73`.
+- **Email popup**: no timer. Shows after value (halfway down a page, quiz result, Now what? plan, 20s on a model page) or desktop exit intent; never to text buddy subscribers.

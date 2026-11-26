@@ -201,6 +201,7 @@ var QZ=[
  {k:'dd2',q:'Think of the worst year of your life with money. How long could you wait for a portfolio to recover?',a:[['Under a year',12],['Up to 3 years',36],['Up to 5 years',60],['As long as it takes',999]]}
 ];
 var STOCKY={dogs:1,garp:1,'core-satellite':1};
+var QZ_WHY={tol:'how you react to a drop matters more than how you think you\u2019d react. it sets how deep a fall your model can have',yrs:'money you need soon can\u2019t wait out a crash, so short timelines rule out the bumpier models',eff:'some models need regular check-ins. if you won\u2019t do them, the model won\u2019t work',gro:'more growth usually means bigger drops. this sets the balance',stk:'a few models hold individual companies. some people want funds only',dd2:'every model falls sometimes. this checks how long you could wait for it to come back'};
 var Q={i:0,a:[],done:false,saved:0};
 /* quiz progress survives a reload */
 try{var _qp=JSON.parse(localStorage.getItem('ml_quizprog')||'null');if(_qp&&Array.isArray(_qp.a)&&_qp.i>=0&&_qp.i<QZ.length){Q.i=_qp.i;Q.a=_qp.a.slice(0,QZ.length);Q.done=!!_qp.done&&Q.a.length===QZ.length;}}catch(e){}
@@ -224,12 +225,18 @@ function matchRank(){
     return {m:m,sc:sc,why:why,flag:flag,ms:ms};
   }).sort(function(a,b){return a.sc-b.sc;});
 }
+function matchWhy(x){var A=Q.a,m=x.m,r=[];var T=A[0],E=A[2],G=A[3];
+  if(x.ms&&-x.ms.mdd<=T+0.005)r.push('its worst fall stayed inside the '+pctAbs(T)+' you said you could sit through');
+  if(m.effort<=E)r.push(m.effort<=1?'it needs almost no upkeep, which fits the time you said you\u2019d spend':'its upkeep fits the time you said you\u2019d spend');
+  if(Math.abs(m.growth-G)<=1)r.push('its growth level matches what you want');
+  return r.length?r.join(', '):'it was the closest overall fit to your answers';}
 function viewMatch(){
   if(hState!=='ready')return loadingView('Match Quiz.','Find the models that fit how you would actually behave.');
   if(Q.done){
     var r=matchRank(),top=r.slice(0,3),avoid=r.slice().reverse().filter(function(x){return x.flag.length;}).slice(0,2),bg=['mint','yellow','peach'];
     return head('Your matches.','Based on your answers and how each model behaved in real history.')+
-    '<div class="stack"><div class="tl-res">'+top.map(function(x,i){return '<a class="tl-hit" style="background:var(--'+bg[i]+')" href="#m-'+x.m.id+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(x.m.name)+'</b><span class="w">'+esc(x.m.tag)+'</span><span class="w">'+esc(x.why[0]||'')+'</span>'+(x.flag.length?'<span class="w">Watch out: '+esc(x.flag.join('; '))+'</span>':'')+'</div><span class="v">View →</span></a>';}).join('')+'</div>'+
+    '<div class="stack"><div class="tl-res">'+top.map(function(x,i){return '<a class="tl-hit" style="background:var(--'+bg[i]+')" href="#m-'+x.m.id+'"><span class="n">'+(i+1)+'</span><div><b>'+esc(x.m.name)+'</b><span class="w">'+esc(x.m.tag)+'</span><span class="w"><em>why it matched:</em> '+esc(matchWhy(x))+'</span><span class="w"><em>where it struggles:</em> '+esc(x.m.worst)+'. '+esc(x.m.cons[0])+'</span><span class="w">'+esc(x.why[0]||'')+'</span>'+(x.flag.length?'<span class="w">Watch out: '+esc(x.flag.join('; '))+'</span>':'')+'</div><span class="v">View →</span></a>';}).join('')+'</div>'+
+    '<div class="panel sh nb"><h2 style="font-size:22px">Explore next</h2><p class="b" style="margin-top:8px">Line your top 3 up side by side: philosophy, risk, what you must tolerate, trade-offs.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn pri sm" data-t-cmp3="'+top.map(function(x){return x.m.id;}).join(',')+'">Compare my top 3</button></div></div>'+
     (avoid.length?'<div class="panel sh"><h2 style="font-size:22px">Likely poor fits</h2><p class="note" style="margin-top:6px">These clashed most with your answers.</p><div class="tl-bars" style="margin-top:8px">'+avoid.map(function(x){return '<p style="margin:10px 0"><b>'+esc(x.m.name)+'</b> <span style="color:var(--muted)">— '+esc(x.flag.join('; '))+'</span></p>';}).join('')+'</div></div>':'')+
     '<div class="panel sh"><h2 style="font-size:22px">Share your match</h2><p class="b" style="margin-top:8px">Send friends the card and see what they get.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn light sm" data-t-share="match">Share my match</button><button class="btn light sm" data-t-link="match">Copy quiz link</button></div>'+(emailSaved()?'<p class="note">Your top match is saved to your email profile so the weekly emails fit you. Educational only.</p>':'')+'</div>'+
     '<a class="buddy-cta" href="#text"><span class="im in">want me to text you when '+esc(top[0].m.name.toLowerCase())+' gets rocky? \uD83D\uDCF1</span><span class="im out pu">yes pls</span></a>'+'<div class="panel" style="background:var(--lilac)"><h2 style="font-size:22px">Next: feel the risk</h2><p class="b" style="margin-top:8px">See how your top match behaves when you invest at a bad time.</p><div class="btns" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn pri sm" href="#pain/'+top[0].m.id+'">Run the Pain Simulator</a><a class="btn light sm" href="#implement/'+top[0].m.id+'">Build my plan</a><button class="btn light sm" data-t-qreset="1">Retake quiz</button></div></div>'+
@@ -238,7 +245,7 @@ function viewMatch(){
   var q=QZ[Q.i];
   return head('Match Quiz.','Six questions about how you would actually behave.')+
    '<div class="stack"><div class="panel sh tl-q story-q"><div class="sq-bars" role="progressbar" aria-valuemin="0" aria-valuemax="'+QZ.length+'" aria-valuenow="'+Q.i+'">'+QZ.map(function(x,j){return '<i class="'+(j<Q.i?'done':(j===Q.i?'cur':''))+'"></i>';}).join('')+'</div>'+
-   '<div class="sq-who"><span class="av sm">'+ML.LOGO+'</span><b>@modellab</b><span>· quiz · '+(Q.i+1)+'/'+QZ.length+'</span></div><div class="im in sq-q">'+esc(q.q)+'</div><p class="sq-hint">tap your answer</p><div class="tl-opts">'+
+   '<div class="sq-who"><span class="av sm">'+ML.LOGO+'</span><b>@modellab</b><span>· question '+(Q.i+1)+' of '+QZ.length+'</span></div><div class="im in sq-q">'+esc(q.q)+'</div><details class="sq-why"><summary>why we ask</summary><p>'+esc(QZ_WHY[q.k]||'')+'</p></details><p class="sq-hint">tap your answer</p><div class="tl-opts">'+
    q.a.map(function(a,j){return '<button class="tl-opt" data-t-q="'+j+'">'+esc(a[0])+(a[2]?'<small>'+esc(a[2])+'</small>':'')+'</button>';}).join('')+'</div>'+
    (Q.i>0?'<p style="margin-top:18px"><button class="chip" data-t-qback="1">← Back</button></p>':'')+'</div></div></div>';
 }
@@ -691,6 +698,7 @@ document.addEventListener('click',function(e){
   var lkb=cap(e,'[data-t-link]');if(lkb){copyTxt(lkb.getAttribute('data-t-link')==='pain'?painLink():new URL('tools/match/',document.baseURI).href,lkb);return;}
   var el;
   if((el=cap(e,'[data-t-q]'))){var j=Number(el.getAttribute('data-t-q'));if(Q.i===0&&window.mlTrack)mlTrack('quiz_started');Q.a[Q.i]=QZ[Q.i].a[j][1];if(Q.i<QZ.length-1)Q.i++;else Q.done=true;qzKeep();if(Q.done){markProg('match');if(window.mlEpAfter)mlEpAfter('quiz');if(window.mlTrack)mlTrack('quiz_completed',{top_match:matchRank()[0].m.id});}ML.rerender();if(Q.done)qzSave();return;}
+  var c3=cap(e,'[data-t-cmp3]');if(c3){ML.setCmp(c3.getAttribute('data-t-cmp3').split(','));ML.go('#compare');return;}
   if(cap(e,'[data-t-qback]')){Q.i=Math.max(0,Q.i-1);Q.a.length=Q.i;qzKeep();ML.rerender();return;}
   if(cap(e,'[data-t-qreset]')){Q={i:0,a:[],done:false,saved:0};qzKeep();ML.rerender();window.scrollTo({top:0,behavior:'instant'});return;}
   if((el=cap(e,'[data-t-psc]'))){if(el.disabled)return;P.sc=el.getAttribute('data-t-psc');painReset();ML.rerender();return;}

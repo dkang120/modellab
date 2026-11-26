@@ -191,7 +191,7 @@ MODELS.forEach(function(m){var o=META[m.id];if(o){m.name=o.name;m.cat=o.cat;m.co
 var CATS=[];MODELS.forEach(function(m){if(CATS.indexOf(m.cat)<0)CATS.push(m.cat);});
 var byId={};MODELS.forEach(function(m){byId[m.id]=m;});
 var HC=['#7c4def','#d9cbfb','#a3a3a8','#6a35e0','#707070','#dedee2','#38383b'];
-var MAXCMP=4;
+var MAXCMP=3;
 function loadCmp(){var d=['index','value','momentum','all-weather'];try{var v=JSON.parse(localStorage.getItem('ml_cmp')||'null');if(Array.isArray(v)){v=v.filter(function(id,i){return byId[id]&&v.indexOf(id)===i;}).slice(0,MAXCMP);return v;}}catch(e){}return d;}
 function cmpSaved(){try{return localStorage.getItem('ml_cmp')!==null;}catch(e){return true;}}
 function saveCmp(){try{localStorage.setItem('ml_cmp',JSON.stringify(state.compare));}catch(e){}}
@@ -284,6 +284,11 @@ function mdl(m,link){
   return link?'<a class="mdl" href="#m-'+m.id+'">'+inner+'</a>':'<div class="mdl">'+inner+'</div>';
 }
 function card(m){return mdl(m,true);}
+/* lab-notebook icon set: one hand-drawn metaphor per model (2026-11-27) */
+var GLYPH={index:'M3 18h18M5 18V8M9 18V8M13 18V8M17 18V8',value:'M3 9h18M3 16c3-5 5 2 8-1s6-4 10 0',growth:'M3 19c7 0 11-4 17-14M15 5h5v5',garp:'M12 4v15M7 19h10M5 8h14M5 8l-2 5h4zM19 8l-2 5h4z',quality:'M4 20h16M12 4l8 5H4zM7 9v11M12 9v11M17 9v11',dividend:'M12 3c3 4 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5 5-9zM4 21h16',dogs:'M5 20V7M10 20v-8M15 20v-5M20 20v-2M5 3.5v.5',contrarian:'M3 6c4 0 6 12 9 12s5-12 9-12',momentum:'M3 17l6-6 4 4 8-8M15 7h6v6',factor:'M12 3l9 16H3zM12 10l4 7H8z',thematic:'M12 5v7M12 12l-6 6M12 12l6 6M12 3.5a1.5 1.5 0 1 0 0 3M5 19.5a1.5 1.5 0 1 0 2-2M19 19.5a1.5 1.5 0 1 1-2-2',
+ 'core-satellite':'M12 8a4 4 0 1 1 0 8a4 4 0 1 1 0-8M4 5h.5M20 5h.5M4 19h.5M20 19h.5',permanent:'M4 4h16v16H4zM12 4v16M4 12h16','all-weather':'M3 12a9 9 0 0 1 18 0zM12 12v6a2 2 0 0 1-4 0'};
+function glyph(m,cls){var d=GLYPH[m.id]||'M4 12h16';return '<svg class="gly'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';}
+function tube(lbl,v){return '<span class="tube" role="img" aria-label="'+lbl+' '+v+' of 5"><em>'+lbl.charAt(0)+'</em><span class="tube-g"><i style="width:'+(v*20)+'%"></i></span></span>';}
 /* ---------- social pieces: avatars ---------- */
 var LABDROP=[{n:2,id:'thematic',when:'this week'}];
 function initials(m){var w=m.name.replace(/[^A-Za-z ]/g,' ').trim().split(/\s+/);return (w.length>1&&w[1].length>2?w[0][0]+w[1][0]:w[0].slice(0,2)).toLowerCase();}
@@ -294,7 +299,7 @@ function isNew(id){return LABDROP.some(function(d){return d.id===id;});}
 function footer(home){
   var L=[['library','Library'],['match','Quiz'],['now','Now what?'],['compare','Compare'],['tools','More tools'],['about','How it works']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
   return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
-   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a> · <a href="#data">Your data</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
+   '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab · made by <a href="https://hidanielkang.com" target="_blank" rel="noopener">Daniel Kang</a></p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a> · <a href="#data">Your data</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
 }
 function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Primary">'+[['text','Text buddy <i>new</i>'],['library','Library'],['match','Quiz'],['now','Now what?']].map(function(a){return '<a href="#'+a[0]+'" data-nav="'+a[0]+'"'+(a[0]==='text'?' class="nav-hl"':'')+'>'+a[1]+'</a>';}).join('')+'</nav></div>';}
@@ -353,6 +358,13 @@ function buddySection(){
    (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">'+(promoOn()?'free \u00b7 unlimited replies through dec 1, then 4 free replies a month \u00b7 reply STOP anytime':'free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime')+'</p>')+'</div>'+
    '<div class="hb-ex">'+exHtml(th)+'</div></section>';
 }
+function labDropSample(){
+  var ld=LABDROP[LABDROP.length-1],m=byId[ld.id];if(!m)return '';
+  var bel=m.belief.split('. ')[0].replace(/\.$/,'').toLowerCase();
+  var t=[['in','lab drop #'+ld.n+' just landed \uD83E\uDDEA '+m.name.toLowerCase()],['in','the bet: '+bel],['in','the catch: '+m.cons[0].replace(/\.$/,'').toLowerCase()],['in','it\u2019s built from '+m.hold.length+' funds. full breakdown on the site'],['out','ok that\u2019s actually interesting']];
+  return '<section class="ld nb" aria-label="Sample Lab Drop"><div class="ld-copy"><p class="eyebrow">this week\u2019s lab drop</p><h2 class="h2"><em>one new model,</em>explained in one text</h2><p class="sub">every week a new investing style lands in the library, and your buddy breaks it down. here\u2019s the real one from this week</p><a class="btn light sm" href="#m-'+m.id+'">see '+esc(m.name.toLowerCase())+' \u2192</a><span class="ld-note" aria-hidden="true">real drop, not a mockup \u2197</span></div>'+
+   '<div class="ld-phone">'+glyph(m,'ld-gly')+t.map(function(x){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'">'+esc(x[1])+'</div>';}).join('')+'</div></section>';
+}
 function viewHome(){
   var doors=[
    ['lilac','the library','every investing style as a real portfolio, ranked from chill to full send','#library','browse the library →'],
@@ -362,16 +374,16 @@ function viewHome(){
     ['what does the text buddy actually send?','2–4 texts a month: a lab drop every 2 weeks, or weekly if you pick “keep me locked in” (one new model, explained in one text; the email version comes weekly), a calm check-in when the market drops, and real replies when you text back. reply STOP anytime'],
     ['is it free?',(promoOn()?'yep, and this week replies are unlimited too, through dec 1. after that the texts stay free with 4 replies a month, or pro is $4.99/mo for up to 100. cancel anytime. msg & data rates may apply':'the texts are free, plus 4 replies a month when you text me. want more? pro is $4.99/mo for up to 100 replies, cancel anytime. msg & data rates may apply')]]
     .map(function(q){return '<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
-  return heroHtml()+'<div class="wrap">'+buddySection()+
+  return heroHtml()+'<div class="wrap">'+labDropSample()+buddySection()+
    '<section class="s doors"><h2 class="h2">start anywhere</h2><p class="sub center">three ways in. each one ends with a buddy who keeps you on track</p><div class="grid3" style="margin-top:36px">'+
     doors.map(function(d){return '<a class="mcard" style="background:var(--'+d[0]+')" href="'+d[3]+'"><h3>'+d[1]+'</h3><p>'+d[2]+'</p><span class="go">'+d[4]+'</span></a>';}).join('')+'</div></section>'+
    '<section class="s"><h2 class="h2">questions people ask</h2><div class="faq">'+faq+'</div></section></div>'+
-   '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('your money,','with a buddy').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#text">get my text buddy →</a><p class="mm-trust">free · educational only · reply STOP anytime</p></div></div></section>';
+   '<section class="ctaband"><div class="mm-footer"><div class="mm-headline">'+hl('your money,','with a buddy').replace('<h2 class="h2">','<h2 class="h2" style="text-align:center">')+'</div><div class="mm-actions"><a class="btn pri" href="#text">get my text buddy →</a><p class="mm-trust">free · educational only · reply STOP anytime</p><p class="mm-trust built">built by <a href="https://hidanielkang.com" target="_blank" rel="noopener">daniel kang</a>, a business marketing student · <a href="#about">how modellab works</a></p></div></div></section>';
 }
 
 var TIERS={risk:['risk',['chill','steady','mid','spicy','full send']],effort:['effort',['set & forget','low-key','some homework','side quest','main character']],growth:['growth',['protect the bag','slow & steady','balanced','growth era','big swings']]};
 function viewLibrary(){
-  var list=MODELS.filter(function(m){return state.cat==='All'||m.cat===state.cat;});
+  var qq=(state.q||'').trim().toLowerCase();var list=MODELS.filter(function(m){return (state.cat==='All'||m.cat===state.cat)&&(!qq||(m.name+' '+m.tag+' '+m.cat+' '+m.belief+' '+(m.hold||[]).map(function(h){return h[0]+' '+h[1];}).join(' ')).toLowerCase().indexOf(qq)>-1);});
   var T=TIERS[state.tier]||TIERS.risk,key=state.tier;
   var chips=['All'].concat(CATS).map(function(c){return '<button class="chip" data-chip="'+esc(c)+'" aria-pressed="'+(state.cat===c)+'">'+esc(c)+'</button>';}).join('');
   var seg=Object.keys(TIERS).map(function(k){return '<button class="seg-b" data-tier="'+k+'" aria-pressed="'+(state.tier===k)+'">'+k+'</button>';}).join('');
@@ -380,11 +392,12 @@ function viewLibrary(){
     return '<div class="tier t'+lv+(ms.length?'':' is-empty')+'"><div class="tier-l"><b>'+T[1][lv-1]+'</b><small>'+T[0]+' '+lv+'/5</small></div><div class="tier-r">'+(ms.length?ms.map(tCard).join(''):'<span class="tier-empty">none yet</span>')+'</div></div>';}).join('');
   return '<div class="wrap"><div class="phead"><h1 class="display">The library.</h1><p class="sub">every investing model, ranked in a tier list. tap one to see what it owns</p>'+
    '<a class="lib-new" data-drop="'+ld.n+'" href="#m-'+ld.id+'">'+av(lm,'sm',true)+'<span><b>new drop</b> · '+esc(lm.name)+' · Lab Drop #'+ld.n+'</span><i>→</i></a></div>'+
-   '<div class="tl-ctrl"><div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
+   '<nav class="learn" aria-label="Learn by"><span>learn by</span><a href="#now">foundations<small>what to do first</small></a><button data-jump=".tierlist">strategies<small>every model below</small></button><a href="#pain">behavior<small>feel a real crash</small></a><a href="#now/drop">market scenarios<small>when it drops</small></a><a href="#compare">comparisons<small>side by side</small></a></nav>'+
+   '<div class="tl-ctrl"><label class="lsearch"><span class="sr">Search models</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="lib-q" type="search" placeholder="search models, funds or ideas" value="'+esc(state.q||'')+'" autocomplete="off"></label>'+(qq?'<p class="lsearch-n">'+list.length+' match'+(list.length===1?'':'es')+'</p>':'')+'<div class="seg" role="group" aria-label="Tier by"><span>tier by</span>'+seg+'</div><div class="chips" role="group" aria-label="Filter by family">'+chips+'</div></div>'+
    (buddyIn()?'':'<a class="lib-sms" href="#text">\uD83D\uDCF1 get every new drop by text \u2192</a>')+'<div class="tierlist">'+rows+'</div><p class="note tier-note">Rows are our 1–5 '+T[0]+' ratings, not a ranking of which model is better. Ratings are editorial.</p></div>';
 }
 function tCard(m){
-  return '<a class="tcard'+(isNew(m.id)?' is-new':'')+'" href="#m-'+m.id+'"><span class="tc-cat">'+esc(m.cat.toLowerCase())+'</span>'+(isNew(m.id)?'<span class="tc-new">new</span>':'')+'<span class="tc-nm">'+esc(m.name)+'</span><span class="tc-tag">'+esc(m.tag)+'</span></a>';
+  return '<a class="tcard'+(isNew(m.id)?' is-new':'')+'" href="#m-'+m.id+'"><span class="tc-top"><span class="tc-cat">'+esc(m.cat.toLowerCase())+'</span>'+glyph(m,'tc-gly')+'</span>'+(isNew(m.id)?'<span class="tc-new">new</span>':'')+'<span class="tc-nm">'+esc(m.name)+'</span><span class="tc-tag">'+esc(m.tag)+'</span><span class="tc-m">'+tube('risk',m.risk)+tube('effort',m.effort)+'</span><span class="tc-off"><b>trade-off</b> '+esc(m.cons[0])+'</span></a>';
 }
 
 function donut(m){
@@ -445,23 +458,33 @@ function rankHtml(){
 }
 function slider(k,label,val){return '<div class="sl"><label for="s-'+k+'">'+label+'<span id="v-'+k+'">'+val+'/5</span></label><input type="range" id="s-'+k+'" data-fit="'+k+'" min="1" max="5" step="1" value="'+val+'" style="--p:'+((val-1)*25)+'%"></div>';}
 function viewCompare(){
-  if(!unlocked())return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div><div class="cgate">'+gatePanel('follow to unlock Compare','Free with your email. You also get live prices on every model and the weekly Lab Drop.','compare')+'</div></div>';
+  if(!unlocked())return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up two or three philosophies side by side.</p></div><div class="cgate">'+gatePanel('follow to unlock Compare','Free with your email. You also get live prices on every model and the weekly Lab Drop.','compare')+'</div></div>';
   var sel=state.compare.map(function(id){return byId[id];}).filter(Boolean);
   var chips=sel.map(function(m){return '<button class="cp" data-cmp="'+m.id+'" aria-label="Remove '+esc(m.name)+'">'+esc(m.name)+' <i>✕</i></button>';}).join('');
   var rest=MODELS.filter(function(m){return state.compare.indexOf(m.id)<0;});
   var menu=(state.menu&&rest.length&&sel.length<MAXCMP)?'<div class="menu" role="menu">'+rest.map(function(m){return '<button role="menuitem" data-cmp="'+m.id+'">'+esc(m.name)+'</button>';}).join('')+'</div>':'';
   var addBtn=sel.length<MAXCMP?'<button class="addm" data-menu="1" aria-expanded="'+(!!state.menu)+'">+ Add model</button>':'';
-  var rows=[['Category',function(m){return esc(m.cat);}],['Horizon',function(m){return esc(m.horizon);}],['Risk',function(m){return dots(m.risk,'p');}],['Effort',function(m){return dots(m.effort,'p');}],['Growth',function(m){return dots(m.growth,'p');}],
-   ['Price change · 1D',function(m){var s=modelStats(m);return s?'<span class="v">'+chg(s.d1)+'</span>':'n/a';}],['Price change · YTD',function(m){var s=modelStats(m);return s?'<span class="v">'+chg(s.ytd,1)+'</span>':'n/a';}],['Best when',function(m){return esc(m.best);}]];
+  function more(t,full){return '<details class="cx"><summary>'+esc(t)+'</summary><p>'+esc(full)+'</p></details>';}
+  /* [label, render, compare-key] — rows whose key matches across every model are dimmed so the differences stand out */
+  var rows=[['Philosophy',function(m){return more(m.tag,m.belief);},function(m){return m.id;}],
+   ['Selection',function(m){return more(m.steps[0],m.steps.join(' '));},function(m){return m.id;}],
+   ['Diversification',function(m){return m.hold.length+' holdings<small>'+esc(m.hold.map(function(h){return h[0];}).join(' · '))+'</small>';},function(m){return m.hold.length;}],
+   ['Risk',function(m){return dots(m.risk,'p');},function(m){return m.risk;}],
+   ['What you must tolerate',function(m){return esc(m.cons[0]);},function(m){return m.id;}],
+   ['Time horizon',function(m){return esc(m.horizon);},function(m){return m.horizon;}],
+   ['Trade-off',function(m){return esc(m.cons[1]||m.cons[0]);},function(m){return m.id;}],
+   ['Complexity',function(m){return dots(m.effort,'p')+'<small>'+['','set and forget','light upkeep','some upkeep','regular work','hands-on'][m.effort]+'</small>';},function(m){return m.effort;}],
+   ['Struggles when',function(m){return esc(m.worst);},function(m){return m.id;}],
+   ['Price change · YTD',function(m){var s=modelStats(m);return s?'<span class="v">'+chg(s.ytd,1)+'</span>':'n/a';},null]];
   var table=sel.length<2?'<div class="panel">Choose at least two models to compare.</div>':
-   '<div class="ct"><table><thead><tr><th></th>'+sel.map(function(m){return '<th><a href="#m-'+m.id+'">'+esc(m.name)+'</a></th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td>'+sel.map(function(m){return '<td>'+r[1](m)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>'+
-   '<p class="note">Price changes are fixed-weight price returns'+(DATA?' as of the '+asOfTxt()+' close':'')+'. Ratings are editorial.</p>';
+   '<div class="ct ct'+sel.length+'"><table><thead><tr><th>compare</th>'+sel.map(function(m){return '<th><a href="#m-'+m.id+'">'+glyph(m)+esc(m.name)+'</a></th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){var same=r[2]&&sel.every(function(m){return String(r[2](m))===String(r[2](sel[0]));});return '<tr class="'+(same?'same':'diff')+'"><td>'+r[0]+(same?'<small>same</small>':'')+'</td>'+sel.map(function(m){return '<td>'+r[1](m)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>'+
+   '<p class="note">Highlighted rows are where these models differ. No model is ranked above another. Price changes are fixed-weight price returns'+(DATA?' as of the '+asOfTxt()+' close':'')+'. Ratings are editorial.</p>';
   var f=state.fit;
-  return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up to four philosophies side by side.</p></div>'+
+  return '<div class="wrap"><div class="phead"><h1 class="display">Compare models.</h1><p class="sub">Line up two or three philosophies side by side.</p></div>'+
    (sel.length>=2?'<div class="vs">'+sel.map(function(m,i){return (i?'<span class="vs-x">vs</span>':'')+'<a class="vs-m" href="#m-'+m.id+'">'+av(m,'lg',true)+'<b>'+esc(handle(m))+'</b><small>risk '+m.risk+'/5 · effort '+m.effort+'/5</small></a>';}).join('')+'</div>':'')+
    '<div class="sel"><span>Comparing</span>'+chips+addBtn+menu+'</div>'+table+pollHtml(sel)+
    '<div class="fit" style="margin:28px 0 100px"><div><h2>Find your fit</h2><p>Tell us how you invest and we will rank the library.</p>'+slider('risk','Risk tolerance',f.risk)+slider('effort','Effort you will spend',f.effort)+slider('growth','Growth you want',f.growth)+'</div>'+
-   '<div class="bm"><small>BEST MATCHES</small><div id="rank">'+rankHtml()+'</div></div></div>'+(buddyIn()?'':'<a class="buddy-cta" href="#text" style="margin-top:24px"><span class="im in">picked one? i\u2019ll text you when it gets rocky so you don\u2019t panic sell \uD83D\uDCF1</span><span class="im out pu">yes pls</span></a>')+'</div>';
+   '<div class="bm"><small>CLOSEST TO YOUR SLIDERS</small><div id="rank">'+rankHtml()+'</div></div></div>'+(buddyIn()?'':'<a class="buddy-cta" href="#text" style="margin-top:24px"><span class="im in">picked one? i\u2019ll text you when it gets rocky so you don\u2019t panic sell \uD83D\uDCF1</span><span class="im out pu">yes pls</span></a>')+'</div>';
 }
 
 function pollHtml(sel){
@@ -506,6 +529,12 @@ function viewBuddy(){
   b.seenN=msgs.length;
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+bub+'</div>'+acts+
    (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies through dec 1. after that it’s still free, with 4 replies a month</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div>'+
+   '<section class="bd-know nb"><h2 class="h2"><em>before you sign up</em>what your buddy is</h2><div class="bk-g">'+
+   '<div><h3>it can</h3><ul><li>check in when the market drops</li><li>explain your model in plain english</li><li>nudge your plan on payday, if you ask</li><li>answer your questions, any time</li></ul></div>'+
+   '<div><h3>it can\u2019t</h3><ul><li>tell you to buy or sell anything</li><li>see your bank or brokerage accounts</li><li>trade or move money for you</li><li>replace a licensed advisor</li></ul></div>'+
+   '<div><h3>how it\u2019s personal</h3><ul><li>uses your quiz match, your goal and how often you want texts</li><li>remembers what you text it, so replies fit you</li><li>an AI buddy, built and checked by daniel</li></ul></div>'+
+   '<div><h3>what it keeps</h3><ul><li>your number and the answers above</li><li>your texts, to reply well</li><li>never sold. reply STOP to leave. <a href="#privacy">privacy</a></li></ul></div></div>'+
+   '<div class="bk-try"><p class="eyebrow">text it things like</p><div class="bk-chips"><span class="im out pu">why is the market down?</span><span class="im out pu">explain my model in one text</span><span class="im out pu">should i change my strategy?</span><span class="im out pu">help me review my plan</span></div><p class="note">it won\u2019t pick stocks for you. it helps you think it through</p></div></section>'+
    (b.done?'':'<section class="bx-sec"><h2 class="h2">what it actually texts you</h2><p class="sub center">a buddy that matches your energy, not a newsletter</p>'+exHtml()+'</section>')+'</div>';
 }
 /* show a form error without redrawing: keeps the keyboard up and the chat from replaying */
@@ -580,6 +609,19 @@ function nwSteps(n){
 }
 function nwShort(k,pick){return {park:'park it',ef:'emergency fund',debt:'kill card debt',match:'401(k) match',model:handle(pick.m),rules:'dip rules'}[k];}
 function nwChain(r){return r.s.map(function(x){return nwShort(x[0],r.pick);}).join(' \u2192 ');}
+var SCN=[['10','down 10%','a correction. happens most years'],['20','down 20%','a bear market. every few years'],['35','down 35%','a crash. 2008, 2020-level']];
+var SCN_RULE={index:'keep buying on schedule and rebalance once a year. selling locks in the drop',value:'check if the businesses got worse or just cheaper. cheaper is the point of value',growth:'ask whether growth expectations changed, not just the price',garp:'re-check price vs growth. a drop can move a stock back into the zone',quality:'check the balance sheets still hold. durable businesses are meant to ride this out',dividend:'watch whether payouts are being cut, not the price',dogs:'stick to the yearly reset date. the rule ignores mid-year moves',contrarian:'this is the setup contrarians wait for, if the thesis still holds',momentum:'the rules may rotate you out of what\u2019s falling. follow them, don\u2019t freeze',factor:'factors can lag for years. the rules don\u2019t change because of one drop',thematic:'ask whether the theme is broken or just out of favor',permanent:'one slice falling is the design. rebalance back to 25% each',
+ 'core-satellite':'leave the core alone. only the satellites are up for review','all-weather':'rebalance to the target mix. it\u2019s built so not everything falls at once'};
+function scenHtml(){
+  var sc=state.scen||'20',ids=['index','value','growth','quality'],mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
+  if(mt&&byId[mt]&&ids.indexOf(mt)<0)ids=[mt].concat(ids.slice(0,3));
+  var cur=SCN.filter(function(x){return x[0]===sc;})[0];
+  return '<section class="scn nb" id="drop"><p class="eyebrow">scenario mode</p><h2 class="h2"><em>the market just dropped.</em>now what?</h2><p class="sub">same drop, read through different models. what each one\u2019s own rules say, not what to buy</p>'+
+   '<div class="scn-t" role="group" aria-label="How big is the drop">'+SCN.map(function(x){return '<button class="chip" data-scn="'+x[0]+'" aria-pressed="'+(x[0]===sc)+'">'+x[1]+'</button>';}).join('')+'</div><p class="scn-c">'+esc(cur[2])+'</p>'+
+   '<div class="scn-g">'+ids.map(function(id){var m=byId[id];return '<a class="scn-m" href="#m-'+id+'">'+glyph(m)+'<b>'+esc(m.name)+(id===mt?' <i>your match</i>':'')+'</b><span>'+esc(SCN_RULE[id]||m.steps[m.steps.length-1])+'</span><small>struggles when: '+esc(m.worst.toLowerCase())+'</small></a>';}).join('')+'</div>'+
+   '<div class="scn-q"><p class="eyebrow">ask yourself</p><ol><li>did anything change about why i picked this, or just the price?</li><li>will i need this money before it could recover?</li><li>would i be selling to follow my plan, or to stop the feeling?</li></ol></div>'+
+   '<p class="note">Educational, rule-based descriptions, not advice to buy, sell or hold. See how far each model really fell in the <a class="lk" href="#stress">Stress Test</a>.</p></section>';
+}
 function viewNow(){
   var n=state.nw,ready=nwReady(n),a=nwAmt(n);
   var per='<div class="nw-per">'+NW_P.map(function(p,i){return '<button class="nw-pc'+(n.persona===i?' on':'')+'" data-nwp="'+i+'"><span>'+p[0]+'</span>'+esc(p[1])+'</button>';}).join('')+'</div>';
@@ -607,7 +649,7 @@ function viewNow(){
   }
   return '<div class="wrap nw"><header class="nw-hd"><p class="eyebrow">new \u00b7 your personalized investing tool</p><h1 class="h1">now what?</h1><p class="sub">tell us what you\u2019ve got. get the order of moves most people in your spot consider, plus the model that fits.</p></header>'+
    '<p class="nw-l nw-l0">tap your situation</p>'+per+'<div class="nw-grid"><div class="nw-ask">'+qs+'<a class="nw-own" href="#overlap">\uD83D\uDCCB already own stocks or funds? paste them in the Overlap Checker \u2192</a></div><div class="nw-out" aria-live="polite">'+out+'</div></div>'+
-   '<p class="note nw-disc">General, rule-based steps for education, not personal investment advice. The order follows common guidance (cushion, high-interest debt, employer match, then invest) and the model pick uses only the risk and effort ratings shown on each model. Your situation may differ; consider a licensed professional for advice.</p></div>';
+   scenHtml()+'<p class="note nw-disc">General, rule-based steps for education, not personal investment advice. The order follows common guidance (cushion, high-interest debt, employer match, then invest) and the model pick uses only the risk and effort ratings shown on each model. Your situation may differ; consider a licensed professional for advice.</p></div>';
 }
 function nwSubmit(){
   var n=state.nw,raw=document.getElementById('nw-ph').value,ph=normPhone(raw),ok=document.getElementById('nw-ok').checked;n.ph=raw;n.ok=ok;
@@ -685,7 +727,7 @@ function epClose(reason){
   if(!EP.done){try{localStorage.setItem('ml_ep_snooze',String(Date.now()+EP_SNOOZE_DAYS*864e5));}catch(e){}mlTrack('email_popup_closed',{reason:reason||'x',page:curH()});}
   epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
 }
-/* when it shows: 20s after the visitor opens the site (most visits are short, so scroll alone almost never fired it),
+/* (old note) when it shows: 20s after the visitor opens the site (most visits are short, so scroll alone almost never fired it),
    or earlier if they scroll halfway down a real page or finish something (a quiz result, a "now what?" plan).
    never in the first 8s, never over the text buddy panel or on the text page, once per visit, 14-day snooze after closing */
 var EP_T0=Date.now(),EP_MIN=8000;
@@ -700,7 +742,10 @@ function epAuto(){if(!EP.shown&&/[?&]popup\b/.test(location.search))setTimeout(f
 (function(){var q=false;addEventListener('scroll',function(){if(q||EP.shown)return;q=true;requestAnimationFrame(function(){q=false;
   var de=document.documentElement,h=de.scrollHeight,vh=window.innerHeight;if(h<vh*1.6)return;
   if((window.scrollY+vh)/h>=0.5)epTry('scroll');});},{passive:true});})();
-var EP_DELAY=20000;(function(){var n=0,iv=setInterval(function(){n++;if(EP.shown||n>25){clearInterval(iv);return;}if(Date.now()-EP_T0>=EP_DELAY&&epTry('timer'))clearInterval(iv);},2000);})();
+/* no timer: it only shows after value (halfway down a real page, a quiz result, a "now what?" plan, 20s on a model page) or on desktop exit intent */
+document.addEventListener('mouseout',function(e){if(EP.shown||e.relatedTarget||e.clientY>8)return;if(!matchMedia('(hover:hover) and (pointer:fine)').matches)return;epTry('exit');});
+var EP_MT=null;window.addEventListener('hashchange',function(){clearTimeout(EP_MT);if(/^#m-/.test(curH()))EP_MT=setTimeout(function(){epTry('model_read');},20000);});
+if(/^#m-|\/models\//.test(location.hash+location.pathname))EP_MT=setTimeout(function(){epTry('model_read');},20000);
 function epSubmit(){
   var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){EP.err='that email looks off, try again';epPaint();var i=document.getElementById('ep-em');i&&i.focus();return;}
@@ -833,7 +878,7 @@ function glClose(){if(glPop){glPop.remove();glPop=null;}document.querySelectorAl
 function glOpen(b){glClose();var p=document.createElement('div');p.className='gl-pop';p.setAttribute('role','tooltip');p.innerHTML='<b>'+esc(b.textContent)+'</b> '+esc(b.getAttribute('data-gl'));document.body.appendChild(p);
   var r=b.getBoundingClientRect(),pw=p.offsetWidth,x=Math.max(12,Math.min(window.innerWidth-pw-12,r.left+r.width/2-pw/2)),above=r.top>p.offsetHeight+24;
   p.style.left=(x+window.scrollX)+'px';p.style.top=((above?r.top-p.offsetHeight-8:r.bottom+8)+window.scrollY)+'px';b.setAttribute('aria-expanded','true');glPop=p;}
-var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};ROUTES.now={view:viewNow,nav:'now'};ROUTES.data={view:viewData};
+var ROUTES={};ROUTES.text={view:viewBuddy,nav:'text'};ROUTES['sms-terms']={view:viewSmsTerms};ROUTES.privacy={view:viewPrivacy};ROUTES.now={view:function(arg){if(arg==='drop')setTimeout(function(){var d=document.getElementById('drop');d&&d.scrollIntoView({block:'start'});},60);return viewNow();},nav:'now'};ROUTES.data={view:viewData};
 var view=$('#view'),foot=$('#foot');
 function render(keep){
   var hash=curH().slice(1),html,nav='',home=false;
@@ -874,6 +919,8 @@ document.addEventListener('click',function(e){
   var pl=t.closest('[data-poll]');if(pl){var pp=pl.getAttribute('data-poll').split('|');try{localStorage.setItem(pp[0],pp[1]);}catch(x){}rerender();return;}
   var cb=t.closest('[data-carb]');if(cb){var cr=cb.closest('.post').querySelector('.car');cr.scrollBy({left:Number(cb.getAttribute('data-carb'))*cr.clientWidth,behavior:'smooth'});return;}
   var sn=t.closest('[data-seen]');if(sn){try{var sv=JSON.parse(localStorage.getItem('ml_seen')||'{}');sv[sn.getAttribute('data-seen')]=1;localStorage.setItem('ml_seen',JSON.stringify(sv));}catch(x){}}
+  var sb=t.closest('[data-scn]');if(sb){state.scen=sb.getAttribute('data-scn');rerender();return;}
+  var jb=t.closest('[data-jump]');if(jb){var je=document.querySelector(jb.getAttribute('data-jump'));je&&je.scrollIntoView({behavior:'smooth',block:'start'});return;}
   var chip=t.closest('[data-chip]');if(chip){state.cat=chip.getAttribute('data-chip');rerender();return;}var tr=t.closest('[data-tier]');if(tr){state.tier=tr.getAttribute('data-tier');rerender();return;}var srt=t.closest('[data-sort]');if(srt){state.sort=srt.getAttribute('data-sort');rerender();return;}
   var st=t.closest('[data-step]');if(st){state.step=Number(st.getAttribute('data-step'));rerender();return;}
   var mn=t.closest('[data-menu]');if(mn){state.menu=!state.menu;rerender();return;}
@@ -882,7 +929,7 @@ document.addEventListener('click',function(e){
     var id=cmp.getAttribute('data-cmp'),i=state.compare.indexOf(id);
     if(i>-1)state.compare.splice(i,1);
     else if(!cmpSaved()){state.compare=[id].concat(state.compare.filter(function(x){return x!==id;})).slice(0,MAXCMP);if(curH()!=='#compare')toast(byId[id].name+' added to compare','#compare','compare now');}
-    else if(state.compare.length>=MAXCMP){state.menu=false;toast('compare is full (4 max). remove one to add '+byId[id].name,'#compare','open compare');return;}
+    else if(state.compare.length>=MAXCMP){state.menu=false;toast('compare is full (3 max). remove one to add '+byId[id].name,'#compare','open compare');return;}
     else{state.compare.push(id);if(curH()!=='#compare')toast(byId[id].name+' added to compare ('+state.compare.length+'/'+MAXCMP+')','#compare','compare now');}
     saveCmp();state.menu=false;rerender();return;
   }
@@ -892,6 +939,7 @@ document.addEventListener('scroll',function(e){var c=e.target;if(!c.classList||!
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.hasAttribute&&t.hasAttribute('data-fit')){var k=t.getAttribute('data-fit');state.fit[k]=Number(t.value);t.style.setProperty('--p',((t.value-1)*25)+'%');$('#v-'+k).textContent=t.value+'/5';$('#rank').innerHTML=rankHtml();}
+  if(t.id==='lib-q'){state.q=t.value;clearTimeout(viewLibrary._t);viewLibrary._t=setTimeout(function(){var s0=t.selectionStart;rerender();var li=document.getElementById('lib-q');if(li){li.focus({preventScroll:true});try{li.setSelectionRange(s0,s0);}catch(x){}}},180);}
   if(t.id==='nw-amt'){state.nw.amt=t.value.replace(/[^\d.]/g,'');state.nw.persona=-1;clearTimeout(viewNow._t);viewNow._t=setTimeout(function(){var s0=t.selectionStart;rerender();var ni=document.getElementById('nw-amt');if(ni){ni.focus();try{ni.setSelectionRange(s0,s0);}catch(x){}}},450);}
   if(t.id==='amt'){state.amount=Math.max(0,Number(t.value)||0);var id=curH().slice(3);if(byId[id]){$('#hold').innerHTML=holdRows(byId[id]);var cr=$('#calcres');if(cr)cr.innerHTML=valueInner(byId[id]);}}
 });
@@ -917,7 +965,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&POP.open&&!
 window.addEventListener('hashchange',function(){if(location.hash.length>1){history.replaceState(null,'',BASE+toPath(location.hash));}state.menu=false;render();});
 if('scrollRestoration' in history)history.scrollRestoration='manual';
 window.addEventListener('popstate',function(e){state.menu=false;var y=(e.state&&e.state.y)||0;render(true);jumpTo(y);requestAnimationFrame(function(){if(Math.abs(window.scrollY-y)>2)jumpTo(y);});});
-window.ML={av:av,handle:handle,LOGO:LOGO,MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
+window.ML={setCmp:function(ids){state.compare=ids.filter(function(i){return byId[i];}).slice(0,MAXCMP);saveCmp();},av:av,handle:handle,LOGO:LOGO,MODELS:MODELS,byId:byId,routes:ROUTES,routeFor:routeFor,data:function(){return DATA;},srcTxt:srcTxt,unlocked:unlocked,gatePanel:gatePanel,rerender:rerender,signup:SIGNUP,curH:curH,go:go,esc:esc,money:money,fmt:fmt,chg:chg,sign:sign,$:$};
 render();
 loadLive();
 epAuto();
