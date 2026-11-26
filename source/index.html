@@ -292,7 +292,7 @@ function handle(m){return '@'+m.id.replace(/-/g,'');}
 function isNew(id){return LABDROP.some(function(d){return d.id===id;});}
 
 function footer(home){
-  var L=[['library','Library'],['match','Quiz'],['now','Now what?'],['compare','Compare'],['tools','More tools'],['about','About']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
+  var L=[['library','Library'],['match','Quiz'],['now','Now what?'],['compare','Compare'],['tools','More tools'],['about','How it works']].map(function(a){return '<a href="#'+a[0]+'">'+a[1]+'</a>';}).join('');
   return '<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-top"><nav class="site-footer-links" aria-label="Site">'+L+'</nav></div>'+
    '<div class="site-footer-bottom"><div class="site-footer-legal"><p>© 2026 ModelLab</p><p>Educational only · not investment advice</p><p class="legal-links"><a href="#text">Text buddy</a> · <a href="#sms-terms">SMS Terms</a> · <a href="#privacy">Privacy</a> · <a href="#data">Your data</a></p></div><a class="site-footer-logo" href="#home" aria-label="ModelLab home">'+LOGO+'<span>modellab</span></a></div>'+
    '<p class="site-footer-src">'+esc(srcTxt())+' Example portfolios are hypothetical. Educational only, not investment advice.</p></div></footer>';
@@ -302,8 +302,8 @@ function navrow(){return '<div class="wrap"><nav class="navrow" aria-label="Prim
 /* ---------- landing stage ---------- */
 var HERO={i:0,timer:null,to:null};
 var HERO_C=[['index','−46.5%. worst fall since 1992.','i could hold that.'],['value','−60.7%. 51 months to recover.','i would have sold.'],['all-weather','−20.3%. its worst crash, 2022.','that is it?'],['growth','−50.9%. the dot-com bust.','ouch.']];
-var HERO_DRIFT=[['is-inyo',16,78,-1,.39,2,'−46.5%. index, worst fall.'],['is-reply',252,96,1,.42,-2,'wait, really?'],['is-inyo',20,126,-1,.32,2,'26 months. to get it back.'],['is-reply',250,556,1,.39,-3,'i’d have held'],['is-inyo',16,506,-1,.28,-2,'−14.7%. permanent, 2022.']];
-var HERO_HALO=[['is-reply',392.23,402.81,1.3,.41,2.75,'i can hold that'],['is-reply',926.29,231.59,1.3,.41,-2.99,'i need this'],['is-reply',293.52,573.65,1.2,.33,-1.75,'how long to recover?'],['is-inyo',174.48,454.91,1.2,.33,2.75,'−46.5%. index, worst since 1992.'],['is-reply',232.44,322.85,1.2,.33,-1.81,'i like this'],['is-inyo',164.45,190.4,1.2,.33,-.17,'−60.7%. value, worst since 1992.'],['is-reply',290.53,70.53,1.2,.33,.01,'read that again'],['is-reply',1005.23,64.08,1.2,.33,1.94,'send me the plan'],['is-inyo',978.24,182.82,1.2,.33,-2.3,'−51.9%. dividend, worst since 1992.'],['is-reply',1097.66,314.88,1.2,.33,-3,'sounds doable'],['is-inyo',996.64,447.33,1.2,.33,1.98,'−14.7%. permanent, 2022.'],['is-reply',1031.03,567.2,1.2,.33,2.05,'wait, really?'],['is-reply',1127.11,680.9,1.09,.25,-1.56,'i’m in'],['is-inyo',161.4,726.71,1.09,.25,-.87,'−4.4%. all-weather, dot-com.'],['is-reply',194.73,636.34,1.09,.25,.93,'go on'],['is-reply',1317.94,698.86,.99,.17,.58,'ok, show me'],['is-inyo',1160.16,786.83,.99,.17,2.41,'−40.8%. momentum, worst since 1992.'],['is-reply',116.25,788.11,.99,.17,2.64,'that tracks']];
+var HERO_DRIFT=[['is-inyo',16,78,-1,.39,2,'−46.5%. index, worst fall.'],['is-reply',252,96,1,.42,-2,'wait, really?'],['is-reply',250,556,1,.39,-3,'i’d have held']];
+var HERO_HALO=[['is-reply',392.23,402.81,1.3,.41,2.75,'i can hold that'],['is-reply',293.52,573.65,1.2,.33,-1.75,'how long to recover?'],['is-inyo',164.45,190.4,1.2,.33,-.17,'−60.7%. value, worst since 1992.'],['is-reply',1005.23,64.08,1.2,.33,1.94,'send me the plan'],['is-inyo',978.24,182.82,1.2,.33,-2.3,'−51.9%. dividend, worst since 1992.'],['is-reply',1031.03,567.2,1.2,.33,2.05,'wait, really?']];
 function heroDeck(i){var n=HERO_C.length,f=byId[HERO_C[i%n][0]],g=byId[HERO_C[(i+1)%n][0]];return '<div class="mm-spin front">'+mdl(f)+'</div><div class="mm-spin mid">'+mdl(g)+'<div class="cast"></div></div>';}
 function heroEx(i){var c=HERO_C[i%HERO_C.length];return '<div class="mm-msg is-inyo"><div class="mm-tilt"><div class="mm-bubble is-inyo"><p>'+esc(c[1])+'</p></div></div></div><div class="mm-msg is-reply"><div class="mm-tilt"><div class="mm-bubble is-reply"><p>'+esc(c[2])+'</p></div></div></div>';}
 function heroHtml(){
@@ -313,8 +313,8 @@ function heroHtml(){
   return '<main class="mm-page"><div class="mm-fit" id="mmfit"><div class="mm-stage"><div class="mm-halo" aria-hidden="true">'+ha+'</div>'+
    '<section class="mm-screen" aria-label="Every investing model, built as a portfolio"><div class="mm-core"><div class="mm-drifts" aria-hidden="true">'+dr+'</div><div class="mm-fade"></div>'+
    '<div class="mm-deck" id="mmdeck" aria-hidden="true">'+heroDeck(HERO.i)+'</div><div class="mm-exch" id="mmex" aria-hidden="true">'+heroEx(HERO.i)+'</div>'+
-   '</div><div class="mm-footer"><div class="mm-headline"><h1 class="sr">Every investing model, built as a portfolio.</h1><p class="mm-line is-soft" aria-hidden="true">investing models</p><div class="mm-line-row" aria-hidden="true"><p class="mm-line">as portfolios.</p>'+heart+'</div></div>'+
-   '<div class="mm-actions"><a class="btn pri" href="#text">get my text buddy →</a><p class="mm-trust">or <a href="#library" class="mm-buddy">explore the library first</a></p></div></div></section></div></div></main>';
+   '</div><div class="mm-footer"><div class="mm-headline"><h1 class="sr">Every investing model as a portfolio, plus a text buddy who keeps you on track.</h1><p class="mm-line is-soft" aria-hidden="true">investing models,</p><div class="mm-line-row" aria-hidden="true"><p class="mm-line">+ a text buddy.</p>'+heart+'</div></div>'+
+   '<div class="mm-actions"><a class="btn pri" href="#text">get my text buddy →</a><p class="mm-trust">free · educational only · or <a href="#library" class="mm-buddy">explore the library first</a></p></div></div></section></div></div></main>';
 }
 function heroFit(){var f=document.getElementById('mmfit');if(f){f.style.setProperty('--mm-w',window.innerWidth);f.style.setProperty('--mm-h',Math.max(560,window.innerHeight-Math.max(0,f.getBoundingClientRect().top+window.scrollY)));}}
 function heroPaint(){var d=document.getElementById('mmdeck'),e=document.getElementById('mmex');if(!d||!e)return;d.innerHTML=heroDeck(HERO.i);e.className='mm-exch';e.innerHTML=heroEx(HERO.i);}
@@ -358,7 +358,7 @@ function viewHome(){
    ['lilac','the library','every investing style as a real portfolio, ranked from chill to full send','#library','browse the library →'],
    ['mint','the quiz','six questions about how you’d actually act. get the style that fits you','#match','take the quiz →'],
    ['peach','now what?','got money sitting there? get the order of moves that makes sense for your spot','#now','tap your situation →']];
-  var faq=[['is this investment advice?','nope. ModelLab is educational. every portfolio is a hypothetical example using public funds, not a recommendation or a record of performance'],
+  var faq=[['is this investment advice?','nope. ModelLab is educational. every portfolio is a hypothetical example using public funds, not a recommendation or a record of performance. <a class="lk" href="#about">how modellab works →</a>'],
     ['what does the text buddy actually send?','2–4 texts a month: a lab drop every 2 weeks, or weekly if you pick “keep me locked in” (one new model, explained in one text; the email version comes weekly), a calm check-in when the market drops, and real replies when you text back. reply STOP anytime'],
     ['is it free?',(promoOn()?'yep, and this week replies are unlimited too, through dec 1. after that the texts stay free with 4 replies a month, or pro is $4.99/mo for up to 100. cancel anytime. msg & data rates may apply':'the texts are free, plus 4 replies a month when you text me. want more? pro is $4.99/mo for up to 100 replies, cancel anytime. msg & data rates may apply')]]
     .map(function(q){return '<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>';}).join('');
@@ -660,7 +660,7 @@ var EP_SNOOZE_DAYS=14;
 function epBlocked(){
   if(/[?&]popup\b/.test(location.search))return false;
   var h=curH();if(h==='#text'||h==='#sms-terms'||h==='#privacy'||h==='#data')return true;
-  try{if(localStorage.getItem('ml_email'))return true;var t=Number(localStorage.getItem('ml_ep_snooze')||0);if(Date.now()<t)return true;}catch(e){return true;}
+  if(buddyIn())return true;try{if(localStorage.getItem('ml_email'))return true;var t=Number(localStorage.getItem('ml_ep_snooze')||0);if(Date.now()<t)return true;}catch(e){return true;}
   return false;
 }
 function epHtml(){
@@ -685,7 +685,7 @@ function epClose(reason){
   if(!EP.done){try{localStorage.setItem('ml_ep_snooze',String(Date.now()+EP_SNOOZE_DAYS*864e5));}catch(e){}mlTrack('email_popup_closed',{reason:reason||'x',page:curH()});}
   epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
 }
-/* when it shows: 10s after the visitor opens the site (most visits are short, so scroll alone almost never fired it),
+/* when it shows: 20s after the visitor opens the site (most visits are short, so scroll alone almost never fired it),
    or earlier if they scroll halfway down a real page or finish something (a quiz result, a "now what?" plan).
    never in the first 8s, never over the text buddy panel or on the text page, once per visit, 14-day snooze after closing */
 var EP_T0=Date.now(),EP_MIN=8000;
@@ -700,7 +700,7 @@ function epAuto(){if(!EP.shown&&/[?&]popup\b/.test(location.search))setTimeout(f
 (function(){var q=false;addEventListener('scroll',function(){if(q||EP.shown)return;q=true;requestAnimationFrame(function(){q=false;
   var de=document.documentElement,h=de.scrollHeight,vh=window.innerHeight;if(h<vh*1.6)return;
   if((window.scrollY+vh)/h>=0.5)epTry('scroll');});},{passive:true});})();
-var EP_DELAY=10000;(function(){var n=0,iv=setInterval(function(){n++;if(EP.shown||n>25){clearInterval(iv);return;}if(Date.now()-EP_T0>=EP_DELAY&&epTry('timer'))clearInterval(iv);},2000);})();
+var EP_DELAY=20000;(function(){var n=0,iv=setInterval(function(){n++;if(EP.shown||n>25){clearInterval(iv);return;}if(Date.now()-EP_T0>=EP_DELAY&&epTry('timer'))clearInterval(iv);},2000);})();
 function epSubmit(){
   var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){EP.err='that email looks off, try again';epPaint();var i=document.getElementById('ep-em');i&&i.focus();return;}
