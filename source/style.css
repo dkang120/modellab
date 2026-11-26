@@ -1045,3 +1045,22 @@ html:has(.mm-screen){scroll-snap-type:y proximity}
   input[type=number],input[type=tel],input[type=email],select{min-height:44px}
 }
 @media(max-width:640px){#mltoast{bottom:calc(84px + env(safe-area-inset-bottom));font-size:13px}}
+/* example buddy threads (home "the highlight" + text page). tabs reuse the .chip spec (32px, 16px radius, 13.288px Inter) */
+.hb-ex{justify-self:center;width:100%;max-width:360px}
+.bx{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:360px;margin:0 auto}
+.bx-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.bx-tab{box-sizing:border-box;min-height:32px;padding:8px 12px;border:0;border-radius:16px;background:var(--bubble);color:var(--ink);font-family:var(--inter);font-size:13.288px;line-height:16px;text-transform:lowercase;cursor:pointer}
+.bx-tab[aria-selected=true]{background:var(--grad);color:#fff}
+.bx .hb-phone{min-height:330px}
+.bx-thr{display:flex;flex-direction:column;gap:7px}
+.bx-thr[hidden]{display:none}
+.bx-thr .im{animation:bd-in .35s ease-out both}
+@media(prefers-reduced-motion:reduce){.bx-thr .im{animation:none}}
+.bx-note{margin:0;font-size:12px;line-height:16px;color:var(--muted);text-align:center}
+.bx-sec{margin:64px 0 24px}
+.bx-sec .h2{text-align:center;margin-bottom:8px}
+.bx-sec .bx{margin-top:28px}
+.bd-skip{display:block;margin:12px auto 0;padding:8px 12px;border:0;background:none;color:var(--muted);font-family:var(--inter);font-size:15px;line-height:20px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bd-skip:hover{color:var(--ink)}
+.bd-textin{margin:10px 0 0;text-align:center;font-family:var(--inter);font-size:15px;color:var(--muted)}
+.bd-textin a{color:var(--blue-deep);font-weight:600}

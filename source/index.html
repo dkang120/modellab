@@ -326,13 +326,32 @@ window.addEventListener('resize',heroFit);
 function hl(soft,main){return '<h2 class="h2"><em>'+soft+'</em>'+main+'</h2>';}
 
 /* ---------- views ---------- */
+/* ---------- example buddy threads (home + text page): show the personality before asking for a number ---------- */
+// Text-in signup ("text LAB to ...") on the Klaviyo toll-free number. Klaviyo's LAB keyword handles consent + the confirmation text. Set number to '' to hide it.
+var TEXT_IN={number:'',display:'',keyword:'LAB'};
+function textInHtml(){if(!TEXT_IN.number)return '';return '<p class="bd-textin">or text <b>'+esc(TEXT_IN.keyword)+'</b> to <a href="sms:'+esc(TEXT_IN.number)+'?&body='+encodeURIComponent(TEXT_IN.keyword)+'" data-textin="1">'+esc(TEXT_IN.display)+'</a></p>';}
+var BX={i:0,t:null,user:false};
+function buddyEx(dip){return [
+  ['market dips',dip||[['in','market’s down 10% from the top. pretty normal tbh. you good?'],['out','ngl kinda nervous'],['in','real talk, the index fund has fallen further before and came back. your plan > the headlines'],['out','ok holding 🔒'],['in','that’s the energy. new drop friday 🧪']]],
+  ['payday',[['in','payday 👀 what’s the plan'],['out','idk might skip this one'],['in','you set $50 every payday. skipping is how plans die quietly'],['out','fine. done'],['in','6 paydays in a row. streak 🔥']]],
+  ['stuck',[['out','there’s too many options i literally can’t pick'],['in','normal. that’s why people freeze, not because they’re bad at this'],['in','your quiz said steady. start there, you can switch later'],['out','ok that helps'],['in','small first move > perfect plan']]],
+  ['dumb q',[['out','ok dumb q what even is an etf'],['in','not dumb. it’s one thing you buy that holds a bunch of companies at once'],['in','like a playlist instead of one song'],['out','ohhh ok'],['in','yep. that’s like 80% of it']]]];}
+function exHtml(dip){
+  var ex=buddyEx(dip),i=BX.i%ex.length;
+  var tabs='<div class="bx-tabs" role="tablist" aria-label="Example texts">'+ex.map(function(e,k){return '<button class="bx-tab" role="tab" data-bx="'+k+'" aria-selected="'+(k===i)+'">'+e[0]+'</button>';}).join('')+'</div>';
+  var thr=ex.map(function(e,k){return '<div class="bx-thr" role="tabpanel"'+(k===i?'':' hidden')+'>'+e[1].map(function(x,j){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'" style="animation-delay:'+(j*.28).toFixed(2)+'s">'+esc(x[1])+'</div>';}).join('')+'</div>';}).join('');
+  return '<div class="bx">'+tabs+'<div class="hb-phone"><div class="hb-top"><span class="av sm ring"><span>'+LOGO+'</span></span><b>modellab buddy</b></div>'+thr+'</div><p class="bx-note">example texts. yours are about your model and how you text</p></div>';
+}
+function bxShow(i){BX.i=i;document.querySelectorAll('.bx').forEach(function(b){b.querySelectorAll('.bx-tab').forEach(function(t,k){t.setAttribute('aria-selected',String(k===i));});b.querySelectorAll('.bx-thr').forEach(function(t,k){t.hidden=k!==i;});});}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-bx]');if(t){BX.user=true;bxShow(Number(t.getAttribute('data-bx')));mlTrack('buddy_example_tab',{tab:t.textContent,page:curH()});return;}var x=e.target.closest&&e.target.closest('[data-textin]');if(x)mlTrack('sms_textin_click',{page:curH()});});
+setInterval(function(){if(BX.user||document.hidden||!document.querySelector('.bx'))return;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;bxShow((BX.i+1)%4);},6500);
 function buddySection(){
   var mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}var mm=(mt&&byId[mt])||byId['index'];
   var th=[['in','market\u2019s down 10% from the top. pretty normal tbh. you good?'],['out','ngl kinda nervous'],['in','real talk, '+mm.name.toLowerCase()+' has fallen further before and came back. your plan > the headlines'],['out','ok holding \uD83D\uDD12'],['in','that\u2019s the energy. new drop friday \uD83E\uDDEA']];
   return '<section class="hb"><div class="hb-copy"><p class="eyebrow">the highlight</p><h2 class="h2"><em>your personalized</em>investing tool</h2><p class="sub">a buddy in your texts who knows your model, checks on you when the market gets wild, and keeps you locked in. free to start</p>'+
    '<ul class="hb-pts"><li><b>about <i>your</i> model</b>, not the same tips everyone gets</li><li><b>calm check-ins</b> when the market drops, never panic</li><li><b>a lab drop every 2 weeks</b> (or weekly, your pick): one new model, explained in one text</li></ul>'+
    (buddyIn()?'<p class="hb-in">you\u2019re in \uD83D\uDD12 texts start soon</p>':'<a class="btn pri hb-cta" href="#text">get my text buddy \u2192</a><p class="hb-note">'+(promoOn()?'free \u00b7 unlimited replies through dec 1, then 4 free replies a month \u00b7 reply STOP anytime':'free \u00b7 2\u20134 texts a month \u00b7 reply STOP anytime')+'</p>')+'</div>'+
-   '<div class="hb-phone" aria-hidden="true"><div class="hb-top"><span class="av sm ring"><span>'+LOGO+'</span></span><b>modellab buddy</b></div>'+th.map(function(x){return '<div class="im '+x[0]+(x[0]==='out'?' pu':'')+'">'+esc(x[1])+'</div>';}).join('')+'</div></section>';
+   '<div class="hb-ex">'+exHtml(th)+'</div></section>';
 }
 function viewHome(){
   var doors=[
@@ -459,19 +478,20 @@ function viewBuddy(){
   var b=state.bd,mt=null;try{mt=localStorage.getItem('ml_match');}catch(e){}
   var mm=mt&&byId[mt],msgs=[['in','hey! 👋'],['in','i’m modellab, your investing buddy, right in your texts'],['in','i text you when markets get wild so you don’t do anything you regret 😅']];
   var acts='';
-  if(b.step>=1)msgs.push(['out','yo let’s do this']);
-  if(b.step>=1)msgs.push(['in','what are you locking in on?']);
-  if(b.step>=2)msgs.push(['out',BD_GOALS.filter(function(g){return g[0]===b.goal;})[0][1]]);
-  if(b.step>=2)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'got you. bite-size only, promise':'ok cool. the match quiz helps, then i keep you on it'))]);
-  if(b.step>=2)msgs.push(['in','how often can i text you?']);
-  if(b.step>=3)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
-  var askM=b.step>=3&&!mm;
-  if(b.step>=3&&mm)msgs.push(['in','perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind']);
+  if(b.quick){msgs.push(['out','just text me']);msgs.push(['in','bet. drop your number and you’re in 🔒']);}
+  if(b.step>=1&&!b.quick)msgs.push(['out','yo let’s do this']);
+  if(b.step>=1&&!b.quick)msgs.push(['in','what are you locking in on?']);
+  if(b.step>=2&&!b.quick)msgs.push(['out',BD_GOALS.filter(function(g){return g[0]===b.goal;})[0][1]]);
+  if(b.step>=2&&!b.quick)msgs.push(['in',b.goal==='panic'?'respect. that’s the #1 way people lose money 💪':(b.goal==='monthly'?'love that. consistency > timing':(b.goal==='basics'?'got you. bite-size only, promise':'ok cool. the match quiz helps, then i keep you on it'))]);
+  if(b.step>=2&&!b.quick)msgs.push(['in','how often can i text you?']);
+  if(b.step>=3&&!b.quick)msgs.push(['out',BD_FREQ.filter(function(f){return f[0]===b.freq;})[0][1]]);
+  var askM=b.step>=3&&!mm&&!b.quick;
+  if(b.step>=3&&mm&&!b.quick)msgs.push(['in','perfect. and i see your match is '+mm.name.toLowerCase()+' 👀 i’ll keep it in mind']);
   if(askM)msgs.push(['in','last one. which model are you into? i’ll text you about that one']);
   if(askM&&b.model)msgs.push(['out',b.model==='none'?'not sure yet':byId[b.model].name.toLowerCase()]);
   if(askM&&b.model)msgs.push(['in',b.model==='none'?'all good, we’ll find it together. drop your number and you’re in 🔒':'good pick. drop your number and you’re in 🔒']);
   if(b.done){msgs.push(['out','done ✅']);msgs.push(['in','you’re on the list 🔒']);msgs.push(['in','check your phone 📱 your first text is on the way (i don’t text late at night, so it might land in the morning). reply STOP anytime.']);}
-  if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button>';
+  if(b.step===0)acts='<button class="bd-go" data-bd="go">Continue <span>›</span></button><button class="bd-skip" data-bd="quick">skip the questions, just text me</button>'+textInHtml();
   else if(b.step===1)acts='<div class="bd-opts">'+BD_GOALS.map(function(g){return '<button class="bd-o" data-bd="goal:'+g[0]+'">'+g[1]+'</button>';}).join('')+'</div>';
   else if(b.step===2)acts='<div class="bd-opts">'+BD_FREQ.map(function(f){return '<button class="bd-o" data-bd="freq:'+f[0]+'">'+f[1]+'<small>'+f[2]+'</small></button>';}).join('')+'</div>';
   else if(askM&&!b.model)acts='<div class="bd-opts">'+['index','all-weather','dividend','growth'].filter(function(id){return byId[id];}).map(function(id){return '<button class="bd-o" data-bd="model:'+id+'">'+esc(byId[id].name.toLowerCase())+'<small>risk '+byId[id].risk+'/5</small></button>';}).join('')+'<button class="bd-o" data-bd="model:none">not sure yet<small>i’ll help you pick</small></button></div><p class="bd-rot"><a href="#match">or take the 2 min match quiz</a></p>';
@@ -485,7 +505,8 @@ function viewBuddy(){
     return pre+'<div class="im '+x[0]+(x[0]==='out'?' pu':'')+(done?' bd-win':'')+(fresh?'':' bd-old')+'" style="animation-delay:'+d.toFixed(2)+'s">'+x[1]+'</div>';}).join('');
   b.seenN=msgs.length;
   return '<div class="wrap"><div class="buddy"><div class="bd-chat" aria-live="polite">'+bub+'</div>'+acts+
-   (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies through dec 1. after that it’s still free, with 4 replies a month</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div></div>';
+   (b.step===0?(promoOn()?'<p class="bd-promo">launch week: unlimited replies through dec 1. after that it’s still free, with 4 replies a month</p>':'')+'<p class="bd-rot">free · for <span id="bdrot">'+BD_ROT[0]+'</span></p>':'')+'</div>'+
+   (b.done?'':'<section class="bx-sec"><h2 class="h2">what it actually texts you</h2><p class="sub center">a buddy that matches your energy, not a newsletter</p>'+exHtml()+'</section>')+'</div>';
 }
 /* show a form error without redrawing: keeps the keyboard up and the chat from replaying */
 function inlineErr(sel,msg,focusId){var e=document.querySelector(sel);if(!e)return false;e.textContent=msg;var f=focusId&&document.getElementById(focusId);if(f)f.focus({preventScroll:true});return true;}
@@ -664,8 +685,9 @@ function epClose(reason){
   if(!EP.done){try{localStorage.setItem('ml_ep_snooze',String(Date.now()+EP_SNOOZE_DAYS*864e5));}catch(e){}mlTrack('email_popup_closed',{reason:reason||'x',page:curH()});}
   epPaint();try{EP.ret&&EP.ret.focus&&EP.ret.focus({preventScroll:true});}catch(e){}
 }
-/* when it shows: never on a timer. after the visitor scrolls halfway down a real page, or right after they finish
-   something (a quiz result, a "now what?" plan). never in the first 8s, never over the text buddy panel, once per visit */
+/* when it shows: 10s after the visitor opens the site (most visits are short, so scroll alone almost never fired it),
+   or earlier if they scroll halfway down a real page or finish something (a quiz result, a "now what?" plan).
+   never in the first 8s, never over the text buddy panel or on the text page, once per visit, 14-day snooze after closing */
 var EP_T0=Date.now(),EP_MIN=8000;
 function epTry(trigger){
   if(EP.open||EP.shown||epBlocked()||POP.open||document.querySelector('.drawer-open,.gl-open,#mltoast.on'))return false;
@@ -678,6 +700,7 @@ function epAuto(){if(!EP.shown&&/[?&]popup\b/.test(location.search))setTimeout(f
 (function(){var q=false;addEventListener('scroll',function(){if(q||EP.shown)return;q=true;requestAnimationFrame(function(){q=false;
   var de=document.documentElement,h=de.scrollHeight,vh=window.innerHeight;if(h<vh*1.6)return;
   if((window.scrollY+vh)/h>=0.5)epTry('scroll');});},{passive:true});})();
+var EP_DELAY=10000;(function(){var n=0,iv=setInterval(function(){n++;if(EP.shown||n>25){clearInterval(iv);return;}if(Date.now()-EP_T0>=EP_DELAY&&epTry('timer'))clearInterval(iv);},2000);})();
 function epSubmit(){
   var el=document.getElementById('ep-em'),email=(el&&el.value||'').trim();EP.last=email;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){EP.err='that email looks off, try again';epPaint();var i=document.getElementById('ep-em');i&&i.focus();return;}
@@ -843,7 +866,7 @@ document.addEventListener('click',function(e){
     if(hr.charAt(0)==='#'&&hr.length>1){e.preventDefault();go(hr);return;}
     if(u.origin===location.origin&&u.pathname.indexOf(BASE)===0&&!/\.[a-z0-9]+$/i.test(u.pathname)&&!u.hash){e.preventDefault();go(fromPath(decodeURIComponent(u.pathname).slice(BASE.length)));return;}}
   var pb=t.closest('[data-pop]');if(pb){var pv=pb.getAttribute('data-pop');if(pv==='open'){POP.open=true;}else if(pv==='close'){POP.open=false;if(!POP.done){try{localStorage.setItem('ml_pop_snooze',String(Date.now()+3*864e5));}catch(x){}}}else if(pv==='snooze'){POP.open=false;try{localStorage.setItem('ml_pop_snooze',String(Date.now()+7*864e5));}catch(x){}}else if(pv==='yes'){POP.step=1;}paintPop();if(pv==='yes'){var pi=document.getElementById('tp-ph');if(pi)pi.focus();}return;}
-  var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}else if(v.indexOf('model:')===0){var mv=v.slice(6);bb.model=(mv==='none'||byId[mv])?mv:'none';}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
+  var bdb=t.closest('[data-bd]');if(bdb){var v=bdb.getAttribute('data-bd'),bb=state.bd;if(v==='go')bb.step=1;else if(v==='quick'){bb.quick=true;bb.goal='model';bb.freq='low';bb.step=3;mlTrack('sms_quick_path',{});}else if(v.indexOf('goal:')===0){bb.goal=v.slice(5);bb.step=2;}else if(v.indexOf('freq:')===0){bb.freq=v.slice(5);bb.step=3;}else if(v.indexOf('model:')===0){var mv=v.slice(6);bb.model=(mv==='none'||byId[mv])?mv:'none';}rerender();var ch=document.querySelector('.bd-chat');if(ch)ch.lastElementChild.scrollIntoView({block:'nearest'});return;}
   var nwb=t.closest('[data-nw]');if(nwb){var nv=nwb.getAttribute('data-nw'),nk=nv.split(':')[0];state.nw[nk]=nv.slice(nk.length+1);state.nw.persona=-1;rerender();return;}
   var nwp=t.closest('[data-nwp]');if(nwp){var pi2=Number(nwp.getAttribute('data-nwp')),pd=NW_P[pi2][2];for(var pk in pd)state.nw[pk]=pd[pk];state.nw.persona=pi2;rerender();if(window.innerWidth<900){var no=document.querySelector('.nw-out');if(no)no.scrollIntoView({behavior:'smooth',block:'start'});}return;}
   if(t.closest('[data-nwshare]')){nwShare();return;}
