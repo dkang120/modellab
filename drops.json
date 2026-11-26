@@ -11,16 +11,20 @@
       "name": "Dogs of the Dow",
       "drop_date": "2026-11-19",
       "status": "live"
-    }
-  ],
-  "queue": [
+    },
     {
       "n": 2,
       "id": "thematic",
       "name": "Thematic (AI, clean energy)",
       "drop_date": "2026-11-26",
-      "status": "queued"
-    },
+      "status": "live",
+      "email_campaign": "01M8AY4731BNQ1RXS6J48BTN9W",
+      "sms_campaign": "01M8AY4KG637YYQRBDVR4T70VX",
+      "email_template": "XBi2wp",
+      "send_status": "drafts ready; Klaviyo needs Daniel to approve scheduling for Thu 9:00 PT"
+    }
+  ],
+  "queue": [
     {
       "n": 3,
       "id": "canslim",
